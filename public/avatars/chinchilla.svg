@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#64748b"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Chinchilla -->
+      <!-- Big round ears -->
+      <circle cx="32" cy="34" r="14" fill="#cbd5e1"/>
+      <circle cx="32" cy="34" r="9" fill="#fbcfe8"/>
+      <circle cx="88" cy="34" r="14" fill="#cbd5e1"/>
+      <circle cx="88" cy="34" r="9" fill="#fbcfe8"/>
+      <!-- Chubby cheeks -->
+      <ellipse cx="60" cy="64" rx="36" ry="28" fill="#94a3b8"/>
+      <ellipse cx="60" cy="72" rx="22" ry="18" fill="#f1f5f9"/>
+      <!-- Big shiny eyes -->
+      <circle cx="44" cy="56" r="6" fill="#0f172a"/>
+      <circle cx="76" cy="56" r="6" fill="#0f172a"/>
+      <circle cx="42" cy="54" r="2" fill="#ffffff"/>
+      <circle cx="74" cy="54" r="2" fill="#ffffff"/>
+      <!-- Cute nose -->
+      <ellipse cx="60" cy="66" rx="3" ry="2" fill="#f472b6"/>
+      <!-- Long whiskers -->
+      <line x1="42" y1="66" x2="20" y2="64" stroke="#475569" stroke-width="1.5"/>
+      <line x1="42" y1="68" x2="22" y2="72" stroke="#475569" stroke-width="1.5"/>
+      <line x1="78" y1="66" x2="100" y2="64" stroke="#475569" stroke-width="1.5"/>
+      <line x1="78" y1="68" x2="98" y2="72" stroke="#475569" stroke-width="1.5"/>
+    
+  </g>
+</svg>

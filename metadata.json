@@ -1,0 +1,6 @@
+{
+  "name": "KYRGYZ AKYLMAN",
+  "description": "Платформа для подготовки к Общереспубликанскому тестированию (ОРТ) в Кыргызстане с онлайн-тестами, черновиком, аналитикой и сертификатами.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

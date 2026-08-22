@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#64748b"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Snow Leopard / Ирбис -->
+      <circle cx="34" cy="36" r="10" fill="#cbd5e1"/>
+      <circle cx="86" cy="36" r="10" fill="#cbd5e1"/>
+      <circle cx="34" cy="36" r="6" fill="#94a3b8"/>
+      <circle cx="86" cy="36" r="6" fill="#94a3b8"/>
+      <ellipse cx="60" cy="62" rx="34" ry="28" fill="#f1f5f9"/>
+      <!-- Rosettes -->
+      <circle cx="36" cy="56" r="3" stroke="#475569" stroke-width="2" fill="none"/>
+      <circle cx="84" cy="56" r="3" stroke="#475569" stroke-width="2" fill="none"/>
+      <circle cx="60" cy="42" r="3" stroke="#475569" stroke-width="2" fill="none"/>
+      <!-- Pale green eyes -->
+      <ellipse cx="46" cy="52" rx="5" ry="4" fill="#86efac"/>
+      <ellipse cx="74" cy="52" rx="5" ry="4" fill="#86efac"/>
+      <ellipse cx="46" cy="52" rx="2" ry="3.5" fill="#0f172a"/>
+      <ellipse cx="74" cy="52" rx="2" ry="3.5" fill="#0f172a"/>
+      <!-- Nose -->
+      <polygon points="56,64 64,64 60,68" fill="#f472b6"/>
+      <path d="M54 72 Q60 76 66 72" stroke="#475569" stroke-width="2" fill="none"/>
+    
+  </g>
+</svg>

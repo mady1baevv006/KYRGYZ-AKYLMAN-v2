@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Asian Tapir (Black & White saddle) -->
+      <ellipse cx="60" cy="70" rx="36" ry="28" fill="#ffffff"/>
+      <path d="M24 70 Q40 50 60 70 L60 98 Q30 98 24 70 Z" fill="#1e293b"/>
+      <circle cx="50" cy="48" r="22" fill="#1e293b"/>
+      <!-- White-tipped ears -->
+      <polygon points="34,26 44,40 30,42" fill="#1e293b"/>
+      <circle cx="34" cy="26" r="3" fill="#ffffff"/>
+      <!-- Snout / proboscis -->
+      <path d="M46 54 Q36 60 38 68 Q44 72 52 64" fill="#0f172a"/>
+      <circle cx="48" cy="46" r="3.5" fill="#ffffff"/>
+      <circle cx="48" cy="46" r="2" fill="#000000"/>
+    
+  </g>
+</svg>

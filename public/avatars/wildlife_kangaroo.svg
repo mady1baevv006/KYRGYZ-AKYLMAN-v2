@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#b45309"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Kangaroo -->
+      <polygon points="36,20 48,40 32,44" fill="#b45309"/>
+      <polygon points="84,20 72,40 88,44" fill="#b45309"/>
+      <ellipse cx="60" cy="62" rx="28" ry="26" fill="#d97706"/>
+      <ellipse cx="60" cy="70" rx="16" ry="14" fill="#fde68a"/>
+      <circle cx="46" cy="52" r="4.5" fill="#1c1917"/>
+      <circle cx="74" cy="52" r="4.5" fill="#1c1917"/>
+      <circle cx="45" cy="51" r="1.5" fill="#ffffff"/>
+      <circle cx="73" cy="51" r="1.5" fill="#ffffff"/>
+      <!-- Snout -->
+      <ellipse cx="60" cy="68" rx="8" ry="6" fill="#1c1917"/>
+    
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Scarlet Macaw -->
+      <ellipse cx="50" cy="64" rx="30" ry="30" fill="#dc2626"/>
+      <!-- Wing colors -->
+      <path d="M22 64 Q44 94 66 64" fill="#f59e0b"/>
+      <path d="M26 72 Q44 98 62 72" fill="#2563eb"/>
+      <circle cx="46" cy="46" r="18" fill="#dc2626"/>
+      <!-- White eye patch -->
+      <ellipse cx="46" cy="46" rx="10" ry="9" fill="#ffffff"/>
+      <circle cx="46" cy="46" r="4" fill="#000000"/>
+      <circle cx="44" cy="44" r="1.5" fill="#ffffff"/>
+      <!-- Curved hook beak -->
+      <path d="M52 42 Q78 46 68 64 Q56 56 52 50 Z" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+      <path d="M52 50 Q64 56 60 62 Z" fill="#1e293b"/>
+    
+  </g>
+</svg>

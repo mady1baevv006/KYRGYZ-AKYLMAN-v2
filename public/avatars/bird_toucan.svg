@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Toucan Bird -->
+      <ellipse cx="50" cy="64" rx="30" ry="28" fill="#0f172a"/>
+      <circle cx="46" cy="48" r="20" fill="#0f172a"/>
+      <circle cx="44" cy="48" r="14" fill="#ffffff"/>
+      <circle cx="44" cy="48" r="7" fill="#38bdf8"/>
+      <circle cx="44" cy="48" r="4" fill="#000000"/>
+      <!-- Huge bill -->
+      <path d="M56 42 Q96 40 106 58 Q88 74 56 62 Z" fill="#f59e0b"/>
+      <path d="M86 48 Q104 54 106 58 Q96 68 86 62 Z" fill="#ef4444"/>
+      <line x1="56" y1="52" x2="102" y2="56" stroke="#1e293b" stroke-width="2"/>
+    
+  </g>
+</svg>

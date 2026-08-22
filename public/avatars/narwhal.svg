@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Narwhal -->
+      <!-- Tusk -->
+      <polygon points="58,10 62,10 60,42" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+      <line x1="58" y1="20" x2="62" y2="22" stroke="#ca8a04" stroke-width="1.5"/>
+      <line x1="58" y1="28" x2="62" y2="30" stroke="#ca8a04" stroke-width="1.5"/>
+      <line x1="58" y1="36" x2="62" y2="38" stroke="#ca8a04" stroke-width="1.5"/>
+      <ellipse cx="60" cy="68" rx="36" ry="28" fill="#475569"/>
+      <ellipse cx="60" cy="74" rx="24" ry="20" fill="#cbd5e1"/>
+      <!-- Spots -->
+      <circle cx="46" cy="56" r="2" fill="#334155"/>
+      <circle cx="74" cy="56" r="2" fill="#334155"/>
+      <circle cx="60" cy="52" r="2" fill="#334155"/>
+      <circle cx="48" cy="62" r="4" fill="#0f172a"/>
+      <circle cx="72" cy="62" r="4" fill="#0f172a"/>
+      <circle cx="46" cy="60" r="1.5" fill="#fff"/>
+      <circle cx="70" cy="60" r="1.5" fill="#fff"/>
+      <path d="M54 74 Q60 80 66 74" stroke="#0f172a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a16207"/><stop offset="100%" stop-color="#713f12"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Sloth -->
+      <ellipse cx="60" cy="62" rx="36" ry="30" fill="#78716c"/>
+      <ellipse cx="60" cy="62" rx="26" ry="22" fill="#f5f5f4"/>
+      <!-- Eye stripe patches -->
+      <ellipse cx="44" cy="56" rx="8" ry="5" transform="rotate(-15 44 56)" fill="#44403c"/>
+      <ellipse cx="76" cy="56" rx="8" ry="5" transform="rotate(15 76 56)" fill="#44403c"/>
+      <circle cx="44" cy="56" r="3" fill="#1c1917"/>
+      <circle cx="76" cy="56" r="3" fill="#1c1917"/>
+      <circle cx="43" cy="55" r="1" fill="#ffffff"/>
+      <circle cx="75" cy="55" r="1" fill="#ffffff"/>
+      <!-- Nose & smiling mouth -->
+      <ellipse cx="60" cy="66" rx="6" ry="4" fill="#1c1917"/>
+      <path d="M52 74 Q60 80 68 74" stroke="#1c1917" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    
+  </g>
+</svg>

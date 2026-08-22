@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#78716c"/><stop offset="100%" stop-color="#57534e"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Babirusa with curved upward tusks -->
+      <!-- Upward curving tusks -->
+      <path d="M48 54 Q40 30 52 18" stroke="#fef08a" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M72 54 Q80 30 68 18" stroke="#fef08a" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- Lower tusks -->
+      <path d="M42 66 Q32 50 38 42" stroke="#fef08a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M78 66 Q88 50 82 42" stroke="#fef08a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Small ears -->
+      <circle cx="32" cy="38" r="6" fill="#44403c"/>
+      <circle cx="88" cy="38" r="6" fill="#44403c"/>
+      <ellipse cx="60" cy="62" rx="30" ry="26" fill="#78716c"/>
+      <circle cx="46" cy="52" r="3.5" fill="#1c1917"/>
+      <circle cx="74" cy="52" r="3.5" fill="#1c1917"/>
+      <!-- Snout disc -->
+      <ellipse cx="60" cy="68" rx="10" ry="8" fill="#a8a29e"/>
+      <circle cx="56" cy="68" r="2" fill="#1c1917"/>
+      <circle cx="64" cy="68" r="2" fill="#1c1917"/>
+    
+  </g>
+</svg>

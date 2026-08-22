@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" width="100%" height="100%">
+  <defs>
+    <style>
+      .page-bg { fill: #ffffff; }
+      .header-bar { fill: #1e293b; }
+      .header-title { font-family: system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 800; fill: #ffffff; }
+      .header-sub { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 600; fill: #94a3b8; }
+      .q-card { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; rx: 12; }
+      .q-num { font-family: system-ui, -apple-system, sans-serif; font-size: 16px; font-weight: 800; fill: #1d4ed8; }
+      .q-text { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 500; fill: #334155; }
+      .q-math { font-family: 'Times New Roman', serif; font-size: 16px; font-style: italic; font-weight: 700; fill: #0f172a; }
+      .opt-box { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 600; fill: #475569; }
+      .opt-letter { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 800; fill: #3730a3; }
+      .watermark { font-family: system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; fill: #cbd5e1; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <rect width="900" height="1200" class="page-bg" />
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="900" height="60" class="header-bar" />
+  <text x="30" y="36" class="header-title">ЦООМО-1 • МАТЕМАТИКА (ЧАСТЬ I)</text>
+  <text x="870" y="36" text-anchor="end" class="header-sub">СТРАНИЦА 4 • ВОПРОСЫ 25 – 30</text>
+
+  <!-- Watermark / Footer -->
+  <text x="450" y="1180" text-anchor="middle" class="watermark">ЦООМО / РЕСПУБЛИКАНСКОЕ ТЕСТИРОВАНИЕ • ЗАВЕРШЕНИЕ ЧАСТИ 1 (25–30)</text>
+
+  <!-- Question 25 -->
+  <g transform="translate(30, 80)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">25</text>
+    <text x="56" y="33" class="q-text">Среднее арифметическое пяти чисел равно 18. Если добавить шестое число, среднее станет 20. Каково шестое число?</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">30</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">28</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">32</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">24</text>
+    </g>
+  </g>
+
+  <!-- Question 26 -->
+  <g transform="translate(30, 260)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">26</text>
+    <text x="56" y="33" class="q-text">В коробке лежат 4 белых, 6 синих и 10 красных шаров. Какова вероятность достать синий шар случайным образом?</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">0.2</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">0.25</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">0.3</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">0.4</text>
+    </g>
+  </g>
+
+  <!-- Question 27 -->
+  <g transform="translate(30, 440)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">27</text>
+    <text x="56" y="33" class="q-text">Сколько существует двухзначных чисел, которые оканчиваются на цифру 7?</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">10</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">9</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">8</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">11</text>
+    </g>
+  </g>
+
+  <!-- Question 28 -->
+  <g transform="translate(30, 620)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">28</text>
+    <text x="56" y="33" class="q-text">Найдите область определения функции f(x) = √(2x - 8):</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">x ≥ 4</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">x &gt; 4</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">x ≤ 4</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">x ≥ -4</text>
+    </g>
+  </g>
+
+  <!-- Question 29 -->
+  <g transform="translate(30, 800)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">29</text>
+    <text x="56" y="33" class="q-text">Если a * b = 2a + 3b - ab, то чему равно 4 * 3 ?</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">5</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">7</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">11</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">9</text>
+    </g>
+  </g>
+
+  <!-- Question 30 -->
+  <g transform="translate(30, 980)">
+    <rect width="840" height="160" class="q-card" />
+    <circle cx="28" cy="28" r="16" fill="#dbeafe" />
+    <text x="28" y="33" text-anchor="middle" class="q-num">30</text>
+    <text x="56" y="33" class="q-text">В геометрической прогрессии первый член b₁ = 3, а знаменатель q = 2. Найдите пятый член прогрессии b₅:</text>
+    
+    <g transform="translate(56, 75)">
+      <rect x="0" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="15" y="23" class="opt-letter">А)</text>
+      <text x="40" y="23" class="opt-box">48</text>
+
+      <rect x="180" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="195" y="23" class="opt-letter">Б)</text>
+      <text x="220" y="23" class="opt-box">32</text>
+
+      <rect x="360" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="375" y="23" class="opt-letter">В)</text>
+      <text x="400" y="23" class="opt-box">24</text>
+
+      <rect x="540" y="0" width="160" height="36" rx="8" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="555" y="23" class="opt-letter">Г)</text>
+      <text x="580" y="23" class="opt-box">96</text>
+    </g>
+  </g>
+</svg>

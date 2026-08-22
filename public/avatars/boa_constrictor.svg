@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#16a34a"/><stop offset="100%" stop-color="#15803d"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Boa Constrictor -->
+      <path d="M20 90 Q40 60 60 85 T100 80" stroke="#854d0e" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <path d="M20 90 Q40 60 60 85 T100 80" stroke="#ca8a04" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <ellipse cx="60" cy="50" rx="26" ry="22" fill="#a16207"/>
+      <ellipse cx="60" cy="50" rx="22" ry="18" fill="#ca8a04"/>
+      <!-- Diamonds pattern -->
+      <polygon points="60,36 66,44 60,52 54,44" fill="#713f12"/>
+      <circle cx="48" cy="46" r="5" fill="#fef08a"/>
+      <circle cx="72" cy="46" r="5" fill="#fef08a"/>
+      <ellipse cx="48" cy="46" rx="1.5" ry="4" fill="#000"/>
+      <ellipse cx="72" cy="46" rx="1.5" ry="4" fill="#000"/>
+      <!-- Tongue -->
+      <path d="M60 68 L60 80 L54 86 M60 80 L66 86" stroke="#dc2626" stroke-width="2" fill="none" stroke-linecap="round"/>
+    
+  </g>
+</svg>

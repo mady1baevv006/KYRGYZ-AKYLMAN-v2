@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#64748b"/><stop offset="100%" stop-color="#475569"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Rhinoceros -->
+      <polygon points="34,30 44,44 30,46" fill="#475569"/>
+      <polygon points="86,30 76,44 90,46" fill="#475569"/>
+      <ellipse cx="60" cy="64" rx="34" ry="28" fill="#64748b"/>
+      <!-- Horn -->
+      <polygon points="56,36 64,36 60,18" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+      <polygon points="58,48 62,48 60,38" fill="#94a3b8"/>
+      <circle cx="40" cy="54" r="4" fill="#0f172a"/>
+      <circle cx="80" cy="54" r="4" fill="#0f172a"/>
+      <circle cx="39" cy="53" r="1.5" fill="#ffffff"/>
+      <circle cx="79" cy="53" r="1.5" fill="#ffffff"/>
+      <!-- Snout -->
+      <ellipse cx="60" cy="74" rx="16" ry="10" fill="#475569"/>
+      <circle cx="52" cy="74" r="2.5" fill="#1e293b"/>
+      <circle cx="68" cy="74" r="2.5" fill="#1e293b"/>
+    
+  </g>
+</svg>

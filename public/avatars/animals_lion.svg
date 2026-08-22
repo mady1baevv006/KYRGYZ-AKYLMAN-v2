@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#ea580c"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Lion -->
+      <!-- Mane -->
+      <circle cx="60" cy="60" r="44" fill="#9a3412"/>
+      <circle cx="60" cy="60" r="40" fill="#c2410c"/>
+      <circle cx="34" cy="38" r="8" fill="#fde047"/>
+      <circle cx="86" cy="38" r="8" fill="#fde047"/>
+      <ellipse cx="60" cy="62" rx="30" ry="26" fill="#fde047"/>
+      <!-- Eyes & Muzzle -->
+      <ellipse cx="48" cy="54" rx="5" ry="4" fill="#713f12"/>
+      <ellipse cx="72" cy="54" rx="5" ry="4" fill="#713f12"/>
+      <ellipse cx="60" cy="68" rx="14" ry="10" fill="#fef08a"/>
+      <polygon points="56,62 64,62 60,67" fill="#9a3412"/>
+      <path d="M54 70 Q60 74 66 70" stroke="#9a3412" stroke-width="2" fill="none"/>
+    
+  </g>
+</svg>

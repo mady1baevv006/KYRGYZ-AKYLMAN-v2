@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Cassowary -->
+      <!-- Helmet / Casque -->
+      <path d="M54 36 Q60 12 74 24 Q68 38 56 40 Z" fill="#ca8a04" stroke="#713f12" stroke-width="2"/>
+      <ellipse cx="60" cy="74" rx="34" ry="26" fill="#0f172a"/>
+      <!-- Electric blue neck -->
+      <ellipse cx="60" cy="54" rx="18" ry="18" fill="#0284c7"/>
+      <!-- Red wattles -->
+      <path d="M58 64 Q54 84 58 88 Q62 84 62 64 Z" fill="#dc2626"/>
+      <circle cx="50" cy="46" r="4" fill="#facc15"/>
+      <circle cx="70" cy="46" r="4" fill="#facc15"/>
+      <circle cx="50" cy="46" r="2" fill="#000000"/>
+      <circle cx="70" cy="46" r="2" fill="#000000"/>
+      <polygon points="56,48 64,48 60,60" fill="#334155"/>
+    
+  </g>
+</svg>

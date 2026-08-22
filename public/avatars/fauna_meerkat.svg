@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Meerkat / Fauna -->
+      <circle cx="36" cy="40" r="6" fill="#451a03"/>
+      <circle cx="84" cy="40" r="6" fill="#451a03"/>
+      <ellipse cx="60" cy="62" rx="28" ry="26" fill="#d97706"/>
+      <!-- Dark eye patches -->
+      <ellipse cx="46" cy="52" rx="8" ry="6" fill="#451a03"/>
+      <ellipse cx="74" cy="52" rx="8" ry="6" fill="#451a03"/>
+      <circle cx="46" cy="52" r="3.5" fill="#fef08a"/>
+      <circle cx="74" cy="52" r="3.5" fill="#fef08a"/>
+      <circle cx="46" cy="52" r="2" fill="#000000"/>
+      <circle cx="74" cy="52" r="2" fill="#000000"/>
+      <!-- Nose & muzzle -->
+      <ellipse cx="60" cy="66" rx="10" ry="8" fill="#fef3c7"/>
+      <polygon points="57,62 63,62 60,66" fill="#1c1917"/>
+    
+  </g>
+</svg>

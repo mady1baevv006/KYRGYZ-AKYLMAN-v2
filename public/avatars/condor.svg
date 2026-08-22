@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#475569"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- California Condor -->
+      <ellipse cx="60" cy="74" rx="34" ry="28" fill="#0f172a"/>
+      <!-- White neck ruff -->
+      <ellipse cx="60" cy="58" rx="20" ry="8" fill="#ffffff"/>
+      <!-- Red/pink bare head -->
+      <ellipse cx="60" cy="44" rx="14" ry="16" fill="#f43f5e"/>
+      <circle cx="54" cy="42" r="3" fill="#dc2626"/>
+      <circle cx="66" cy="42" r="3" fill="#dc2626"/>
+      <circle cx="54" cy="42" r="1.5" fill="#000000"/>
+      <circle cx="66" cy="42" r="1.5" fill="#000000"/>
+      <!-- Hooked beak -->
+      <path d="M56 46 Q68 46 64 60 Q58 54 56 50 Z" fill="#fef08a"/>
+    
+  </g>
+</svg>

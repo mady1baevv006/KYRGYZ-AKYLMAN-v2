@@ -1,0 +1,189 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1350" width="100%" height="100%">
+  <defs>
+    <style>
+      .page-bg { fill: #ffffff; }
+      .header-bar { fill: #1e293b; }
+      .header-title { font-family: system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 800; fill: #ffffff; }
+      .header-sub { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 600; fill: #94a3b8; }
+      .q-card { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; rx: 10; }
+      .q-num { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 800; fill: #1d4ed8; }
+      .q-text { font-family: system-ui, -apple-system, sans-serif; font-size: 13px; font-weight: 500; fill: #334155; }
+      .q-math { font-family: 'Times New Roman', serif; font-size: 14px; font-style: italic; font-weight: 700; fill: #0f172a; }
+      .opt-box { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 600; fill: #475569; }
+      .opt-letter { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 800; fill: #3730a3; }
+      .watermark { font-family: system-ui, -apple-system, sans-serif; font-size: 11px; font-weight: 700; fill: #cbd5e1; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <rect width="900" height="1350" class="page-bg" />
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="900" height="60" class="header-bar" />
+  <text x="30" y="36" class="header-title">ЦООМО-1 • МАТЕМАТИКА (ЧАСТЬ I)</text>
+  <text x="870" y="36" text-anchor="end" class="header-sub">СТРАНИЦА 3 • ВОПРОСЫ 16 – 24</text>
+
+  <!-- Watermark / Footer -->
+  <text x="450" y="1330" text-anchor="middle" class="watermark">ЦООМО / РЕСПУБЛИКАНСКОЕ ТЕСТИРОВАНИЕ • СТРАНИЦА 3 (16–24)</text>
+
+  <!-- Question 16 -->
+  <g transform="translate(30, 75)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">16</text>
+    <text x="50" y="29" class="q-text">В прямоугольном треугольнике катеты равны 6 см и 8 см. Найдите длину гипотенузы:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 9 см</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 10 см</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 12 см</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 14 см</text>
+    </g>
+  </g>
+
+  <!-- Question 17 -->
+  <g transform="translate(30, 210)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">17</text>
+    <text x="50" y="29" class="q-text">Один из углов равнобедренного треугольника равен 100°. Найдите градусную меру угла при основании:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 40°</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 50°</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 45°</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 80°</text>
+    </g>
+  </g>
+
+  <!-- Question 18 -->
+  <g transform="translate(30, 345)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">18</text>
+    <text x="50" y="29" class="q-text">Площадь круга равна 36π см². Найдите длину окружности этого круга:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 6π см</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 12π см</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 18π см</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 24π см</text>
+    </g>
+  </g>
+
+  <!-- Question 19 -->
+  <g transform="translate(30, 480)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">19</text>
+    <text x="50" y="29" class="q-text">Найдите расстояние между точками A(1; 3) и B(4; 7) на координатной плоскости:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 5</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 6</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 7</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) √7</text>
+    </g>
+  </g>
+
+  <!-- Question 20 -->
+  <g transform="translate(30, 615)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">20</text>
+    <text x="50" y="29" class="q-text">В параллелограмме ABCD угол A равен 65°. Чему равен угол B?</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 115°</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 125°</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 65°</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 105°</text>
+    </g>
+  </g>
+
+  <!-- Question 21 -->
+  <g transform="translate(30, 750)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">21</text>
+    <text x="50" y="29" class="q-text">Чему равен объем куба, если площадь одной его грани равна 25 см²?</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 100 см³</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 125 см³</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 150 см³</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 625 см³</text>
+    </g>
+  </g>
+
+  <!-- Question 22 -->
+  <g transform="translate(30, 885)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">22</text>
+    <text x="50" y="29" class="q-text">Сумма углов правильного n-угольника равна 1080°. Сколько сторон у этого многоугольника?</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 6</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 7</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 8</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 10</text>
+    </g>
+  </g>
+
+  <!-- Question 23 -->
+  <g transform="translate(30, 1020)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">23</text>
+    <text x="50" y="29" class="q-text">В трапеции основания равны 8 см и 14 см, а высота равна 5 см. Найдите ее площадь:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 45 см²</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 55 см²</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 60 см²</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 70 см²</text>
+    </g>
+  </g>
+
+  <!-- Question 24 -->
+  <g transform="translate(30, 1155)">
+    <rect width="840" height="125" class="q-card" />
+    <circle cx="24" cy="24" r="14" fill="#dbeafe" />
+    <text x="24" y="29" text-anchor="middle" class="q-num">24</text>
+    <text x="50" y="29" class="q-text">Если sin α = 0.6 и α — острый угол, то найдите cos α:</text>
+    <g transform="translate(50, 65)">
+      <rect x="0" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="12" y="22" class="opt-letter">А) 0.4</text>
+      <rect x="200" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="212" y="22" class="opt-letter">Б) 0.8</text>
+      <rect x="400" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="412" y="22" class="opt-letter">В) 0.64</text>
+      <rect x="600" y="0" width="180" height="34" rx="6" fill="#ffffff" stroke="#e2e8f0" />
+      <text x="612" y="22" class="opt-letter">Г) 0.75</text>
+    </g>
+  </g>
+</svg>

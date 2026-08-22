@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#14b8a6"/><stop offset="100%" stop-color="#0f766e"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Sea Turtle -->
+      <!-- Flippers -->
+      <ellipse cx="28" cy="46" rx="16" ry="8" transform="rotate(-30 28 46)" fill="#059669"/>
+      <ellipse cx="92" cy="46" rx="16" ry="8" transform="rotate(30 92 46)" fill="#059669"/>
+      <ellipse cx="36" cy="84" rx="10" ry="6" transform="rotate(30 36 84)" fill="#059669"/>
+      <ellipse cx="84" cy="84" rx="10" ry="6" transform="rotate(-30 84 84)" fill="#059669"/>
+      <!-- Shell -->
+      <ellipse cx="60" cy="62" rx="30" ry="26" fill="#047857"/>
+      <polygon points="60,44 72,52 72,68 60,76 48,68 48,52" fill="#10b981" stroke="#065f46" stroke-width="2"/>
+      <!-- Head -->
+      <ellipse cx="60" cy="34" rx="12" ry="14" fill="#34d399"/>
+      <circle cx="54" cy="30" r="2.5" fill="#064e3b"/>
+      <circle cx="66" cy="30" r="2.5" fill="#064e3b"/>
+    
+  </g>
+</svg>

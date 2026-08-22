@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#047857"/></linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="60" cy="60" r="54"/>
+    </clipPath>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bgGrad)" stroke="#ffffff" stroke-width="3"/>
+  <g clip-path="url(#circleClip)">
+    
+      <!-- Elk / Deer with magnificent antlers -->
+      <!-- Antlers -->
+      <path d="M46 36 Q30 20 24 8 M32 22 L24 26 M38 14 L46 10" stroke="#78350f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M74 36 Q90 20 96 8 M88 22 L96 26 M82 14 L74 10" stroke="#78350f" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <!-- Ears -->
+      <polygon points="32,40 44,48 30,54" fill="#92400e"/>
+      <polygon points="88,40 76,48 90,54" fill="#92400e"/>
+      <ellipse cx="60" cy="64" rx="26" ry="24" fill="#b45309"/>
+      <ellipse cx="60" cy="72" rx="14" ry="12" fill="#fed7aa"/>
+      <circle cx="46" cy="54" r="4.5" fill="#1c1917"/>
+      <circle cx="74" cy="54" r="4.5" fill="#1c1917"/>
+      <circle cx="45" cy="52" r="1.5" fill="#ffffff"/>
+      <circle cx="73" cy="52" r="1.5" fill="#ffffff"/>
+      <polygon points="56,70 64,70 60,74" fill="#1c1917"/>
+    
+  </g>
+</svg>
