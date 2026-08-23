@@ -13,6 +13,7 @@ import { Footer } from './components/Footer';
 import { TwinklingStars } from './components/TwinklingStars';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TrialWelcomeModal } from './components/TrialWelcomeModal';
+import { CreativeLoader } from './components/CreativeLoader';
 
 import { AppLanguage } from './types';
 
@@ -122,6 +123,7 @@ export default function App() {
     if (saved === 'kg' || saved === 'ru') return saved;
     return 'ru';
   });
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const handleSetLang = (newLang: AppLanguage) => {
     setLang(newLang);
@@ -131,7 +133,23 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
     localStorage.setItem('ort_theme', 'dark');
+
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 650);
+
+    return () => clearTimeout(timer);
   }, []);
+
+  if (initialLoading) {
+    return (
+      <CreativeLoader
+        size="fullscreen"
+        text={lang === 'kg' ? 'Кыргыз Акылман ЖРТ платформасы жүктөлүүдө...' : 'Загрузка платформы Кыргыз Акылман...'}
+        subtext={lang === 'kg' ? 'Даярдануу системасы ишке кирүүдө' : 'Система подготовки к ОРТ запускается'}
+      />
+    );
+  }
 
   return (
     <AuthProvider>

@@ -34,12 +34,12 @@ const I18N = {
   ru: {
     backToHome: 'На главную',
     dataNotFound: 'Данные теста не найдены',
-    officialResult: 'Официальный результат ОРТ',
+    testResult: 'Итоги тестирования',
     blockTraining: 'Тренировка блоков',
     sectionTraining: 'Тренировка раздела',
     practiceMode: 'Тренировочный полигон',
     practiceReport: 'Отчет по тренировке:',
-    certDescFull: 'Подтвержденный результат симуляции ОРТ',
+    fullTestDesc: 'Полный тест ОРТ (150 заданий)',
     certDescMath: 'Математика (Обе части)',
     certDescPractice: 'Точечная отработка без учета времени',
     ortScore: 'Балл ОРТ',
@@ -66,12 +66,12 @@ const I18N = {
   kg: {
     backToHome: 'Башкы бетке',
     dataNotFound: 'Тесттин маалыматтары табылган жок',
-    officialResult: 'ОРТнын ырасмий жыйынтыгы',
+    testResult: 'Тесттин жыйынтыгы',
     blockTraining: 'Бөлүмдөрдү машыгуу',
     sectionTraining: 'Бөлүмдү машыгуу',
     practiceMode: 'Машыгуу полигону',
     practiceReport: 'Машыгуу боюнча отчет:',
-    certDescFull: 'ОРТ симуляциясынын жыйынтыгы',
+    fullTestDesc: 'ЖРТ толук тести (150 тапшырма)',
     certDescMath: 'Математика (Эки бөлүгү тең)',
     certDescPractice: 'Убакытты эсепке албастан машыгуу',
     ortScore: 'ОРТ баллы',
@@ -287,7 +287,9 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                 </p>
                 <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-none">
                   {t.modalQuestion}{' '}
-                  {getRelativeQuestionNumber(selectedQuestion.question_number, selectedQuestion.section_id)}
+                  {activeTab === 'overall'
+                    ? selectedQuestion.question_number
+                    : getRelativeQuestionNumber(selectedQuestion.question_number, selectedQuestion.section_id)}
                 </h3>
               </div>
               <button
@@ -469,7 +471,7 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
           <div className="relative z-10 text-center md:text-left flex-1">
             <p className="text-xs font-black uppercase tracking-[0.2em] mb-2 text-emerald-300">
               {mode === 'full'
-                ? t.officialResult
+                ? t.testResult
                 : mode === 'custom'
                 ? t.certDescMath
                 : mode === 'practice'
@@ -483,7 +485,7 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
             </h1>
             <p className="text-sm font-medium text-emerald-100">
               {mode === 'full'
-                ? t.certDescFull
+                ? t.fullTestDesc
                 : mode === 'custom'
                 ? t.certDescMath
                 : mode === 'practice'
@@ -603,7 +605,9 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                     className={`relative h-12 md:h-14 rounded-xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer transform hover:scale-105 active:scale-95 ${colorStyle}`}
                   >
                     <span className="font-black text-xs md:text-sm">
-                      {getRelativeQuestionNumber(q.question_number, q.section_id)}
+                      {activeTab === 'overall'
+                        ? q.question_number
+                        : getRelativeQuestionNumber(q.question_number, q.section_id)}
                     </span>
                     <span className="text-[9px] font-bold -mt-0.5 opacity-80 uppercase">
                       {userAns || '—'}

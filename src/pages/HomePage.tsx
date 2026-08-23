@@ -11,7 +11,7 @@ import { FALLBACK_VARIANTS } from '../data/fallbackVariants';
 import { PricingSection } from '../components/PricingSection';
 import { StudentsResultsSection } from '../components/StudentsResultsSection';
 import { OrtScoreCalculator } from '../components/OrtScoreCalculator';
-import { OrtCountdownTimer } from '../components/OrtCountdownTimer';
+import { CreativeLoader } from '../components/CreativeLoader';
 import heroEarthStarsImg from '../assets/images/hero_earth_stars_1787130940166.jpg';
 
 const THEME_STYLES: Record<string, {
@@ -186,10 +186,11 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#041d16] min-h-[60vh]">
-        <div className="w-16 h-16 border-4 border-emerald-600/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
-        <p className="text-emerald-300 font-medium animate-pulse">{t.loading}</p>
-      </div>
+      <CreativeLoader
+        size="fullscreen"
+        text={lang === 'kg' ? 'Тесттер жүктөлүүдө...' : 'Загрузка тестов...'}
+        subtext={lang === 'kg' ? 'Кыргыз Акылман • Бардык варианттар даярдалууда' : 'Кыргыз Акылман • Подготовка базы заданий'}
+      />
     );
   }
 
@@ -333,24 +334,15 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                   onClick={() => toggleCard(variant.id)}
                   className="p-6 cursor-pointer select-none flex flex-col flex-1"
                 >
-                  {/* Top Meta Bar */}
-                  <div className="flex items-center justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg text-xs font-black tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200/80 dark:border-emerald-800/80 uppercase">
-                        #{variant.id}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black tracking-wider uppercase bg-slate-100 dark:bg-emerald-900/40 text-slate-700 dark:text-emerald-300 border border-slate-200 dark:border-emerald-800/50">
-                        {isKg ? 'Кыргызча' : 'Русский'}
-                      </span>
-                    </div>
-
-                    {variant.isNew && (
+                  {/* Top Meta Bar (Only show New badge if applicable, without #id and language duplicates) */}
+                  {variant.isNew && (
+                    <div className="flex items-center justify-end mb-2">
                       <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-emerald-300/60 dark:border-emerald-700/80 shadow-xs flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         {t.newBadge}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Title */}
                   <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">

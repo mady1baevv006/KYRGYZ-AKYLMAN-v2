@@ -13,6 +13,7 @@ import {
 } from '../data/constants';
 import { getFallbackQuestions } from '../data/fallbackQuestions';
 import { getOptimizedTestPageUrl } from '../utils/imageOptimization';
+import { CreativeLoader } from '../components/CreativeLoader';
 
 const TEST_TRANSLATIONS = {
   ru: {
@@ -739,12 +740,19 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
   if (loading || calculating) {
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white">
-        <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-bold text-lg animate-pulse">
-          {calculating ? 'Идет подсчет результатов...' : 'Загрузка вопросов...'}
-        </p>
-      </div>
+      <CreativeLoader
+        size="fullscreen"
+        text={
+          calculating
+            ? (lang === 'kg' ? 'Жыйынтыктар эсептелүүдө...' : 'Идет подсчет результатов...')
+            : (lang === 'kg' ? 'Суроолор жүктөлүүдө...' : 'Загрузка вопросов...')
+        }
+        subtext={
+          calculating
+            ? (lang === 'kg' ? 'Баллдар шкала боюнча такталууда' : 'Формирование итогового балла ОРТ')
+            : (lang === 'kg' ? 'ОРТ материалдары даярдалууда' : 'Подготовка материалов тестирования')
+        }
+      />
     );
   }
 
