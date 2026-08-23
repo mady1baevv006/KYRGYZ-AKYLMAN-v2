@@ -50,35 +50,134 @@ interface HomeworkQuestion {
   explanationKg: string;
 }
 
-const HOMEWORK_QUESTIONS: HomeworkQuestion[] = [
-  {
-    id: 1,
-    questionRu: 'Какое наименьшее натуральное число удовлетворяет неравенству 2x - 7 > 0?',
-    questionKg: '2x - 7 > 0 барабарсыздыгын канааттандырган эң кичине натуралдык санды тапкыла:',
-    options: ['0', '3', '4', '5'],
-    correctIdx: 2,
-    explanationRu: '2x > 7 => x > 3.5. Ближайшее натуральное число больше 3.5 — это 4. Помните: 0 не является натуральным числом!',
-    explanationKg: '2x > 7 => x > 3.5. 3.5тен чоң эң кичине натуралдык сан бул 4. Эске салсак: 0 натуралдык сан эмес!',
-  },
-  {
-    id: 2,
-    questionRu: 'Сколько целых чисел расположено строго между числами -4.8 и 3.2 на числовой прямой?',
-    questionKg: 'Сан огунда -4.8 жана 3.2 сандарынын арасында канча бүтүн сан жайгашкан?',
-    options: ['7', '8', '9', '6'],
-    correctIdx: 1,
-    explanationRu: 'Целые числа в этом интервале: -4, -3, -2, -1, 0, 1, 2, 3. Всего 8 целых чисел.',
-    explanationKg: 'Бул аралыктагы бүтүн сандар: -4, -3, -2, -1, 0, 1, 2, 3. Бардыгы 8 бүтүн сан.',
-  },
-  {
-    id: 3,
-    questionRu: 'Произведение любых трех последовательных целых чисел обязательно делится на:',
-    questionKg: 'Каалаган удаалаш үч бүтүн сандын көбөйтүндүсү сөзсүз кайсы санга бөлүнөт?',
-    options: ['4', '6', '9', '12'],
-    correctIdx: 1,
-    explanationRu: 'Среди 3 последовательных чисел как минимум одно четное (делится на 2) и одно кратно 3. Значит их произведение всегда кратно 2 * 3 = 6.',
-    explanationKg: 'Удаалаш 3 сандын ичинен жок дегенде бирөө жуп (2ге бөлүнөт) жана бирөө 3кө бөлүнөт. Демек көбөйтүндүсү дайыма 2 * 3 = 6га бөлүнөт.',
-  },
-];
+const HOMEWORK_QUESTIONS_BY_SUBJECT: Record<string, HomeworkQuestion[]> = {
+  algebra: [
+    {
+      id: 1,
+      questionRu: 'Какое наименьшее натуральное число удовлетворяет неравенству 2x - 7 > 0?',
+      questionKg: '2x - 7 > 0 барабарсыздыгын канааттандырган эң кичине натуралдык санды тапкыла:',
+      options: ['0', '3', '4', '5'],
+      correctIdx: 2,
+      explanationRu: '2x > 7 => x > 3.5. Ближайшее натуральное число больше 3.5 — это 4. Помните: 0 не является натуральным числом!',
+      explanationKg: '2x > 7 => x > 3.5. 3.5тен чоң эң кичине натуралдык сан бул 4. Эске салсак: 0 натуралдык сан эмес!',
+    },
+    {
+      id: 2,
+      questionRu: 'Сколько целых чисел расположено строго между числами -4.8 и 3.2 на числовой прямой?',
+      questionKg: 'Сан огунда -4.8 жана 3.2 сандарынын арасында канча бүтүн сан жайгашкан?',
+      options: ['7', '8', '9', '6'],
+      correctIdx: 1,
+      explanationRu: 'Целые числа в этом интервале: -4, -3, -2, -1, 0, 1, 2, 3. Всего 8 целых чисел.',
+      explanationKg: 'Бул аралыктагы бүтүн сандар: -4, -3, -2, -1, 0, 1, 2, 3. Бардыгы 8 бүтүн сан.',
+    },
+    {
+      id: 3,
+      questionRu: 'Произведение любых трех последовательных целых чисел обязательно делится на:',
+      questionKg: 'Каалаган удаалаш үч бүтүн сандын көбөйтүндүсү сөзсүз кайсы санга бөлүнөт?',
+      options: ['4', '6', '9', '12'],
+      correctIdx: 1,
+      explanationRu: 'Среди 3 последовательных чисел как минимум одно четное (делится на 2) и одно кратно 3. Значит их произведение всегда кратно 2 * 3 = 6.',
+      explanationKg: 'Удаалаш 3 сандын ичинен жок дегенде бирөө жуп (2ге бөлүнөт) жана бирөө 3кө бөлүнөт. Демек көбөйтүндүсү дайыма 2 * 3 = 6га бөлүнөт.',
+    },
+  ],
+  geometry: [
+    {
+      id: 1,
+      questionRu: 'В прямоугольном треугольнике катеты равны 6 и 8. Чему равна гипотенуза?',
+      questionKg: 'Тик бурчтуу үч бурчтуктун катеттери 6 жана 8ге барабар. Гипотенузасы канчага барабар?',
+      options: ['10', '12', '14', '9'],
+      correctIdx: 0,
+      explanationRu: 'По теореме Пифагора: c² = 6² + 8² = 36 + 64 = 100 => c = 10 (Египетский треугольник).',
+      explanationKg: 'Пифагор теоремасы боюнча: c² = 6² + 8² = 36 + 64 = 100 => c = 10.',
+    },
+    {
+      id: 2,
+      questionRu: 'Один из смежных углов равен 65°. Чему равен второй угол?',
+      questionKg: 'Жанаша бурчтардын бири 65° болсо, экинчи бурч канчага барабар?',
+      options: ['115°', '125°', '25°', '95°'],
+      correctIdx: 0,
+      explanationRu: 'Сумма смежных углов всегда равна 180°. 180° - 65° = 115°.',
+      explanationKg: 'Жанаша бурчтардын суммасы дайыма 180° болот. 180° - 65° = 115°.',
+    },
+    {
+      id: 3,
+      questionRu: 'Сумма углов любого выпуклого четырехугольника равна:',
+      questionKg: 'Каалаган төрт бурчтуктун ички бурчтарынын суммасы канчага барабар?',
+      options: ['180°', '360°', '540°', '270°'],
+      correctIdx: 1,
+      explanationRu: 'Сумма углов выпуклого n-угольника = (n-2)*180°. Для n=4 получаем (4-2)*180° = 360°.',
+      explanationKg: 'Төрт бурчтуктун ички бурчтарынын суммасы: (4-2)*180° = 360°.',
+    },
+  ],
+  russian: [
+    {
+      id: 1,
+      questionRu: 'Укажите пару с отношением «Род — Вид»: Дерево : Дуб',
+      questionKg: '«Жалпы — Жекече» байланышы бар түгөйдү тандаңыз: Дарак : Эмен',
+      options: ['Птица : Крыло', 'Цветок : Роза', 'Книга : Страница', 'Врач : Больница'],
+      correctIdx: 1,
+      explanationRu: 'Роза — это разновидность цветка (Род — Вид). Крыло — это часть птицы (Часть — Целое).',
+      explanationKg: 'Роза — гүлдүн бир түрү (Жалпы — Жекече байланышы).',
+    },
+    {
+      id: 2,
+      questionRu: 'Найдите ошибку в употреблении деепричастного оборота:',
+      questionKg: 'Чакчыл түрмөктүн туура эмес колдонулушун табыңыз:',
+      options: [
+        'Возвращаясь домой, мы попали под дождь.',
+        'Читая книгу, мне стало скучно.',
+        'Открыв окно, он вдохнул свежий воздух.',
+        'Решая задачу, ученик допустил ошибку.',
+      ],
+      correctIdx: 1,
+      explanationRu: '«Читая книгу, мне стало скучно» — ошибка, так как в безличном предложении нет субъекта, выполняющего добавочное действие деепричастия.',
+      explanationKg: 'Чакчыл менен баяндооч бир эле ээге таандык болушу керек.',
+    },
+    {
+      id: 3,
+      questionRu: 'Укажите словосочетание с грамматической ошибкой управления:',
+      questionKg: 'Башкаруу байланышы бузулган сөз айкашын белгилеңиз:',
+      options: ['Согласно приказу', 'Вопреки прогнозу', 'Благодаря стараниям', 'Оплатить за проезд'],
+      correctIdx: 3,
+      explanationRu: 'Глагол «оплатить» требует винительного падежа без предлога («оплатить проезд»), либо «заплатить за проезд».',
+      explanationKg: '«Оплатить» этиши предлогсуз колдонулат («оплатить проезд»).',
+    },
+  ],
+  english: [
+    {
+      id: 1,
+      questionRu: 'Choose the correct conditional form: If I ___ more free time, I would learn Spanish.',
+      questionKg: 'Туура форманы тандаңыз: If I ___ more free time, I would learn Spanish.',
+      options: ['have', 'had', 'will have', 'would have'],
+      correctIdx: 1,
+      explanationRu: 'Second Conditional (unreal present): If + Past Simple (had), would + Infinitive.',
+      explanationKg: '2nd Conditional формуласы: If + Past Simple (had), would + Verb.',
+    },
+    {
+      id: 2,
+      questionRu: 'Find the sentence with the correct Passive Voice:',
+      questionKg: 'Passive Voice туура түзүлгөн сүйлөмдү табыңыз:',
+      options: [
+        'The new library was built last year.',
+        'The new library built last year.',
+        'The new library was build last year.',
+        'The new library had build last year.',
+      ],
+      correctIdx: 0,
+      explanationRu: 'Past Simple Passive: was/were + Past Participle (built).',
+      explanationKg: 'Пассив түзүлүшү: was + V3 (built).',
+    },
+    {
+      id: 3,
+      questionRu: 'Identify the error: She (A) enjoys (B) reading historical novels (C) and to write (D) poems.',
+      questionKg: 'Катаны табыңыз: She enjoys reading historical novels and to write poems.',
+      options: ['(A) enjoys', '(B) reading', '(C) and', '(D) to write'],
+      correctIdx: 3,
+      explanationRu: 'Parallel structure: "reading... and writing" (Gerund must follow "enjoys").',
+      explanationKg: 'Параллелдик түзүлүш: "reading... and writing" болушу керек.',
+    },
+  ],
+};
 
 export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
   user,
@@ -167,9 +266,12 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
     setHomeworkAnswers((prev) => ({ ...prev, [qId]: optionIdx }));
   };
 
+  const currentHomeworkQuestions =
+    HOMEWORK_QUESTIONS_BY_SUBJECT[selectedSubjectId] || HOMEWORK_QUESTIONS_BY_SUBJECT.algebra;
+
   const calculateHomeworkScore = () => {
     let correct = 0;
-    HOMEWORK_QUESTIONS.forEach((q) => {
+    currentHomeworkQuestions.forEach((q) => {
       if (homeworkAnswers[q.id] === q.correctIdx) {
         correct++;
       }
@@ -953,14 +1055,14 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                       {showHomeworkResults && (
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 font-bold text-xs">
                           <span>
-                            {isKg ? 'Жыйынтык:' : 'Результат:'} {calculateHomeworkScore()} / {HOMEWORK_QUESTIONS.length}
+                            {isKg ? 'Жыйынтык:' : 'Результат:'} {calculateHomeworkScore()} / {currentHomeworkQuestions.length}
                           </span>
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-4">
-                      {HOMEWORK_QUESTIONS.map((q, idx) => {
+                      {currentHomeworkQuestions.map((q, idx) => {
                         const selectedAns = homeworkAnswers[q.id];
                         const isAnswered = selectedAns !== undefined;
                         const isCorrect = selectedAns === q.correctIdx;
@@ -1101,8 +1203,8 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                       </h4>
                       <p className="text-xs sm:text-sm text-emerald-200/80 max-w-md mb-4 leading-relaxed">
                         {isKg
-                          ? 'Теория жана ЖРТ мисалдарын чыгаруу видеороликтери (Абдраим Турусбековичтин жеке түшүндүрмөсү менен) Премиум жазылуусу бар колдонуучуларга гана жеткиликтүү.'
-                          : 'Видеоролики с теорией и с решением примеров (лично от Абдраима Турусбековича) доступны только для пользователей с премиальной подпиской.'}
+                          ? 'Теория жана ЖРТ мисалдарын чыгаруу видеороликтери Премиум жазылуусу бар колдонуучуларга гана жеткиликтүү.'
+                          : 'Видеоролики с теорией и с решением примеров ОРТ доступны только для пользователей с премиальной подпиской.'}
                       </p>
                       <button
                         type="button"
@@ -1128,8 +1230,8 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                           </h4>
                           <p className="text-xs text-emerald-200/60 max-w-sm">
                             {isKg
-                              ? 'Абдраим Турусбекович: 1-сабак • Натуралдык жана бүтүн сандар'
-                              : 'Абдраим Турусбекович: Урок 1 • Натуральные и целые числа ОРТ'}
+                              ? 'Автордук методика: ЖРТ сабактары жана талдоолор'
+                              : 'Авторская методика ОРТ: видеоразбор темы и заданий'}
                           </p>
                         </div>
                       ) : (
