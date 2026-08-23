@@ -1,3 +1,5 @@
+export const TEACHER_PHOTO_URL = '';
+
 export interface TheoryTopic {
   id: string;
   titleRu: string;
@@ -21,6 +23,7 @@ export interface TheoryTopic {
     thumbnailUrl: string;
     videoUrl?: string;
     authorName: string;
+    authorPhotoUrl?: string;
     descriptionRu: string;
     descriptionKg: string;
   }[];
@@ -37,18 +40,21 @@ export interface TheoryBlock {
 }
 
 export interface TheorySubject {
-  id: 'algebra' | 'geometry';
+  id: 'algebra' | 'geometry' | 'russian' | 'english';
+  category: 'math' | 'russian' | 'english';
   titleRu: string;
   titleKg: string;
   descRu: string;
   descKg: string;
   icon: string;
+  isSubjectTest?: boolean;
   blocks: TheoryBlock[];
 }
 
-export const THEORIES_DATA: Record<'algebra' | 'geometry', TheorySubject> = {
+export const THEORIES_DATA: Record<'algebra' | 'geometry' | 'russian' | 'english', TheorySubject> = {
   algebra: {
     id: 'algebra',
+    category: 'math',
     titleRu: 'Алгебра',
     titleKg: 'Алгебра',
     descRu: 'Числа, делимость, уравнения, неравенства, модули, функции и текстовые задачи ОРТ',
@@ -221,6 +227,7 @@ export const THEORIES_DATA: Record<'algebra' | 'geometry', TheorySubject> = {
   },
   geometry: {
     id: 'geometry',
+    category: 'math',
     titleRu: 'Геометрия',
     titleKg: 'Геометрия',
     descRu: 'Треугольники, четырехугольники, окружности, вычисление площадей и стереометрия ОРТ',
@@ -271,6 +278,184 @@ export const THEORIES_DATA: Record<'algebra' | 'geometry', TheorySubject> = {
             id: 'areas-and-stereometry',
             titleRu: 'Площади фигур и пространственные тела',
             titleKg: 'Фигуралардын аянттары жана мейкиндиктеги нерселер',
+            isAvailable: false,
+          },
+        ],
+      },
+    ],
+  },
+  russian: {
+    id: 'russian',
+    category: 'russian',
+    titleRu: 'Русский язык',
+    titleKg: 'Орус тили',
+    descRu: 'Аналогии и дополнения предложений, чтение и понимание текста, практическая грамматика ОРТ',
+    descKg: 'Аналогиялар жана сүйлөмдү толуктоо, текстти түшүнүү, практикалык грамматика',
+    icon: 'BookOpen',
+    blocks: [
+      {
+        id: 'rus-block-1',
+        number: 1,
+        titleRu: 'Аналогии и дополнения предложений',
+        titleKg: 'Аналогиялар жана сүйлөмдөрдү толуктоо',
+        descRu: 'Типы отношений между словами, синонимы, антонимы, род-вид, причина-следствие и контекст вставки слов в тестах ОРТ',
+        descKg: 'Сөздөрдүн байланыш түрлөрү, синонимдер, антонимдер, себеп-натыйжа жана сүйлөмдү толуктоо эрежелери',
+        topics: [
+          {
+            id: 'analogies-basics',
+            titleRu: 'Типы логических отношений в аналогиях',
+            titleKg: 'Аналогиялардагы логикалык байланыштардын түрлөрү',
+            isAvailable: true,
+            contentRu: `### 1. Что такое Аналогии в ОРТ?
+Аналогии — это первый субтест основного теста (30 заданий). В каждом задании дана пара слов, между которыми существует четкая логическая связь. Ваша задача — найти среди вариантов пару с точно таким же типом связи и направлением.
+
+---
+
+### 2. Основные типы логических связей:
+1. **Род — Вид (Общее — Частное):**
+   * *Дерево : Дуб* (Дуб — это разновидность дерева).
+   * *Инструмент : Молоток*.
+
+2. **Часть — Целое:**
+   * *Колесо : Автомобиль* (Колесо — часть автомобиля).
+   * *Страница : Книга*.
+
+3. **Причина — Следствие:**
+   * *Вирус : Болезнь* (Вирус вызывает болезнь).
+   * *Засуха : Неурожай*.
+
+4. **Предмет — Функция (Действие):**
+   * *Нож : Резать* (Нож предназначен для резки).
+   * *Термометр : Измерять*.
+
+5. **Субъект — Объект деятельности:**
+   * *Хирург : Скальпель* (Инструмент специалиста).
+   * *Художник : Кисть*.
+
+> ⚠️ **Главная ловушка ОРТ:**
+> Всегда проверяйте **направление связи**! Если в условии *«Род : Вид»* (*Птица : Орёл*), ответ *«Окунь : Рыба»* не подходит, так как там связь в обратном порядке (*Вид : Род*).`,
+            contentKg: `### 1. ЖРТдагы Аналогиялар деген эмне?
+Аналогиялар — негизги тесттин биринчи бөлүгү (30 тапшырма). Ар бир тапшырмада ортосунда так логикалык байланыш бар эки сөз берилет. Сиздин максат — дал ошондой байланыштагы вариантты табуу.
+
+---
+
+### 2. Негизги логикалык байланыш түрлөрү:
+1. **Жалпы — Жекече (Род — Вид):**
+   * *Дарак : Эмен*
+2. **Бөлүк — Бүтүн:**
+   * *Дөңгөлөк : Унаа*
+3. **Себеп — Натыйжа:**
+   * *Вирус : Оору*
+4. **Буюм — Аткарган кызматы:**
+   * *Бычак : Кесүү*`,
+          },
+        ],
+      },
+      {
+        id: 'rus-block-2',
+        number: 2,
+        titleRu: 'Чтение и понимание текста',
+        titleKg: 'Текстти окуу жана түшүнүү',
+        descRu: 'Анализ микротекстов и больших статей, выделение главной мысли, подтекст, аргументация и авторская позиция',
+        descKg: 'Тексттерди талдоо, негизги ойду табуу, автордук көз караш жана аргументтер',
+        topics: [
+          {
+            id: 'reading-comprehension',
+            titleRu: 'Поиск главной мысли и анализ структуры текста',
+            titleKg: 'Негизги ойду табуу жана тексттин түзүлүшү',
+            isAvailable: false,
+          },
+        ],
+      },
+      {
+        id: 'rus-block-3',
+        number: 3,
+        titleRu: 'Практическая грамматика родного языка',
+        titleKg: 'Эне тилдин практикалык грамматикасы',
+        descRu: 'Орфографические и пунктуационные нормы, синтаксис, исправление речевых и грамматических ошибок',
+        descKg: 'Орфография жана пунктуация эрежелери, синтаксис, грамматикалык каталарды оңдоо',
+        topics: [
+          {
+            id: 'practical-grammar',
+            titleRu: 'Нормы согласования и пунктуация сложных предложений',
+            titleKg: 'Эрежелер жана татаал сүйлөмдөрдүн тыныш белгилери',
+            isAvailable: false,
+          },
+        ],
+      },
+    ],
+  },
+  english: {
+    id: 'english',
+    category: 'english',
+    titleRu: 'Английский язык',
+    titleKg: 'Англис тили',
+    descRu: 'Предметный тест ОРТ: Reading Comprehension, Grammar & Vocabulary, Error Identification',
+    descKg: 'ЖРТ предметтик тести: Текстти түшүнүү, грамматика, лексика жана каталарды табуу',
+    icon: 'Languages',
+    isSubjectTest: true,
+    blocks: [
+      {
+        id: 'eng-block-1',
+        number: 1,
+        titleRu: 'Reading & Text Comprehension',
+        titleKg: 'Текстти окуу жана түшүнүү (Reading)',
+        descRu: 'Работа с текстами ОРТ: skimming, scanning, контекстное значение слов, главная идея и логические выводы',
+        descKg: 'ЖРТ тексттери менен иштөө: негизги ойду табуу, сөздөрдүн мааниси жана логикалык тыянактар',
+        topics: [
+          {
+            id: 'eng-reading-strategies',
+            titleRu: 'Strategies for Reading Comprehension on ORT',
+            titleKg: 'ЖРТ тексттерин туура жана тез түшүнүү стратегиялары',
+            isAvailable: true,
+            contentRu: `### 1. English Subject Test on ORT
+Предметный тест по английскому языку проверяет глубокое понимание письменной речи, знание грамматических конструкций и богатый словарный запас.
+
+---
+
+### 2. Key Reading Skills:
+1. **Main Idea Identification:** Finding the core thesis of each paragraph.
+2. **Context Clues:** Guessing unfamiliar vocabulary from the surrounding sentence structure.
+3. **Inference & Conclusion:** Answering questions where information is implied rather than explicitly stated.`,
+            contentKg: `### 1. Англис тили боюнча ЖРТ предметтик тести
+Бул тест окуучунун текстти түшүнүүсүн, грамматиканы туура колдонуусун жана сөздүк корун текшерет.
+
+---
+
+### 2. Негизги ыкмалар:
+1. **Негизги ойду табуу (Main Idea):** Ар бир абзацтын маанисин түшүнүү.
+2. **Контексттен сөздү аныктоо:** Белгисиз сөздүн маанисин сүйлөмдүн түзүлүшүнөн чыгаруу.`,
+          },
+        ],
+      },
+      {
+        id: 'eng-block-2',
+        number: 2,
+        titleRu: 'Grammar, Tenses & Vocabulary',
+        titleKg: 'Грамматика, чактар жана сөздүк кор (Grammar & Vocab)',
+        descRu: 'Времена глаголов, Passive Voice, Conditionals, модальные глаголы, предлоги и фразовые глаголы ОРТ',
+        descKg: 'Этиштин чактары, Passive Voice, Conditionals, модалдык этиштер жана предлогдор',
+        topics: [
+          {
+            id: 'eng-tenses-passive',
+            titleRu: 'Tenses and Passive Voice mastery',
+            titleKg: 'Чактар жана Passive Voice эрежелери',
+            isAvailable: false,
+          },
+        ],
+      },
+      {
+        id: 'eng-block-3',
+        number: 3,
+        titleRu: 'Sentence Structure & Error Identification',
+        titleKg: 'Сүйлөмдүн түзүлүшү жана каталарды табуу (Error Identification)',
+        descRu: 'Поиск грамматических и стилистических ошибок в подчеркнутых частях предложений формата ОРТ',
+        descKg: 'ЖРТ форматындагы сүйлөмдөрдүн асты сызылган бөлүктөрүнөн каталарды аныктоо',
+        topics: [
+          {
+            id: 'eng-error-detection',
+            titleRu: 'Mastering Error Identification subtest',
+            titleKg: 'Каталарды табуу бөлүмүнүн сырлары',
             isAvailable: false,
           },
         ],

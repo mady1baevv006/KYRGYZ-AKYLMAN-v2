@@ -3,15 +3,15 @@ import { SubscriptionPlan } from '../types';
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: 'free',
-    name: 'Бесплатная',
-    nameKg: 'Акысыз',
+    name: 'Базовая подписка',
+    nameKg: 'Базалык жазылуу',
     price: 0,
     priceLabel: '0 сом',
     priceLabelKg: '0 сом',
     periodLabel: 'Базовый доступ',
     periodLabelKg: 'Негизги мүмкүнчүлүк',
-    badge: 'Базовый',
-    badgeKg: 'Негизги',
+    badge: 'Базовая',
+    badgeKg: 'Базалык',
     description: 'Идеально для первого знакомства с форматом ОРТ и проверки базового уровня знаний.',
     descriptionKg: 'ЖРТ форматы менен таанышуу жана базалык билимди текшерүү үчүн ыңгайлуу.',
     features: [

@@ -14,10 +14,11 @@ import {
   ShieldCheck,
   Flame,
   Check,
+  GraduationCap,
 } from 'lucide-react';
 import { AppLanguage, SubscriptionPlan } from '../types';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
 
 interface TheoryPlanSelectionModalProps {
   isOpen: boolean;
@@ -38,13 +39,11 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
   const isKg = lang === 'kg';
   const standardPlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'standard') || SUBSCRIPTION_PLANS[1];
   const premiumPlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'premium') || SUBSCRIPTION_PLANS[2];
+  const isAdmin = Boolean(user?.identifier && user.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase());
 
-  const hasUserStandard =
-    user?.subscriptionPlan === 'standard' ||
-    (user?.isPaid && subscriptionStatus.effectivePlan === 'standard');
-  const hasUserPremium =
-    user?.subscriptionPlan === 'premium' ||
-    (user?.isPaid && subscriptionStatus.effectivePlan === 'premium');
+  // Paid users have active subscription until June 1, 2027
+  const isPaidUserPremium = (Boolean(user?.isPaid) && (user?.subscriptionPlan === 'premium' || subscriptionStatus.effectivePlan === 'premium')) || isAdmin;
+  const isPaidUserStandard = Boolean(user?.isPaid) && user?.subscriptionPlan === 'standard' && !isPaidUserPremium;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
@@ -85,7 +84,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
           </div>
 
           {/* If user has standard plan, show upgrade banner */}
-          {hasUserStandard && (
+          {isPaidUserStandard && (
             <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 via-[#0a3528] to-[#041a14] border-2 border-amber-400/60 flex items-center justify-between gap-4 text-xs sm:text-sm shadow-lg">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/40">
@@ -106,7 +105,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
           )}
 
           {/* 2 Plans Comparison Grid (with extra top padding so VIP badge does not touch header text) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-5 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-6 mt-6">
             {/* 1. ДОСТУПНАЯ ПОДПИСКА */}
             <div className="relative rounded-3xl bg-[#041a14] border-2 border-emerald-700/70 p-6 sm:p-7 flex flex-col justify-between shadow-xl hover:border-emerald-500 transition-all group">
               <div className="space-y-4">
@@ -178,7 +177,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
 
               {/* Select Button */}
               <div className="pt-6">
-                {hasUserPremium ? (
+                {isPaidUserPremium ? (
                   <button
                     type="button"
                     disabled
@@ -187,7 +186,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                     <Check className="w-4 h-4 text-emerald-400" />
                     <span>{isKg ? 'Премиумга кошулган' : 'Включено в Премиум'}</span>
                   </button>
-                ) : hasUserStandard ? (
+                ) : isPaidUserStandard ? (
                   <button
                     type="button"
                     disabled
@@ -235,9 +234,9 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                   </h3>
                   <div className="flex items-baseline gap-2 mt-1">
                     <span className="text-3xl sm:text-4xl font-black text-amber-300">
-                      {hasUserStandard ? '3 000 сом' : (isKg ? premiumPlan.priceLabelKg : premiumPlan.priceLabel)}
+                      {isPaidUserStandard ? '3 000 сом' : (isKg ? premiumPlan.priceLabelKg : premiumPlan.priceLabel)}
                     </span>
-                    {hasUserStandard && (
+                    {isPaidUserStandard && (
                       <span className="text-sm line-through text-slate-400 font-bold">5 000 сом</span>
                     )}
                   </div>
@@ -268,10 +267,15 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
 
                   <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2 rounded-xl border border-amber-400/30">
                     <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                    <span>
-                      <strong className="text-amber-300">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>{' '}
-                      {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские уроки лично от преподавателя'}
-                    </span>
+                    <div>
+                      <strong className="text-amber-300 block">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
+                        <span className="text-xs text-amber-200/90">
+                          {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские уроки с объяснением тем'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2 rounded-xl border border-amber-400/30">
@@ -294,7 +298,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
 
               {/* Select Button */}
               <div className="pt-6">
-                {hasUserPremium ? (
+                {isPaidUserPremium ? (
                   <button
                     type="button"
                     disabled
@@ -303,7 +307,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                     <Check className="w-4 h-4 text-amber-300" />
                     <span>{isKg ? 'Сиздин активдүү тарифиңиз (Премиум)' : 'Ваш активный тариф (Премиум)'}</span>
                   </button>
-                ) : hasUserStandard ? (
+                ) : isPaidUserStandard ? (
                   <button
                     type="button"
                     onClick={() => onSelectPlan(premiumPlan)}
@@ -337,9 +341,15 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
               </span>
             </div>
 
-            <span className="text-emerald-400 font-bold">
-              {isKg ? 'Колдоо кызматы: @kyrgyzakylman' : 'Поддержка в Telegram: @kyrgyzakylman'}
-            </span>
+            <a
+              href="https://t.me/kyrgyzakylman"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 font-bold transition-all"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{isKg ? 'Telegram: @kyrgyzakylman' : 'Telegram: @kyrgyzakylman'}</span>
+            </a>
           </div>
         </div>
       </div>

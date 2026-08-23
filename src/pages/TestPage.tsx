@@ -116,13 +116,15 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const initialTargetSec = targetSectionId || (customSectionsParam ? Number(customSectionsParam.split(',')[0]) : 1);
   const initialFirstQ = initialTargetSec === 3 ? 61 : (initialTargetSec === 2 ? 31 : (initialTargetSec === 4 ? 91 : (initialTargetSec === 5 ? 121 : 1)));
 
+  const builtInVariantIds = [1, 2, 3, 12, 16, 19, 20, 101];
+
   const [questions, setQuestions] = useState<Question[]>(() => {
-    if (Number(variantId) === 1 || Number(variantId) === 2 || !variantId) {
+    if (builtInVariantIds.includes(Number(variantId)) || !variantId) {
       return getFallbackQuestions(variantId || 1);
     }
     return [];
   });
-  const [loading, setLoading] = useState<boolean>(() => Number(variantId) !== 1 && Number(variantId) !== 2);
+  const [loading, setLoading] = useState<boolean>(() => !builtInVariantIds.includes(Number(variantId)) && !!variantId);
   const [calculating, setCalculating] = useState(false);
 
   const [currentSection, setCurrentSection] = useState<number>(initialTargetSec);
@@ -170,7 +172,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             console.error('Error parsing local variant:', e);
           }
         }
-        if (!initialData || initialData.length === 0 || Number(variantId) === 1 || Number(variantId) === 2) {
+        if (!initialData || initialData.length === 0 || builtInVariantIds.includes(Number(variantId))) {
           initialData = getFallbackQuestions(variantId || 1);
         }
 
@@ -183,7 +185,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
         // Background fast network check for custom variants (with 2.5s AbortController timeout to prevent Render sleep blocking)
         let serverData: Question[] | null = null;
-        if (Number(variantId) !== 1) {
+        if (!builtInVariantIds.includes(Number(variantId))) {
           try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 2500);

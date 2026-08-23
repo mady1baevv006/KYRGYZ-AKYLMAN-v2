@@ -9,9 +9,10 @@ import {
   ExternalLink,
   Flame,
   ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
 import { SubscriptionPlan, AppLanguage } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
 
 interface SubscriptionModalProps {
   plan: SubscriptionPlan | null;
@@ -41,15 +42,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const isKg = lang === 'kg';
   const isPremiumPlan = plan.id === 'premium';
-  const hasUserStandard =
-    user?.subscriptionPlan === 'standard' ||
-    (user?.isPaid && subscriptionStatus.effectivePlan === 'standard');
-  const hasUserPremium =
-    user?.subscriptionPlan === 'premium' ||
-    (user?.isPaid && subscriptionStatus.effectivePlan === 'premium');
+  const isAdmin = Boolean(user?.identifier && user.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase());
 
-  // Upgrade scenario: Standard -> Premium discount (3 000 KGS instead of 5 000 KGS)
-  const isUpgrade = isPremiumPlan && hasUserStandard;
+  // Paid users have active subscription until June 1, 2027
+  const isPaidUserPremium = (Boolean(user?.isPaid) && (user?.subscriptionPlan === 'premium' || subscriptionStatus.effectivePlan === 'premium')) || isAdmin;
+  const isPaidUserStandard = Boolean(user?.isPaid) && user?.subscriptionPlan === 'standard' && !isPaidUserPremium;
+
+  // Upgrade scenario: Paid Standard -> Premium discount (3 000 KGS instead of 5 000 KGS)
+  const isUpgrade = isPremiumPlan && isPaidUserStandard;
 
   const planTitle = isKg ? plan.nameKg : plan.name;
   const displayedPrice = isUpgrade
@@ -63,14 +63,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   let telegramMessage = '';
   if (isUpgrade) {
     telegramMessage = isKg
-      ? `Саламатсызбы Абдраим Турусбекович! Менде «Жеткиликтүү жазылуу» бар. «Премиум жазылууга» өтүү үчүн 3 000 сом кошумча төлөдүм. Квитанцияны жөнөтөм, Премиум мүмкүнчүлүктү ачып бере аласызбы?`
-      : `Здравствуйте Абдраим Турусбекович! У меня активна «Доступная подписка». Я доплатил 3 000 сом для перехода на «Премиальную подписку». Отправляю квитанцию, откройте пожалуйста Премиум доступ!`;
+      ? `Саламатсызбы! Менде «Жеткиликтүү жазылуу» бар. «Премиум жазылууга» өтүү үчүн 3 000 сом кошумча төлөдүм. Квитанцияны жөнөтөм, Премиум мүмкүнчүлүктү ачып бере аласызбы?`
+      : `Здравствуйте! У меня активна «Доступная подписка». Я доплатил 3 000 сом для перехода на «Премиальную подписку». Отправляю квитанцию, откройте пожалуйста Премиум доступ!`;
   } else {
     const planNameInSentenceRu = isPremiumPlan ? 'Премиальную' : 'Доступную';
     const planNameInSentenceKg = isPremiumPlan ? 'Премиум' : 'Жеткиликтүү';
     telegramMessage = isKg
-      ? `Саламатсызбы Абдраим Турусбекович! Мен сизден ${planNameInSentenceKg} жазылуусун сатып алып төлөдүм, азыр квитанцияны жөнөтөм, мага мүмкүнчүлүк ачып бере аласызбы?`
-      : `Здравствуйте Абдраим Турусбекович! Я купил у вас ${planNameInSentenceRu} подписку и оплатил, сейчас отправлю квитанцию, можете мне открыть доступ?`;
+      ? `Саламатсызбы! Мен ${planNameInSentenceKg} жазылуусун сатып алып төлөдүм, азыр квитанцияны жөнөтөм, мага мүмкүнчүлүк ачып бере аласызбы?`
+      : `Здравствуйте! Я купил ${planNameInSentenceRu} подписку и оплатил, сейчас отправлю квитанцию, можете мне открыть доступ?`;
   }
 
   const telegramUrl = `https://t.me/kyrgyzakylman?text=${encodeURIComponent(telegramMessage)}`;
@@ -143,7 +143,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     onClose();
   };
 
-  if (hasUserPremium && !isUpgrade) {
+  // Only block users who ALREADY PAID for permanent Premium until 2027
+  if (isPaidUserPremium && !isUpgrade) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
         <div
@@ -163,12 +164,12 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
           <div>
             <h3 className="text-xl sm:text-2xl font-black text-white">
-              {isKg ? 'Сизде Премиум жазылуу активдүү!' : 'У вас активна «Премиальная подписка»!'}
+              {isKg ? 'Сизде Премиалдуу жазылуу активдүү!' : 'У вас активна «Премиальная подписка»!'}
             </h3>
             <p className="text-xs sm:text-sm text-emerald-200/80 mt-2 leading-relaxed max-w-sm mx-auto">
               {isKg
-                ? 'Сизде максималдуу мүмкүнчүлүктөр ачык (Теория, сүрөт-чечмелөөлөр, видеосабактар жана үй тапшырмасы). Башка тариф сатып алуунун кажети жок.'
-                : 'Вам уже доступны все материалы, видеоуроки, фоторазборы и домашние задания. Дополнительные тарифы не требуются.'}
+                ? 'Сизде 2027-жылдын 1-июнуна чейин толук мүмкүнчүлүктөр ачык. Башка тариф сатып алуунун кажети жок.'
+                : 'У вас действует подписка до 1 июня 2027 года со всеми материалами и тестами. Дополнительные тарифы не требуются.'}
             </p>
           </div>
 
@@ -185,9 +186,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
       <div
-        className="relative w-full max-w-lg bg-[#06261d] border border-emerald-700/80 rounded-3xl p-5 sm:p-7 shadow-2xl shadow-emerald-950/80 text-white max-h-[90vh] overflow-y-auto custom-scrollbar"
+        className="relative w-full max-w-lg bg-[#06261d] border border-emerald-700/80 rounded-3xl p-5 sm:p-7 shadow-2xl shadow-emerald-950/80 text-white max-h-[90vh] overflow-y-auto overflow-x-hidden custom-scrollbar my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Glow backdrop */}
@@ -197,16 +198,16 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         {/* Close Button */}
         <button
           onClick={handleResetModal}
-          className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
         {waitingForTelegram ? (
           /* Step 2: Post-Click Screen -> Send Receipt to Telegram */
-          <div className="text-center py-3 space-y-4 animate-in fade-in duration-300">
-            <div className="w-16 h-16 rounded-2xl bg-sky-500/20 border border-sky-400 text-sky-300 flex items-center justify-center mx-auto shadow-lg shadow-sky-500/30">
-              <Send className="w-8 h-8 translate-x-0.5 -translate-y-0.5 text-sky-400" />
+          <div className="text-center py-2 space-y-4 animate-in fade-in duration-300">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-sky-500/20 border border-sky-400 text-sky-300 flex items-center justify-center mx-auto shadow-lg shadow-sky-500/30">
+              <Send className="w-7 h-7 sm:w-8 sm:h-8 translate-x-0.5 -translate-y-0.5 text-sky-400" />
             </div>
 
             <div>
@@ -217,22 +218,53 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <h3 className="text-xl sm:text-2xl font-black text-white">
                 {isKg ? 'Квитанцияны жөнөтүңүз' : 'Отправьте квитанцию'}
               </h3>
-              <p className="text-xs sm:text-sm text-emerald-200/80 max-w-sm mx-auto mt-1 leading-relaxed">
+              <p className="text-xs sm:text-sm text-emerald-200/80 max-w-md mx-auto mt-1 leading-relaxed">
                 {isKg
-                  ? 'Төлөм жасалгандан кийин, квитанцияны (чекти) Telegram аркылуу жөнөтүңүз. Мен текшерип, дароо толук мүмкүнчүлүктү ачып берем!'
-                  : 'После перевода отправьте квитанцию (чек) в Telegram. Я лично проверю и сразу открою вам полный доступ к материалам!'}
+                  ? 'Банк аркылуу төлөм өткөндөн кийин квитанцияны Telegram аркылуу жөнөтүңүз. Бардык төлөмдөр 100% коопсуз жана ачык-айкын, мүмкүнчүлүк текшерүүдөн соң дароо активдештирилет!'
+                  : 'После перевода отправьте чек в Telegram. Все операции на 100% безопасны и прозрачны, подключение подтверждается надёжно и персонально для вашего аккаунта!'}
               </p>
             </div>
 
             {/* Prepared Message Box */}
-            <div className="p-4 rounded-2xl bg-[#031510] border border-emerald-800/80 text-left space-y-2">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-[#031510] border border-emerald-800/80 text-left space-y-2">
               <div className="flex items-center justify-between text-[11px] text-emerald-400/90 font-bold uppercase">
-                <span>{isKg ? 'Даяр билдирүү:' : 'Готовое сообщение:'}</span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isKg ? 'Даяр билдирүү:' : 'Готовое сообщение:'}</span>
+                </span>
                 <span className="text-amber-300 font-black">{displayedPrice}</span>
               </div>
-              <p className="text-xs text-slate-200 bg-[#020e0b] p-3 rounded-xl border border-emerald-900/60 font-sans leading-relaxed">
+              <p className="text-xs text-slate-200 bg-[#020e0b] p-3 rounded-xl border border-emerald-900/60 font-sans leading-relaxed break-words">
                 «{telegramMessage}»
               </p>
+            </div>
+
+            {/* Verification & Support Box */}
+            <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-[#031510] border border-emerald-700/60 shadow-md">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                  <UserCheck className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="text-left text-xs truncate">
+                  <span className="text-white font-bold block truncate">Кыргыз Акылман</span>
+                  <span className="text-[10px] text-emerald-300/80 block truncate">
+                    {isKg ? 'Жеке текшерүү жана колдоо' : 'Личная проверка чека и кураторство'}
+                  </span>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-800 shrink-0">
+                @kyrgyzakylman
+              </span>
+            </div>
+
+            {/* Transparency / Timing Notice */}
+            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-left flex items-start gap-2.5 text-[11px] text-emerald-200/80">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                {isKg
+                  ? 'Коопсуздук жана ачыктык: Төлөм расмий банктык реквизиттер боюнча жүргүзүлөт, ал эми мүмкүнчүлүктү куратор текшерип дароо активдештирет.'
+                  : 'Безопасность и прозрачность: Оплата идёт напрямую через официальные банковские QR/счета, а подключение подписки куратор подтверждает лично.'}
+              </span>
             </div>
 
             {/* Primary Telegram Button */}
@@ -240,7 +272,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               href={telegramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-sky-600 hover:brightness-110 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-sky-500/25 transition-all cursor-pointer active:scale-98"
+              className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-sky-500 via-blue-500 to-sky-600 hover:brightness-110 text-white font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-xl shadow-sky-500/25 transition-all cursor-pointer active:scale-98"
             >
               <Send className="w-4 h-4 translate-x-0.5 -translate-y-0.5" />
               <span>{isKg ? 'Telegram’га өтүү жана чекти жөнөтүү' : 'Перейти в Telegram и отправить чек'}</span>
@@ -254,7 +286,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             </button>
           </div>
         ) : (
-          /* Step 1: Bank Selection Grid (100x100 squares) */
+          /* Step 1: Bank Selection Grid */
           <div className="space-y-4">
             {/* Header / Plan Info */}
             <div>
@@ -294,7 +326,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 </div>
               )}
 
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-3xl sm:text-4xl font-black text-white">{displayedPrice}</span>
                 {isUpgrade && (
                   <span className="text-sm line-through text-slate-400 font-bold">5 000 сом</span>
@@ -318,21 +350,21 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 </p>
                 <p className="text-[11px] text-emerald-200/60 mt-0.5">
                   {isKg
-                    ? 'Банкты басканда төлөм барагы ачылып, чекти жөнөтүү үчүн Telegram даярдалат'
-                    : 'При нажатии на банк откроется перевод с суммой и откроется Telegram для отправки чека'}
+                    ? 'Төлөмдөр 100% коопсуз жана ачык-айкын, квитанцияны Telegram аркылуу жөнөтүңүз'
+                    : 'Все операции прозрачны и безопасны, подключение подтверждается после отправки чека в Telegram'}
                 </p>
               </div>
 
-              {/* 4 Square 100x100 Bank Buttons Grid */}
-              <div className="grid grid-cols-2 min-[440px]:grid-cols-4 gap-3 sm:gap-4 justify-items-center pt-1">
+              {/* Responsive Bank Buttons Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 justify-items-center pt-1">
                 {BANKS.map((bank) => (
                   <button
                     key={bank.id}
                     onClick={() => handleBankClick(bank)}
-                    className="flex flex-col items-center group cursor-pointer focus:outline-none transition-all active:scale-95"
+                    className="flex flex-col items-center group cursor-pointer focus:outline-none transition-all active:scale-95 w-full max-w-[110px]"
                   >
-                    {/* Square 100x100 px Logo Box */}
-                    <div className="w-[100px] h-[100px] rounded-2xl p-1 bg-[#031510] border-2 border-emerald-800/80 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center overflow-hidden">
+                    {/* Square Bank Logo Box */}
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl p-1 bg-[#031510] border-2 border-emerald-800/80 group-hover:border-emerald-400 group-hover:shadow-lg group-hover:shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center overflow-hidden">
                       <img
                         src={bank.logoUrl}
                         alt={bank.name}
@@ -343,7 +375,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     </div>
 
                     {/* Bank Name below the square */}
-                    <span className="text-xs font-black text-white group-hover:text-emerald-300 mt-2 tracking-tight transition-colors text-center">
+                    <span className="text-xs font-black text-white group-hover:text-emerald-300 mt-1.5 tracking-tight transition-colors text-center truncate w-full">
                       {bank.name}
                     </span>
                   </button>
@@ -353,15 +385,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
             {/* Direct Telegram Assistant Link Footer */}
             <div className="p-3 rounded-2xl bg-[#031510] border border-emerald-800/80 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center shrink-0">
                   <Send className="w-4 h-4" />
                 </div>
-                <div>
-                  <p className="font-bold text-white leading-tight">
+                <div className="truncate">
+                  <p className="font-bold text-white leading-tight truncate">
                     {isKg ? 'Суроолор же чекти жөнөтүү:' : 'Вопросы или чек:'}
                   </p>
-                  <p className="text-[11px] text-sky-300 font-semibold">@kyrgyzakylman</p>
+                  <p className="text-[11px] text-emerald-400 font-semibold truncate">@kyrgyzakylman</p>
                 </div>
               </div>
 

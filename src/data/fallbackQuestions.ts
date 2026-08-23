@@ -1,6 +1,12 @@
 import { Question } from '../types';
 import { getOptimizedTestPageUrl } from '../utils/imageOptimization';
 import { getCustomAnswer } from './testAnswersManager';
+import {
+  getQuestionsVariant16,
+  getQuestionsVariant19,
+  getQuestionsVariant20,
+  getQuestionsVariant101,
+} from './testsDataExtended';
 
 const applyCustomAnswers = (vId: number, questions: Question[]): Question[] => {
   return questions.map((q) => {
@@ -1348,6 +1354,22 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     }
 
     return questions;
+  }
+
+  if (vId === 16) {
+    return getQuestionsVariant16();
+  }
+
+  if (vId === 19) {
+    return getQuestionsVariant19();
+  }
+
+  if (vId === 20) {
+    return getQuestionsVariant20();
+  }
+
+  if (vId === 101) {
+    return getQuestionsVariant101();
   }
 
   // Fallback for general variants if offline

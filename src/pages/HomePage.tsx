@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Download, FileText, Clock } from 'lucide-react';
 import { Variant, AppLanguage } from '../types';
 import {
   API_BASE_URL,
@@ -112,6 +113,8 @@ const HOME_TRANSLATIONS = {
     chooseFormatTitle: 'Выбери формат тренировки:',
     fullTestButton: 'ПОЛНЫЙ ТЕСТ ОРТ',
     mathBoth: 'Математика (Обе части)',
+    downloadPdf: 'Скачать PDF версию этого теста',
+    inProgress: 'В процессе',
     noTestsFound: 'Тесты не найдены.',
     tryChangeSearch: 'В данном разделе пока нет доступных тестов.',
   },
@@ -139,6 +142,8 @@ const HOME_TRANSLATIONS = {
     chooseFormatTitle: 'Машыгуу форматын танда:',
     fullTestButton: 'ТОЛУК ЖРТ ТЕСТИ',
     mathBoth: 'Математика (Эки бөлүгү тең)',
+    downloadPdf: 'Бул тесттин PDF версиясын көчүрүп алуу',
+    inProgress: 'В процессе',
     noTestsFound: 'Тесттер табылган жок.',
     tryChangeSearch: 'Бул бөлүмдө азырынча тесттер жок.',
   },
@@ -487,6 +492,40 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                           </div>
                         );
                       })}
+                    </div>
+
+                    {/* PDF Version Download Link (Requested by User) */}
+                    <div className="pt-2 mt-1 border-t border-slate-200/80 dark:border-emerald-900/60">
+                      {variant.pdfUrl ? (
+                        <a
+                          href={variant.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-400/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-between transition-all group/pdf cursor-pointer"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>{t.downloadPdf}</span>
+                          </span>
+                          <span className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 group-hover/pdf:translate-y-0.5 transition-transform">
+                            <Download className="w-3.5 h-3.5" />
+                            <span>PDF</span>
+                          </span>
+                        </a>
+                      ) : (
+                        <div
+                          className="w-full py-2 px-3 rounded-xl bg-slate-100/70 dark:bg-emerald-950/40 border border-slate-200/70 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-300/70 text-xs flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <FileText className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                            <span>{t.downloadPdf}</span>
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/60 dark:bg-[#02100c] border border-slate-200/80 dark:border-emerald-800/60 text-[10px] font-bold text-slate-600 dark:text-emerald-300/90 flex items-center gap-1 shrink-0">
+                            <Clock className="w-3 h-3 text-emerald-500/80" />
+                            <span>{t.inProgress}</span>
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

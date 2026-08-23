@@ -10,10 +10,12 @@ import {
   Flame,
   FileCheck,
   Video,
+  Gift,
+  GraduationCap,
 } from 'lucide-react';
 import { SubscriptionPlan, AppLanguage } from '../types';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
 import { SubscriptionModal } from './SubscriptionModal';
 
 interface PricingSectionProps {
@@ -26,11 +28,14 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isKg = lang === 'kg';
-  const effectivePlan = subscriptionStatus.effectivePlan;
-  const isUserPremium = effectivePlan === 'premium' || user?.subscriptionPlan === 'premium';
-  const isUserStandard =
-    (effectivePlan === 'standard' || user?.subscriptionPlan === 'standard') && !isUserPremium;
+  const isAdmin = Boolean(user?.identifier && user.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase());
 
+  // Paid users have active subscription until June 1, 2027
+  const isPaidUserPremium = (Boolean(user?.isPaid) && (user?.subscriptionPlan === 'premium' || subscriptionStatus.effectivePlan === 'premium')) || isAdmin;
+  const isPaidUserStandard = Boolean(user?.isPaid) && user?.subscriptionPlan === 'standard' && !isPaidUserPremium;
+  const isTrialUser = !user?.isPaid && !isAdmin;
+
+  const freePlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'free') || SUBSCRIPTION_PLANS[0];
   const standardPlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'standard') || SUBSCRIPTION_PLANS[1];
   const premiumPlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'premium') || SUBSCRIPTION_PLANS[2];
 
@@ -47,7 +52,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
         <div className="absolute bottom-1/4 right-1/4 w-80 sm:w-96 h-80 sm:h-96 bg-amber-500/15 rounded-full blur-[120px]" />
       </div>
 
-      <div className="max-w-5xl mx-auto relative">
+      <div className="max-w-6xl mx-auto relative">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3 sm:space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/20 to-amber-500/20 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-black uppercase tracking-widest shadow-lg shadow-emerald-500/10">
@@ -76,12 +81,12 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
 
           <p className="text-xs sm:text-sm md:text-base text-emerald-200/80 max-w-2xl mx-auto leading-relaxed">
             {isKg
-              ? 'Эки тариф тең 2027-жылдын 1-июнуна чейин иштейт. Өзүңүзгө ылайыктуусун тандап, толук мүмкүнчүлүккө ээ болуңуз!'
-              : 'Обе подписки действуют до 1 июня 2027 года. Сравните возможности и выберите подходящий тариф для поступления на бюджет!'}
+              ? 'Тарифтер 2027-жылдын 1-июнуна чейин иштейт. Өзүңүзгө ылайыктуусун тандап, бюджетке өтүүгө даярданыңыз!'
+              : 'Подписки действуют до 1 июня 2027 года. Сравните возможности и выберите подходящий тариф для поступления на бюджет!'}
           </p>
 
-          {/* Premium User VIP status banner */}
-          {isUserPremium && (
+          {/* Paid Premium User VIP status banner */}
+          {isPaidUserPremium && (
             <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-950/70 via-[#072b20] to-[#041a14] border-2 border-amber-400/80 shadow-2xl shadow-amber-500/20 text-left flex items-center gap-4 animate-in fade-in duration-300">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-200 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/30">
                 <Crown className="w-6 h-6 text-slate-950" />
@@ -101,8 +106,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
             </div>
           )}
 
-          {/* Standard User Upgrade banner */}
-          {isUserStandard && (
+          {/* Paid Standard User Upgrade banner */}
+          {isPaidUserStandard && (
             <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 via-[#0a3528] to-[#041a14] border-2 border-amber-400/60 flex items-center justify-between gap-4 text-xs sm:text-sm shadow-lg text-left">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-400/40">
@@ -121,12 +126,111 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
               </div>
             </div>
           )}
+
+          {/* Trial User Notice Banner */}
+          {isTrialUser && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-[#0a3a2c] to-[#05261d] border border-emerald-500/50 flex items-center gap-3.5 text-xs sm:text-sm text-left shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-400/40">
+                <Gift className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <span className="font-black text-emerald-300 block">
+                  {isKg
+                    ? '🎁 Сизге 24 сааттык сыноо VIP-мүмкүнчүлүгү белекке берилди!'
+                    : '🎁 Вам подарен 24-часовой пробный VIP-доступ!'}
+                </span>
+                <span className="text-emerald-100/80 text-xs block mt-0.5 leading-relaxed">
+                  {isKg
+                    ? 'Платформанын бардык мүмкүнчүлүктөрүн колдонуп көрүңүз. Чексиз мүмкүнчүлүктү сактап калуу үчүн 2027-жылдын 1-июнуна чейинки тарифти тандаңыз.'
+                    : 'Оцените все возможности платформы. Чтобы сохранить неограниченный доступ после окончания суток, выберите подходящий тариф до 1 июня 2027 года.'}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* 2 Main Plans Comparison Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
-          {/* 1. ДОСТУПНАЯ ПОДПИСКА */}
-          <div className="relative rounded-3xl bg-[#041a14] border-2 border-emerald-700/70 p-6 sm:p-8 flex flex-col justify-between shadow-xl hover:border-emerald-500 transition-all group">
+        {/* 3 Plans Comparison Grid: Free (Subtle), Standard (Vibrant Emerald), Premium (VIP Gold) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
+          {/* 1. БАЗОВАЯ (Muted & Basic) */}
+          <div className="relative rounded-3xl bg-[#031510]/80 border border-slate-700/60 p-6 flex flex-col justify-between shadow-lg opacity-90 hover:opacity-100 transition-all">
+            <div className="space-y-4">
+              {/* Badge & Title */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-800/80 text-slate-300 border border-slate-700">
+                  {isKg ? 'Базалык' : 'Базовая'}
+                </span>
+                <span className="text-xs text-slate-400 font-semibold">
+                  {isKg ? freePlan.periodLabelKg : freePlan.periodLabel}
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold text-slate-200">
+                  {isKg ? freePlan.nameKg : freePlan.name}
+                </h3>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-3xl sm:text-4xl font-bold text-slate-300">
+                    {isKg ? freePlan.priceLabelKg : freePlan.priceLabel}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-1">
+                  {isKg
+                    ? 'ЖРТ форматы менен таанышуу жана базалык билимди текшерүү үчүн.'
+                    : 'Базовое ознакомление с платформой и проверка начального уровня.'}
+                </p>
+              </div>
+
+              {/* Feature Checklist */}
+              <div className="pt-3 border-t border-slate-800 space-y-2.5 text-xs sm:text-sm">
+                <div className="flex items-start gap-2.5 text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white">{isKg ? 'Сынамык тест:' : 'Пробный тест:'}</strong>{' '}
+                    {isKg ? '1 базалык тест жана баллдарды эсептөө' : '1 ознакомительный тест и подсчет баллов'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white">{isKg ? 'Калькулятор:' : 'Калькулятор баллов:'}</strong>{' '}
+                    {isKg ? 'ЖРТ шкаласы боюнча автоматтык эсептөө' : 'Точный расчет по шкале ЦООМО'}
+                  </span>
+                </div>
+
+                {/* Not included in Free */}
+                <div className="flex items-start gap-2.5 text-slate-500 opacity-70 pt-1">
+                  <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <span>{isKg ? 'Бардык теория жана конспекттер' : 'Полная база теории по темам'}</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-slate-500 opacity-70">
+                  <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <span>{isKg ? 'Сүрөт-талдоолор жана чыгаруу жолдору' : 'Фоторазборы задач реального ОРТ'}</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-slate-500 opacity-70">
+                  <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                  <span>{isKg ? 'Үй тапшырмалары жана видеосабактар' : 'Домашние задания и видеоуроки'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Free Button */}
+            <div className="pt-6">
+              <button
+                type="button"
+                disabled
+                className="w-full py-3 px-5 rounded-2xl bg-white/5 border border-slate-700/60 text-slate-400 font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-default"
+              >
+                <Check className="w-4 h-4 text-slate-400" />
+                <span>{isKg ? 'Базалык мүмкүнчүлүк' : 'Базовый доступ'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 2. ДОСТУПНАЯ ПОДПИСКА (Vibrant Emerald) */}
+          <div className="relative rounded-3xl bg-[#041a14] border-2 border-emerald-500/80 p-6 sm:p-7 flex flex-col justify-between shadow-xl hover:border-emerald-400 transition-all group">
             <div className="space-y-4">
               {/* Badge & Title */}
               <div className="flex items-center justify-between gap-2">
@@ -196,7 +300,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
 
             {/* Select Button */}
             <div className="pt-6">
-              {isUserPremium ? (
+              {isPaidUserPremium ? (
                 <button
                   type="button"
                   disabled
@@ -205,7 +309,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                   <Check className="w-4 h-4 text-emerald-400" />
                   <span>{isKg ? 'Премиумга кошулган' : 'Включено в Премиум'}</span>
                 </button>
-              ) : isUserStandard ? (
+              ) : isPaidUserStandard ? (
                 <button
                   type="button"
                   disabled
@@ -221,14 +325,14 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                   className="w-full py-3.5 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/30 transition-all cursor-pointer active:scale-95 group-hover:scale-[1.02]"
                 >
                   <Zap className="w-4 h-4" />
-                  <span>{isKg ? 'Жеткиликтүү жазылуу — 2 000 сом' : 'Выбрать Доступную — 2 000 сом'}</span>
+                  <span>{isKg ? 'Жеткиликтүү — 2 000 сом' : 'Выбрать — 2 000 сом'}</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* 2. ПРЕМИАЛЬНАЯ ПОДПИСКА (VIP Golden Highlighted) */}
-          <div className="relative rounded-3xl bg-gradient-to-b from-[#093527] to-[#041a14] border-2 border-amber-400/90 p-6 sm:p-8 flex flex-col justify-between shadow-2xl shadow-amber-500/20 hover:border-amber-300 transition-all group">
+          {/* 3. ПРЕМИАЛЬНАЯ ПОДПИСКА (VIP Golden Highlighted) */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#093527] to-[#041a14] border-2 border-amber-400/90 p-6 sm:p-7 flex flex-col justify-between shadow-2xl shadow-amber-500/20 hover:border-amber-300 transition-all group">
             {/* Top Right Floating Badge */}
             <div className="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-[11px] uppercase tracking-wider shadow-lg flex items-center gap-1.5">
               <Crown className="w-3.5 h-3.5 text-slate-950" />
@@ -253,9 +357,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 </h3>
                 <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-3xl sm:text-4xl font-black text-amber-300">
-                    {isUserStandard ? '3 000 сом' : (isKg ? premiumPlan.priceLabelKg : premiumPlan.priceLabel)}
+                    {isPaidUserStandard ? '3 000 сом' : (isKg ? premiumPlan.priceLabelKg : premiumPlan.priceLabel)}
                   </span>
-                  {isUserStandard && (
+                  {isPaidUserStandard && (
                     <span className="text-sm line-through text-slate-400 font-bold">5 000 сом</span>
                   )}
                 </div>
@@ -286,10 +390,15 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
 
                 <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
                   <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong className="text-amber-300">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>{' '}
-                    {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские уроки лично от преподавателя'}
-                  </span>
+                  <div>
+                    <strong className="text-amber-300 block">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span className="text-xs text-amber-200/90">
+                        {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские видеоуроки с объяснением тем'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
@@ -312,7 +421,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
 
             {/* Select Button */}
             <div className="pt-6">
-              {isUserPremium ? (
+              {isPaidUserPremium ? (
                 <button
                   type="button"
                   disabled
@@ -321,7 +430,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                   <Check className="w-4 h-4 text-amber-300" />
                   <span>{isKg ? 'Сиздин активдүү тарифиңиз (Премиум)' : 'Ваш активный тариф (Премиум)'}</span>
                 </button>
-              ) : isUserStandard ? (
+              ) : isPaidUserStandard ? (
                 <button
                   type="button"
                   onClick={() => handleOpenPlan(premiumPlan)}
@@ -337,7 +446,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                   className="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-amber-500/30 transition-all cursor-pointer active:scale-95 group-hover:scale-[1.02]"
                 >
                   <Crown className="w-4 h-4 text-slate-950" />
-                  <span>{isKg ? 'Премиум тандоо — 5 000 сом' : 'Выбрать Премиум — 5 000 сом'}</span>
+                  <span>{isKg ? 'Премиум — 5 000 сом' : 'Выбрать Премиум — 5 000 сом'}</span>
                 </button>
               )}
             </div>
@@ -359,7 +468,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
             href="https://t.me/kyrgyzakylman"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-amber-300 font-bold hover:underline flex items-center gap-1"
+            className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors flex items-center gap-1"
           >
             <span>{isKg ? 'Колдоо кызматы: @kyrgyzakylman' : 'Поддержка в Telegram: @kyrgyzakylman'}</span>
           </a>

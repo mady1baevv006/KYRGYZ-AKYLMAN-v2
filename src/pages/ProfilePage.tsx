@@ -654,12 +654,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
               </p>
             </div>
 
-            {/* 3 Plans Grid */}
+            {/* 3 Plans Grid (Matching Main Page Pricing Design) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-stretch mb-6">
               {SUBSCRIPTION_PLANS.map((plan) => {
                 const isKg = lang === 'kg';
                 const isPremium = plan.id === 'premium';
                 const isStandard = plan.id === 'standard';
+                const isFree = plan.id === 'free';
                 const isCurrent = (user.subscriptionPlan || 'free') === plan.id;
                 const planName = isKg ? plan.nameKg : plan.name;
                 const planPeriod = isKg ? plan.periodLabelKg : plan.periodLabel;
@@ -671,97 +672,125 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 return (
                   <div
                     key={plan.id}
-                    className={`relative flex flex-col justify-between rounded-2xl sm:rounded-3xl p-5 sm:p-6 transition-all duration-300 ${
+                    className={`relative flex flex-col justify-between rounded-3xl p-5 sm:p-6 transition-all duration-300 ${
                       isPremium
-                        ? 'bg-gradient-to-b from-[#07382c] via-[#05281e] to-[#041e17] border-2 border-amber-400/80 shadow-xl shadow-emerald-500/20'
+                        ? 'bg-gradient-to-b from-[#093527] to-[#041a14] border-2 border-amber-400/90 shadow-2xl shadow-amber-500/20 hover:border-amber-300'
                         : isStandard
-                        ? 'bg-[#062920] border border-emerald-500/70 shadow-lg shadow-emerald-950/60'
-                        : 'bg-[#041a14] border border-emerald-800/60'
+                        ? 'bg-[#041a14] border-2 border-emerald-500/80 shadow-xl hover:border-emerald-400'
+                        : 'bg-[#031510]/80 border border-slate-700/60 shadow-lg opacity-90 hover:opacity-100'
                     }`}
                   >
-                    <div>
+                    {/* Top VIP Floating Badge for Premium */}
+                    {isPremium && (
+                      <div className="absolute -top-3 right-5 px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-md flex items-center gap-1">
+                        <Crown className="w-3 h-3 text-slate-950" />
+                        <span>VIP • {isKg ? 'Баары камтылган' : 'Все включено'}</span>
+                      </div>
+                    )}
+
+                    <div className="space-y-4">
                       {/* Badge & Title */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
+                      <div className="flex items-center justify-between gap-2">
                         <span
                           className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${
                             isPremium
                               ? 'bg-amber-400/20 text-amber-300 border-amber-400/50'
                               : isStandard
                               ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50'
-                              : 'bg-white/5 text-emerald-300/80 border-emerald-700/60'
+                              : 'bg-slate-800/80 text-slate-300 border-slate-700'
                           }`}
                         >
                           {planBadge}
                         </span>
-                        {isCurrent && (
+                        {isCurrent ? (
                           <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-800">
                             {isKg ? 'Учурдагы' : 'Текущий'}
                           </span>
+                        ) : (
+                          <span className="text-xs text-slate-400 font-semibold">{planPeriod}</span>
                         )}
                       </div>
 
-                      <h4 className="text-lg font-black text-white mb-1">{planName}</h4>
-                      <p className="text-xs text-emerald-200/70 mb-4 min-h-[32px] leading-relaxed">
-                        {planDesc}
-                      </p>
-
-                      {/* Pricing */}
-                      <div className="mb-4 pb-4 border-b border-emerald-800/50">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      <div>
+                        <h4
+                          className={`text-lg sm:text-xl font-bold ${
+                            isPremium ? 'text-amber-100' : isStandard ? 'text-emerald-100' : 'text-slate-200'
+                          }`}
+                        >
+                          {planName}
+                        </h4>
+                        <div className="flex items-baseline gap-1.5 mt-1">
+                          <span
+                            className={`text-2xl sm:text-3xl font-black ${
+                              isPremium ? 'text-amber-300' : isStandard ? 'text-emerald-300' : 'text-slate-300'
+                            }`}
+                          >
                             {planPrice}
                           </span>
                         </div>
-                        <span className="text-[11px] text-emerald-300/80 font-bold block mt-0.5">
-                          {planPeriod}
-                        </span>
+                        <p className="text-xs text-slate-300/80 mt-1 leading-relaxed">{planDesc}</p>
                       </div>
 
                       {/* Features List */}
-                      <ul className="space-y-2 mb-6">
+                      <div className="pt-3 border-t border-emerald-900/60 space-y-2">
                         {features.map((feat, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-xs text-emerald-100/90 leading-tight">
+                          <div key={idx} className="flex items-start gap-2 text-xs text-slate-200 leading-tight">
                             <CheckCircle2
                               className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
                                 isPremium
                                   ? 'text-amber-400'
                                   : isStandard
                                   ? 'text-emerald-400'
-                                  : 'text-emerald-500'
+                                  : 'text-slate-400'
                               }`}
                             />
                             <span>{feat}</span>
-                          </li>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     </div>
 
                     {/* Action Button */}
-                    <div>
+                    <div className="pt-5">
                       {isCurrent ? (
                         <div className="w-full py-2.5 rounded-xl bg-emerald-900/40 border border-emerald-700/60 text-emerald-300 font-bold text-xs text-center">
                           {isKg ? 'Сиздин активдүү тарифиңиз' : 'Ваш активный тариф'}
                         </div>
+                      ) : isFree ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full py-2.5 px-4 rounded-xl bg-white/5 border border-slate-700/60 text-slate-400 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-default"
+                        >
+                          <Check className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{isKg ? 'Базалык мүмкүнчүлүк' : 'Базовый доступ'}</span>
+                        </button>
                       ) : (
                         <button
                           type="button"
                           onClick={() => {
                             setSelectedPlanForCheckout(plan);
                           }}
-                          className={`w-full py-2.5 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+                          className={`w-full py-3 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95 ${
                             isPremium
-                              ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-emerald-300 text-slate-950 hover:brightness-110'
-                              : isStandard
-                              ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
-                              : 'bg-white/10 hover:bg-white/20 text-white border border-emerald-700/60'
+                              ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 hover:brightness-110 shadow-amber-500/30'
+                              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-700/30'
                           }`}
                         >
+                          {isPremium ? (
+                            <Crown className="w-3.5 h-3.5 text-slate-950" />
+                          ) : (
+                            <Zap className="w-3.5 h-3.5" />
+                          )}
                           <span>
-                            {plan.price === 0
-                              ? (isKg ? 'Акысыз тандоо' : 'Выбрать базовый')
-                              : (isKg ? 'Толук маалымат жана сатып алуу' : 'Оформить подписку')}
+                            {isPremium
+                              ? isKg
+                                ? 'Премиум — 5 000 сом'
+                                : 'Выбрать Премиум — 5 000 сом'
+                              : isKg
+                              ? 'Жеткиликтүү — 2 000 сом'
+                              : 'Выбрать — 2 000 сом'}
                           </span>
-                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -770,13 +799,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
               })}
             </div>
 
-            {/* Modal Bottom Note */}
-            <div className="text-center pt-3 border-t border-emerald-900/60 text-xs text-emerald-200/60 flex items-center justify-center gap-2">
+            {/* Modal Bottom Note - 100% Secure & Transparent */}
+            <div className="text-center pt-3 border-t border-emerald-900/60 text-xs text-emerald-200/80 flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>
                 {lang === 'kg'
-                  ? 'Бардык төлөмдөр коопсуз жана MBank, О!Деньги, QR аркылуу кабыл алынат'
-                  : 'Оплата и подключение происходят мгновенно через MBank, О!Деньги или WhatsApp'}
+                  ? 'Банк аркылуу төлөөдө баары ачык-айкын, расмий жана 100% коопсуз'
+                  : 'Все операции и оплата проходят прозрачно, официально и на 100% безопасно'}
               </span>
             </div>
           </div>

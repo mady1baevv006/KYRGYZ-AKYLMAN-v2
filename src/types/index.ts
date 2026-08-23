@@ -40,6 +40,7 @@ export interface Variant {
   tags: string[];
   status?: string;
   availableSections: number[];
+  pdfUrl?: string;
 }
 
 export interface TestDraft {

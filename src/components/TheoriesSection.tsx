@@ -99,10 +99,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
   // Navigation states: 'overview' -> 'blocks' -> 'topic'
   const [currentView, setCurrentView] = useState<'overview' | 'blocks' | 'topic'>('overview');
-  const [selectedSubjectId, setSelectedSubjectId] = useState<'algebra' | 'geometry'>('algebra');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<'algebra' | 'geometry' | 'russian' | 'english'>('algebra');
   const [selectedBlock, setSelectedBlock] = useState<TheoryBlock | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<TheoryTopic | null>(null);
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
+  const [subjectModalMode, setSubjectModalMode] = useState<'math_only' | 'all'>('all');
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(null);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -111,7 +112,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
   const [homeworkAnswers, setHomeworkAnswers] = useState<Record<number, number>>({});
   const [showHomeworkResults, setShowHomeworkResults] = useState(false);
 
-  const subject = THEORIES_DATA[selectedSubjectId];
+  const subject = THEORIES_DATA[selectedSubjectId] || THEORIES_DATA['algebra'];
 
   const handleOpenPlanChoice = () => {
     setIsPlanModalOpen(true);
@@ -122,11 +123,17 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
     onOpenSubscriptionModal(plan);
   };
 
-  const handleOpenSubjectModal = () => {
+  const handleOpenMathModal = () => {
+    setSubjectModalMode('math_only');
     setIsSubjectModalOpen(true);
   };
 
-  const handleSelectSubject = (subjectId: 'algebra' | 'geometry') => {
+  const handleOpenGeneralSubjectModal = () => {
+    setSubjectModalMode('all');
+    setIsSubjectModalOpen(true);
+  };
+
+  const handleSelectSubject = (subjectId: 'algebra' | 'geometry' | 'russian' | 'english') => {
     setSelectedSubjectId(subjectId);
     setIsSubjectModalOpen(false);
     setCurrentView('blocks');
@@ -180,89 +187,293 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
       />
 
       {/* ------------------------------------------------------------- */}
-      {/* 1. OVERVIEW VIEW (Card resembling a major subscription block) */}
+      {/* 1. OVERVIEW VIEW (3 Major Subject Blocks: Math, Russian, English) */}
       {/* ------------------------------------------------------------- */}
       {currentView === 'overview' && (
-        <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-emerald-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
-          {/* Mathematical Blueprint Background Elements (White & Black on firm Emerald) */}
-          <MathBackgroundElements opacity="opacity-30" variant="full" />
+        <div className="space-y-6">
+          {/* BLOCK 1: ТЕОРИЯ ПО МАТЕМАТИКЕ (Основной предмет) */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-emerald-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* Mathematical Blueprint Background Elements */}
+            <MathBackgroundElements opacity="opacity-30" variant="math" />
 
-          {/* Glowing background accents */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+            {/* Glowing background accents */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Header pill */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
-              <BookOpen className="w-4 h-4 text-emerald-400" />
-              <span>{isKg ? 'Негизги предмет' : 'Основной предмет'}</span>
-            </div>
-          </div>
-
-          {/* Main Title & Subtitle */}
-          <div className="relative z-10 space-y-4 max-w-3xl mb-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
-              {isKg ? 'Математика боюнча теория' : 'Теория по математике'}
-            </h1>
-            <p className="text-emerald-100/90 text-sm sm:text-base md:text-lg leading-relaxed">
-              {isKg
-                ? 'Математика — ЖРТдагы эң чоң упай алып келүүчү негизги бөлүк (60 суроо). Бул жерде теориялык эрежелер, формуляр, тузактар, ОРТнын чыныгы мисалдарынын сүрөттөрү жана автордук видеосабактар чогултулган.'
-                : 'Математика — главный фундамент Общереспубликанского тестирования (60 вопросов). Здесь собраны понятные теоретические конспекты, формулы, секреты ловушек ОРТ, пошаговые фото-разборы, практические домашние задания и авторские видеоуроки.'}
-            </p>
-          </div>
-
-          {/* Key Value Cards Row */}
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
-            <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1">
-              <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
-                <Calculator className="w-4 h-4" />
-                <span>{isKg ? 'Алгебра' : 'Алгебра'}</span>
+            {/* Header pill & Methodology Badge */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
+                <BookOpen className="w-4 h-4 text-emerald-400" />
+                <span>{isKg ? 'Негизги предмет' : 'Основной предмет'}</span>
               </div>
-              <p className="text-xs text-emerald-200/70">
-                {isKg ? 'Сандар, теңдемелер, модулдар, маселелер' : 'Числа, уравнения, модули, текстовые задачи'}
+
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-emerald-700/50 shadow-md">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0">
+                  <Calculator className="w-4 h-4" />
+                </div>
+                <div className="text-left leading-tight">
+                  <span className="text-xs font-bold text-white block">{isKg ? 'Автордук методика' : 'Авторская методика'}</span>
+                  <span className="text-[10px] text-emerald-300/80 font-medium">
+                    {isKg ? 'ЖРТнын бардык бөлүмдөрү' : 'Все разделы ОРТ'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Title & Subtitle */}
+            <div className="relative z-10 space-y-4 max-w-3xl mb-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
+                {isKg ? 'Математика боюнча теория' : 'Теория по математике'}
+              </h1>
+              <p className="text-emerald-100/90 text-sm sm:text-base md:text-lg leading-relaxed">
+                {isKg
+                  ? 'Математика — ЖРТдагы эң чоң упай алып келүүчү негизги бөлүк (60 суроо). 2 чоң бөлүмдөн турат: Алгебра жана Геометрия.'
+                  : 'Математика — главный фундамент Общереспубликанского тестирования (60 вопросов). Включает 2 фундаментальных блока: Алгебра и Геометрия со всеми конспектами, формулами и ловушками ОРТ.'}
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1">
-              <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
-                <Compass className="w-4 h-4" />
-                <span>{isKg ? 'Геометрия' : 'Геометрия'}</span>
+            {/* Key Value Cards Row (2 Main Subjects: Algebra and Geometry) */}
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              <div
+                onClick={() => handleSelectSubject('algebra')}
+                className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-2 cursor-pointer transition-all group/subcard"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-emerald-400 font-black text-base">
+                    <Calculator className="w-5 h-5" />
+                    <span>{isKg ? '1. Алгебра' : '1. Алгебра'}</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-emerald-400 opacity-60 group-hover/subcard:opacity-100 group-hover/subcard:translate-x-1 transition-all" />
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg
+                    ? 'Сандардын түрлөрү, бөлүнүүчүлүк, теңдемелер, барабарсыздыктар, модулдар, маселелер'
+                    : 'Числа и делимость, уравнения, неравенства, модули, прогрессии, текстовые задачи'}
+                </p>
               </div>
-              <p className="text-xs text-emerald-200/70">
-                {isKg ? 'Үч бурчтуктар, төрт бурчтуктар, аянттар' : 'Треугольники, четырехугольники, площади'}
-              </p>
+
+              <div
+                onClick={() => handleSelectSubject('geometry')}
+                className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-teal-400 space-y-2 cursor-pointer transition-all group/subcard"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-teal-400 font-black text-base">
+                    <Compass className="w-5 h-5" />
+                    <span>{isKg ? '2. Геометрия' : '2. Геометрия'}</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-teal-400 opacity-60 group-hover/subcard:opacity-100 group-hover/subcard:translate-x-1 transition-all" />
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg
+                    ? 'Үч бурчтуктар, төрт бурчтуктар, тегерек жана айлана, аянттар, стереометрия'
+                    : 'Треугольники, четырехугольники, окружности, формулы площадей, стереометрия'}
+                </p>
+              </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1">
-              <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
-                <Video className="w-4 h-4" />
-                <span>{isKg ? 'Видео + Үй тапшырма' : 'Видео + Домашнее задание'}</span>
-              </div>
-              <p className="text-xs text-emerald-200/70">
-                {isKg ? 'Абдраим Турусбековичтин автордук сабактары' : 'Авторские уроки и домашние задания ОРТ'}
-              </p>
+            {/* Primary Action Button: "Пройти теорию" */}
+            <div className="relative z-10 flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={handleOpenMathModal}
+                className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-emerald-500/40 transition-all cursor-pointer group/btn active:scale-95"
+              >
+                <span>{isKg ? 'Математика теориясын баштоо' : 'Пройти теорию по математике'}</span>
+                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+              </button>
             </div>
           </div>
 
-          {/* Primary Action Button: "Пройти теорию" */}
-          <div className="relative z-10 flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={handleOpenSubjectModal}
-              className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-emerald-500/40 transition-all cursor-pointer group/btn active:scale-95"
-            >
-              <span>{isKg ? 'Теорияны баштоо' : 'Пройти теорию'}</span>
-              <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-            </button>
+          {/* BLOCK 2: ТЕОРИЯ ПО РУССКОМУ ЯЗЫКУ (Основной предмет) */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#072c23] via-[#052119] to-[#031510] border-2 border-emerald-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* Background elements with Russian Literature/Grammar motifs */}
+            <MathBackgroundElements opacity="opacity-25" variant="literature" />
 
-            <button
-              type="button"
-              onClick={handleOpenPlanChoice}
-              className="px-6 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-emerald-500/40 text-emerald-200 hover:text-white font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-              <span>{isKg ? 'Тарифтерди көрүү' : 'Посмотреть тарифы'}</span>
-            </button>
+            {/* Glowing accents */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/20 transition-all" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header pill & Methodology Badge */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
+                <BookOpen className="w-4 h-4 text-emerald-400" />
+                <span>{isKg ? 'Негизги предмет' : 'Основной предмет'}</span>
+              </div>
+
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-emerald-700/50 shadow-md">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div className="text-left leading-tight">
+                  <span className="text-xs font-bold text-white block">{isKg ? 'Автордук методика' : 'Авторская методика'}</span>
+                  <span className="text-[10px] text-emerald-300/80 font-medium">
+                    {isKg ? '3 тематикалык блок' : '3 тематических блока'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Title & Subtitle */}
+            <div className="relative z-10 space-y-4 max-w-3xl mb-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
+                {isKg ? 'Орус тили боюнча теория' : 'Теория по русскому языку'}
+              </h1>
+              <p className="text-emerald-100/90 text-sm sm:text-base md:text-lg leading-relaxed">
+                {isKg
+                  ? 'Орус тили — ЖРТдагы милдеттүү негизги предмет (60 суроо). 3 өзүнчө блокту камтыйт: Аналогиялар жана сүйлөмдү толуктоо, Текстти окуу жана түшүнүү, Практикалык грамматика.'
+                  : 'Русский язык — второй обязательный основной предмет Общереспубликанского тестирования (60 вопросов). Включает 3 тематических блока: Аналогии и дополнение предложений, Чтение и понимание, Практическая грамматика.'}
+              </p>
+            </div>
+
+            {/* 3 Rectangular Blocks Row */}
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
+              <div
+                onClick={() => handleSelectSubject('russian')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
+                  <FileText className="w-4 h-4" />
+                  <span>{isKg ? '1. Аналогиялар' : '1. Аналогии и дополнения'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Түр-тек, бөлүк-бүтүн, себеп-натыйжа логикасы' : 'Род-вид, часть-целое, причина-следствие, ловушки'}
+                </p>
+              </div>
+
+              <div
+                onClick={() => handleSelectSubject('russian')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
+                  <BookOpen className="w-4 h-4" />
+                  <span>{isKg ? '2. Текстти түшүнүү' : '2. Чтение и понимание'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Тексттин мааниси, башкы ой, контекстти талдоо' : 'Анализ микротем, подтекст, аргументация и выводы'}
+                </p>
+              </div>
+
+              <div
+                onClick={() => handleSelectSubject('russian')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>{isKg ? '3. Грамматика' : '3. Практическая грамматика'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Пунктуация, орфография, синтаксис эрежелери' : 'Пунктуация, орфография, нормы речи и тесты'}
+                </p>
+              </div>
+            </div>
+
+            {/* Primary Action Button */}
+            <div className="relative z-10 flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={() => handleSelectSubject('russian')}
+                className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-emerald-500/40 transition-all cursor-pointer group/btn active:scale-95"
+              >
+                <span>{isKg ? 'Орус тили теориясын баштоо' : 'Пройти теорию по русскому языку'}</span>
+                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          {/* BLOCK 3: ТЕОРИЯ ПО АНГЛИЙСКОМУ ЯЗЫКУ (Предметный тест ОРТ) */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#06241b] via-[#041c15] to-[#02110c] border-2 border-teal-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* Background elements with English dictionary/vocab motifs */}
+            <MathBackgroundElements opacity="opacity-25" variant="english" />
+
+            {/* Glowing accents */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/20 transition-all" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Header pill & Methodology Badge */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-300 text-xs font-black uppercase tracking-wider shadow-inner">
+                <GraduationCap className="w-4 h-4 text-teal-400" />
+                <span>{isKg ? 'Предметтик тест ОРТ' : 'Предметный тест ОРТ'}</span>
+              </div>
+
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-teal-700/50 shadow-md">
+                <div className="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-400 flex items-center justify-center text-teal-300 shrink-0">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div className="text-left leading-tight">
+                  <span className="text-xs font-bold text-white block">{isKg ? 'Предметтик курс' : 'Предметный курс'}</span>
+                  <span className="text-[10px] text-teal-300/80 font-medium">
+                    {isKg ? 'Англис тили' : 'Английский язык'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Title & Subtitle */}
+            <div className="relative z-10 space-y-4 max-w-3xl mb-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-none">
+                {isKg ? 'Англис тили боюнча теория' : 'Теория по английскому языку'}
+              </h1>
+              <p className="text-emerald-100/90 text-sm sm:text-base md:text-lg leading-relaxed">
+                {isKg
+                  ? 'Англис тили — ЖРТнын предметтик тести. Бул бөлүмдө Reading Comprehension, грамматика жана Error Identification боюнча бардык эрежелер камтылган.'
+                  : 'Английский язык — профильный предметный тест ОРТ. Включает 3 блока: Reading Comprehension, Grammar & Vocabulary и Error Identification с практическими разборами типовых заданий.'}
+              </p>
+            </div>
+
+            {/* 3 Rectangular Blocks Row */}
+            <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
+              <div
+                onClick={() => handleSelectSubject('english')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
+                  <BookOpen className="w-4 h-4" />
+                  <span>{isKg ? '1. Тексттерди окуу' : '1. Reading Comprehension'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Тексттерди талдоо, сөздүктөр жана суроолор' : 'Понимание текстов, подтекст, главная мысль'}
+                </p>
+              </div>
+
+              <div
+                onClick={() => handleSelectSubject('english')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
+                  <FileText className="w-4 h-4" />
+                  <span>{isKg ? '2. Грамматика' : '2. Grammar & Vocabulary'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Англисче чактар, модалдык этиштер жана пассив' : 'Времена глаголов, модальные глаголы, пассив'}
+                </p>
+              </div>
+
+              <div
+                onClick={() => handleSelectSubject('english')}
+                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
+              >
+                <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>{isKg ? '3. Каталарды табуу' : '3. Error Identification'}</span>
+                </div>
+                <p className="text-xs text-emerald-200/70">
+                  {isKg ? 'Сүйлөмдөрдөгү типтүү грамматикалык каталар' : 'Типовые грамматические ошибки в тестах ОРТ'}
+                </p>
+              </div>
+            </div>
+
+            {/* Primary Action Button */}
+            <div className="relative z-10 flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={() => handleSelectSubject('english')}
+                className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-300 to-teal-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-teal-500/40 transition-all cursor-pointer group/btn active:scale-95"
+              >
+                <span>{isKg ? 'Англис тили теориясын баштоо' : 'Пройти теорию по английскому языку'}</span>
+                <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -286,7 +497,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
               <button
                 type="button"
-                onClick={handleOpenSubjectModal}
+                onClick={handleOpenGeneralSubjectModal}
                 className="p-2 sm:px-3 sm:py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-xs sm:text-sm font-bold text-emerald-300 flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <GraduationCap className="w-4 h-4" />
@@ -299,21 +510,38 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               <button
                 type="button"
                 onClick={handleOpenPlanChoice}
-                className="px-3.5 py-1.5 rounded-xl bg-amber-400/15 border border-amber-400/40 text-amber-300 font-bold text-xs flex items-center gap-1.5 hover:bg-amber-400/25 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 font-bold text-xs flex items-center gap-1.5 hover:bg-emerald-500/25 transition-all cursor-pointer shadow-sm"
               >
-                <Crown className="w-3.5 h-3.5" />
-                <span>{isKg ? 'Жазылууну алуу' : 'Оформить подписку'}</span>
+                <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{isKg ? 'Тарифтерди көрүү' : 'Посмотреть тарифы'}</span>
               </button>
             </div>
           </div>
 
           {/* Subject Header Card */}
           <div className="relative rounded-3xl bg-gradient-to-r from-[#062920] to-[#041a14] border border-emerald-700/60 p-6 sm:p-8 shadow-xl overflow-hidden">
-            <MathBackgroundElements opacity="opacity-20" variant="banner" />
+            <MathBackgroundElements
+              opacity="opacity-20"
+              variant={
+                selectedSubjectId === 'russian'
+                  ? 'literature'
+                  : selectedSubjectId === 'english'
+                  ? 'english'
+                  : 'math'
+              }
+            />
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider mb-1">
-                  {selectedSubjectId === 'algebra' ? <Calculator className="w-3.5 h-3.5" /> : <Compass className="w-3.5 h-3.5" />}
+                  {selectedSubjectId === 'algebra' ? (
+                    <Calculator className="w-3.5 h-3.5" />
+                  ) : selectedSubjectId === 'geometry' ? (
+                    <Compass className="w-3.5 h-3.5" />
+                  ) : selectedSubjectId === 'russian' ? (
+                    <FileText className="w-3.5 h-3.5" />
+                  ) : (
+                    <GraduationCap className="w-3.5 h-3.5" />
+                  )}
                   <span>{isKg ? subject.titleKg : subject.titleRu}</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -326,7 +554,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
               <button
                 type="button"
-                onClick={handleOpenSubjectModal}
+                onClick={handleOpenGeneralSubjectModal}
                 className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-emerald-700/60 text-xs font-bold text-emerald-300 flex items-center gap-2 transition-colors self-start cursor-pointer"
               >
                 <Layers className="w-4 h-4" />
@@ -947,17 +1175,17 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                     </div>
 
                     <div className="p-4 rounded-2xl bg-[#031510] border border-emerald-800/60 flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 font-black text-sm shrink-0">
-                        АТ
+                      <div className="w-11 h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0 shadow-md">
+                        <GraduationCap className="w-6 h-6" />
                       </div>
                       <div>
                         <h5 className="text-xs sm:text-sm font-bold text-white">
-                          Абдраим Турусбекович
+                          {isKg ? 'Эксперттик видеосабак' : 'Экспертный видеоурок'}
                         </h5>
                         <p className="text-[11px] text-emerald-200/70">
                           {isKg
-                            ? 'ЖРТ боюнча математика мугалими • Автордук методика'
-                            : 'Преподаватель математики по подготовке к ОРТ • Авторская методика'}
+                            ? 'ЖРТ боюнча автордук методика жана мисалдардын толук талдоосу'
+                            : 'Авторская методика подготовки к ОРТ и разбор всех заданий'}
                         </p>
                       </div>
                     </div>
@@ -970,11 +1198,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* Mini Modal: Choice "Алгебра" или "Геометрия"                  */}
+      {/* Mini Modal: Choice "Алгебра", "Геометрия", "Русский", "English" */}
       {/* ------------------------------------------------------------- */}
       {isSubjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg bg-[#07241c] border border-emerald-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="relative w-full max-w-lg bg-[#07241c] border border-emerald-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-emerald-800/60">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
@@ -982,10 +1210,22 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                 </div>
                 <div>
                   <h3 className="text-lg sm:text-xl font-black text-white">
-                    {isKg ? 'Бөлүмдү тандаңыз' : 'Выберите раздел теории'}
+                    {subjectModalMode === 'math_only'
+                      ? isKg
+                        ? 'Математика бөлүмүн тандаңыз'
+                        : 'Выберите раздел математики'
+                      : isKg
+                      ? 'Бөлүмдү тандаңыз'
+                      : 'Выберите предмет теории'}
                   </h3>
                   <span className="text-[11px] text-emerald-200/70 block">
-                    {isKg ? 'Математика боюнча ЖРТ программасы' : 'Программа подготовки к ОРТ'}
+                    {subjectModalMode === 'math_only'
+                      ? isKg
+                        ? 'Алгебра же Геометрия'
+                        : 'Алгебра или Геометрия (2 раздела)'
+                      : isKg
+                      ? 'ЖРТ программасы боюнча бардык предметтер'
+                      : 'Предметы программы ОРТ'}
                   </span>
                 </div>
               </div>
@@ -998,7 +1238,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </button>
             </div>
 
-            {/* 2 Big Choice Cards */}
+            {/* Choice Cards */}
             <div className="grid grid-cols-1 gap-3.5">
               {/* Algebra Option */}
               <button
@@ -1016,11 +1256,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                     </h4>
                     <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
                       {isKg
-                        ? 'Сандар, теңдемелер, барабарсыздыктар, модулдар, прогрессиялар жана тексттик маселелер'
+                        ? 'Сандар, теңдемелер, барабарсыздыктар, модулдар, прогрессиялар жана маселелер'
                         : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
                     </p>
                     <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
-                      4 {isKg ? 'чоң блок' : 'тематических блока'}
+                      {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
                     </span>
                   </div>
                 </div>
@@ -1049,7 +1289,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                         : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
                     </p>
                     <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
-                      3 {isKg ? 'чоң блок' : 'тематических блока'}
+                      {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
                     </span>
                   </div>
                 </div>
@@ -1057,6 +1297,69 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </button>
+
+              {/* Russian and English Options (Shown when not math_only) */}
+              {subjectModalMode === 'all' && (
+                <>
+                  {/* Russian Language Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('russian')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                          {isKg ? 'Орус тили' : 'Русский язык'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Аналогиялар, текстти окуу жана түшүнүү, практикалык грамматика жана ЖРТ тузактары'
+                            : 'Аналогии, чтение и понимание текстов, практическая грамматика и разбор ловушек ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
+                          {isKg ? 'Орус тили • Негизги предмет' : 'Русский язык • Основной предмет'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* English Language Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('english')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-teal-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
+                        <GraduationCap className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
+                          {isKg ? 'Англис тили' : 'Английский язык'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Reading Comprehension, грамматика, чактар жана каталарды табуу'
+                            : 'Reading Comprehension, Grammar & Vocabulary, Error Identification'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
+                          {isKg ? 'Англис тили • Предметтик тест ОРТ' : 'Английский язык • Предметный тест ОРТ'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

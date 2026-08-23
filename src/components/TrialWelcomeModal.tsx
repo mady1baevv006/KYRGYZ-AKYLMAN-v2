@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Sparkles,
@@ -10,6 +10,7 @@ import {
   ArrowRight,
   ShieldAlert,
   GraduationCap,
+  Lock,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -26,9 +27,32 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
   lang = 'ru',
 }) => {
   const { subscriptionStatus } = useAuth();
+  const [countdown, setCountdown] = useState(5);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCountdown(5);
+      return;
+    }
+
+    setCountdown(5);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const isKg = lang === 'kg';
+  const isLocked = countdown > 0;
   const hoursLeft = subscriptionStatus.hoursRemainingInStage;
   const minutesLeft = subscriptionStatus.minutesRemainingInStage;
 
@@ -42,12 +66,25 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
         <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close button */}
+        {/* Close button with 5-second lock indicator */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+          onClick={isLocked ? undefined : onClose}
+          disabled={isLocked}
+          className={`absolute top-4 right-4 p-2.5 rounded-2xl transition-all ${
+            isLocked
+              ? 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50 flex items-center gap-1 text-xs font-mono'
+              : 'bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white cursor-pointer'
+          }`}
+          title={isLocked ? (isKg ? `${countdown} сек күтүңүз` : `Подождите ${countdown} сек`) : undefined}
         >
-          <X className="w-5 h-5" />
+          {isLocked ? (
+            <span className="flex items-center gap-1 font-bold text-amber-300">
+              <Lock className="w-3.5 h-3.5" />
+              <span>{countdown}s</span>
+            </span>
+          ) : (
+            <X className="w-5 h-5" />
+          )}
         </button>
 
         {/* Gift Header */}
@@ -149,15 +186,33 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
           </div>
         </div>
 
-        {/* Action Button */}
+        {/* Action Button with 5s countdown lock */}
         <div className="pt-3">
           <button
             type="button"
-            onClick={onClose}
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/30 transition-all cursor-pointer active:scale-95"
+            onClick={isLocked ? undefined : onClose}
+            disabled={isLocked}
+            className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+              isLocked
+                ? 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-400/60 cursor-not-allowed'
+                : 'bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 shadow-xl shadow-emerald-500/30 cursor-pointer active:scale-95'
+            }`}
           >
-            <span>{isKg ? 'Даярданууну баштоо' : 'Начать подготовку'}</span>
-            <ArrowRight className="w-4 h-4" />
+            {isLocked ? (
+              <span className="flex items-center gap-2">
+                <Clock className="w-4 h-4 animate-spin text-amber-400" />
+                <span>
+                  {isKg
+                    ? `Маалыматты окуп чыгыңыз (${countdown} сек)`
+                    : `Прочитайте информацию (${countdown} сек)`}
+                </span>
+              </span>
+            ) : (
+              <>
+                <span>{isKg ? 'Даярданууну баштоо' : 'Начать подготовку'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </div>
