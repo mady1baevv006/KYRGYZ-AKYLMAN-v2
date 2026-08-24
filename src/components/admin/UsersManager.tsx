@@ -91,7 +91,7 @@ export const UsersManager: React.FC = () => {
   const handleResetTrial = (targetUser: UserProfile) => {
     adminResetTrial(targetUser.id);
     refreshList();
-    showToast(`Пользователю ${targetUser.name} сброшен 48-часовой пробный период!`);
+    showToast(`Пользователю ${targetUser.name} сброшен 24-часовой пробный период!`);
   };
 
   const handleDelete = (targetUser: UserProfile) => {
@@ -331,10 +331,18 @@ export const UsersManager: React.FC = () => {
         ) : (
           filteredUsers.map((u) => {
             const isAdminAccount = u.identifier.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-            const isPrem = u.subscriptionPlan === 'premium';
-            const isStan = u.subscriptionPlan === 'standard';
+            const isPaidPrem = (u.subscriptionPlan === 'premium' && u.isPaid) || isAdminAccount;
+            const isPaidStan = u.subscriptionPlan === 'standard' && u.isPaid;
             const testCount = u.testHistory?.length || 0;
             const regDate = u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('ru-RU') : '—';
+
+            // Calculate trial status
+            // Calculate trial status (24 hours single VIP stage)
+            const regTimestamp = u.registeredAt ? new Date(u.registeredAt).getTime() : Date.now();
+            const msPassed = Math.max(0, Date.now() - regTimestamp);
+            const totalHoursElapsed = msPassed / (1000 * 60 * 60);
+            const isTrialPrem = !u.isPaid && !isAdminAccount && totalHoursElapsed < 24;
+            const trialHoursLeft = isTrialPrem ? Math.max(0, Math.floor(24 - totalHoursElapsed)) : 0;
 
             return (
               <div
@@ -391,15 +399,20 @@ export const UsersManager: React.FC = () => {
                       <span className="text-xs font-black text-emerald-300">{testCount}</span>
                     </div>
 
-                    {isPrem ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-500/20 to-emerald-500/20 text-amber-300 border border-amber-400/50 flex items-center gap-1.5">
+                    {isPaidPrem ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-500/20 to-emerald-500/20 text-amber-300 border border-amber-400/50 flex items-center gap-1.5 shadow-sm">
                         <Crown className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Премиальная подписка</span>
+                        <span>👑 Премиум (до 2027)</span>
                       </span>
-                    ) : isStan ? (
-                      <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-500/20 text-teal-300 border border-teal-500/50 flex items-center gap-1.5">
+                    ) : isPaidStan ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-teal-500/20 text-teal-300 border border-teal-500/50 flex items-center gap-1.5 shadow-sm">
                         <Zap className="w-3.5 h-3.5 text-teal-400" />
-                        <span>Доступная подписка</span>
+                        <span>⚡ Доступный (до 2027)</span>
+                      </span>
+                    ) : isTrialPrem ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-400/60 flex items-center gap-1.5 shadow-sm">
+                        <Clock className="w-3.5 h-3.5 text-amber-400" />
+                        <span>⏳ Пробный VIP ({trialHoursLeft}ч)</span>
                       </span>
                     ) : (
                       <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-300 border border-emerald-700/60 flex items-center gap-1.5">
@@ -421,26 +434,26 @@ export const UsersManager: React.FC = () => {
                       type="button"
                       onClick={() => handleQuickSetPlan(u, 'premium', true)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 transition-all cursor-pointer ${
-                        isPrem
+                        isPaidPrem
                           ? 'bg-amber-400 text-slate-950'
                           : 'bg-amber-400/15 hover:bg-amber-400/25 border border-amber-400/40 text-amber-300'
                       }`}
                     >
                       <Crown className="w-3 h-3" />
-                      <span>{isPrem ? 'Активен Премиум' : '👑 Выдать Премиум'}</span>
+                      <span>{isPaidPrem ? 'Активен Премиум' : '👑 Выдать Премиум'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleQuickSetPlan(u, 'standard', true)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 transition-all cursor-pointer ${
-                        isStan
+                        isPaidStan
                           ? 'bg-teal-400 text-slate-950'
                           : 'bg-teal-400/15 hover:bg-teal-400/25 border border-teal-400/40 text-teal-300'
                       }`}
                     >
                       <Zap className="w-3 h-3" />
-                      <span>{isStan ? 'Активна Доступная' : '⚡ Выдать Доступную'}</span>
+                      <span>{isPaidStan ? 'Активна Доступная' : '⚡ Выдать Доступную'}</span>
                     </button>
 
                     <button
@@ -456,10 +469,10 @@ export const UsersManager: React.FC = () => {
                       type="button"
                       onClick={() => handleResetTrial(u)}
                       className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 transition-all flex items-center gap-1 cursor-pointer"
-                      title="Сбросить 48-часовой пробный период"
+                      title="Сбросить 24-часовой пробный период"
                     >
                       <RotateCcw className="w-3 h-3" />
-                      <span>Сбросить 48ч</span>
+                      <span>Сбросить 24ч</span>
                     </button>
                   </div>
 

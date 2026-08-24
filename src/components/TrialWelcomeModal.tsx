@@ -26,11 +26,11 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
   onClose,
   lang = 'ru',
 }) => {
-  const { subscriptionStatus } = useAuth();
+  const { user, subscriptionStatus } = useAuth();
   const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !user) {
       setCountdown(5);
       return;
     }
@@ -47,9 +47,9 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen]);
+  }, [isOpen, user]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !user) return null;
 
   const isKg = lang === 'kg';
   const isLocked = countdown > 0;
@@ -99,103 +99,64 @@ export const TrialWelcomeModal: React.FC<TrialWelcomeModalProps> = ({
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            {isKg ? 'Сизге 1 күн Премиум жазылуу берилди!' : 'Вам начислен 1 день Премиальной подписки!'}
+            {isKg ? 'Сизге 24 сааттык Премиум жазылуу берилди!' : 'Вам начислен 24-часовой Премиум доступ!'}
           </h2>
 
           <p className="text-xs sm:text-sm text-emerald-100/85 max-w-md mx-auto leading-relaxed">
             {isKg
-              ? 'Платформанын бардык мүмкүнчүлүктөрүн толук көрүп чыгуу үчүн сизге атайын сынамык мөөнөтү берилди.'
-              : 'Чтобы вы могли оценить все преимущества подготовки, вам открыт максимальный пробный доступ.'}
+              ? 'Платформанын бардык мүмкүнчүлүктөрүн толук колдонуп, ЖРТга ишенимдүү даярданыңыз.'
+              : 'Вам открыты все возможности платформы: изучайте теорию, смотрите видеоразборы и решайте задания.'}
           </p>
 
           {/* Current Live Stage Countdown */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs sm:text-sm font-black">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-400/15 border border-amber-400/40 text-amber-300 text-xs sm:text-sm font-black shadow-sm">
             <Clock className="w-4 h-4 text-amber-400 animate-spin" style={{ animationDuration: '6s' }} />
             <span>
               {isKg
-                ? `1-этаптын бүтүшүнө калды: ${hoursLeft} саат ${minutesLeft} мүнөт`
-                : `До конца 1-го этапа осталось: ${hoursLeft} ч. ${minutesLeft} мин.`}
+                ? `Премиумдун бүтүшүнө калды: ${hoursLeft} саат ${minutesLeft} мүнөт`
+                : `До окончания Премиум-доступа осталось: ${hoursLeft} ч. ${minutesLeft} мин.`}
             </span>
           </div>
         </div>
 
-        {/* 3 Step Timeline */}
-        <div className="py-5 space-y-3.5">
-          <h3 className="text-xs font-black uppercase tracking-wider text-emerald-300">
-            {isKg ? 'Сыноо мөөнөтүнүн графиги:' : 'График работы пробного периода:'}
-          </h3>
-
-          {/* Stage 1 */}
-          <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-400/50 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
-              1
+        {/* Unlocked Benefits list */}
+        <div className="py-5 space-y-2.5">
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#041d16] border border-emerald-800/60">
+            <div className="w-7 h-7 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0">
+              <Crown className="w-4 h-4" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-black text-xs sm:text-sm text-white flex items-center gap-1.5">
-                  <Crown className="w-3.5 h-3.5 text-amber-300" />
-                  {isKg ? '1-күн (24 саат): Премиум жазылуу' : '1-й день (24 часа): Премиальная подписка'}
-                </span>
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40">
-                  {isKg ? 'Азыр активдүү' : 'Активен сейчас'}
-                </span>
-              </div>
-              <p className="text-xs text-emerald-200/80 leading-snug">
-                {isKg
-                  ? 'Толук теория, сүрөт-чечмелөөлөр, үй тапшырмасы, теория видеолору жана автордук видеоталдоолор.'
-                  : 'Полная теория, фоторешения, домашние задания, видеоуроки с теорией и видеоразборы.'}
-              </p>
-            </div>
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
+              {isKg ? 'Толук теория жана бардык бөлүмдөрдүн сүрөт-талдоолору' : 'Полная теория и подробные фоторазборы заданий'}
+            </span>
           </div>
-
-          {/* Stage 2 */}
-          <div className="p-4 rounded-2xl bg-[#041a14] border border-emerald-700/60 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
-              2
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#041d16] border border-emerald-800/60">
+            <div className="w-7 h-7 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-black text-xs sm:text-sm text-white flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-emerald-400" />
-                  {isKg ? '2-күн (кийинки 24 саат): Доступная подписка' : '2-й день (следующие 24 часа): Доступная подписка'}
-                </span>
-              </div>
-              <p className="text-xs text-emerald-200/70 leading-snug">
-                {isKg
-                  ? 'Премиум аяктаганда автоматтык түрдө «Жеткиликтүү жазылууга» өтөт (Теория жана сүрөт-талдоолор).'
-                  : 'После окончания Премиума автоматически активируется «Доступная подписка» (Теория и фоторазборы).'}
-              </p>
-            </div>
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
+              {isKg ? 'Мугалимдердин видеосабактары жана автордук видеочечмелөөлөрү' : 'Видеоуроки преподавателей и авторские видеоразборы'}
+            </span>
           </div>
-
-          {/* Stage 3 */}
-          <div className="p-4 rounded-2xl bg-[#031510] border border-emerald-900/60 flex items-start gap-3 opacity-80">
-            <div className="w-8 h-8 rounded-xl bg-slate-700 text-slate-200 flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
-              3
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#041d16] border border-emerald-800/60">
+            <div className="w-7 h-7 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
-            <div className="space-y-1">
-              <span className="font-bold text-xs sm:text-sm text-slate-300">
-                {isKg ? '3-күн жана андан ары: Акысыз базалык тариф' : '3-й день и далее: Базовый бесплатный тариф'}
-              </span>
-              <p className="text-xs text-emerald-200/60 leading-snug">
-                {isKg
-                  ? 'Сыноо мөөнөтү бүткөндөн кийин каалаган убакта туруктуу подписканы сатып алсаңыз болот.'
-                  : 'После завершения пробного периода вы сможете оформить постоянную подписку до 2027 года.'}
-              </p>
-            </div>
+            <span className="text-xs sm:text-sm text-emerald-100 font-medium">
+              {isKg ? 'Интерактивдүү үй тапшырмалары жана толук ЖРТ сыноо тесттери' : 'Интерактивные домашние задания и пробные тесты ОРТ'}
+            </span>
           </div>
         </div>
 
-        {/* Action Button with 5s countdown lock */}
-        <div className="pt-3">
+        {/* Action Button with 5s countdown lock - Golden button */}
+        <div className="pt-2">
           <button
             type="button"
             onClick={isLocked ? undefined : onClose}
             disabled={isLocked}
             className={`w-full py-4 px-6 rounded-2xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
               isLocked
-                ? 'bg-emerald-950/60 border border-emerald-800/80 text-emerald-400/60 cursor-not-allowed'
-                : 'bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 shadow-xl shadow-emerald-500/30 cursor-pointer active:scale-95'
+                ? 'bg-amber-950/40 border border-amber-800/60 text-amber-300/60 cursor-not-allowed'
+                : 'bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:brightness-110 text-slate-950 shadow-xl shadow-amber-500/25 cursor-pointer active:scale-95'
             }`}
           >
             {isLocked ? (

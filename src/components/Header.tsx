@@ -193,15 +193,35 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-2 sm:gap-2.5 p-1 sm:pr-3 rounded-2xl bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-500/40 transition-all cursor-pointer shadow-sm group text-left"
+                  className={`flex items-center gap-2 sm:gap-2.5 p-1 sm:pr-3 rounded-2xl bg-emerald-950/70 hover:bg-emerald-900/80 transition-all cursor-pointer shadow-sm group text-left ${
+                    isVip
+                      ? 'border border-amber-400/60 shadow-[0_0_12px_rgba(251,191,36,0.25)]'
+                      : 'border border-emerald-500/40'
+                  }`}
                 >
                   <div className="relative">
-                    <img
-                      src={user.avatar || '/avatars/snow_leopard.svg'}
-                      alt={user.name}
-                      referrerPolicy="no-referrer"
-                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-emerald-400/40 bg-emerald-900/50"
-                    />
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name}
+                        referrerPolicy="no-referrer"
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover bg-emerald-900/50 ${
+                          isVip
+                            ? 'border-2 border-amber-400 ring-1 ring-amber-400/60 shadow-[0_0_8px_rgba(251,191,36,0.5)]'
+                            : 'border border-emerald-400/40'
+                        }`}
+                      />
+                    ) : (
+                      <div
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm ${
+                          isVip
+                            ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 border-2 border-amber-400 ring-1 ring-amber-400/60 shadow-[0_0_8px_rgba(251,191,36,0.5)]'
+                            : 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 border border-emerald-400/40'
+                        }`}
+                      >
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'У'}
+                      </div>
+                    )}
                     {isVip && (
                       <span className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-amber-200 text-slate-950 p-0.5 rounded-full shadow">
                         <Crown className="w-2.5 h-2.5" />

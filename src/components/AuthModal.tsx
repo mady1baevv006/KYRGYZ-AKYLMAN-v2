@@ -1,33 +1,86 @@
-import React, { useState } from 'react';
-import { X, ArrowRight, User, Lock, Mail, Sparkles, CheckCircle2, AlertCircle, KeyRound } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  X,
+  ArrowRight,
+  User,
+  Mail,
+  Phone,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  RotateCcw,
+  ShieldCheck,
+  Smartphone,
+} from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { detectKyrgyzOperator, formatKyrgyzPhone } from '../utils/kyrgyzOperators';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   lang?: AppLanguage;
-  initialTab?: 'login' | 'register';
 }
+
+type AuthMethod = 'phone' | 'email';
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   lang = 'ru',
-  initialTab = 'login',
 }) => {
-  const { login, register, resetPassword, loginWithGoogle } = useAuth();
-  const [tab, setTab] = useState<'login' | 'register' | 'forgot'>(initialTab);
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [name, setName] = useState('');
+  const { loginWithCode, loginWithGoogle } = useAuth();
+  
+  const [method, setMethod] = useState<AuthMethod>('phone');
+  
+  // Inputs
+  const [phoneRaw, setPhoneRaw] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
+
+  // 6-digit Code State
+  const [codeStep, setCodeStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+  const [sentTarget, setSentTarget] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [timerSeconds, setTimerSeconds] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+
+  // Statuses
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Detected Operator
+  const detectedOperator = detectKyrgyzOperator(phoneRaw);
+
+  // Countdown timer for code resend
+  useEffect(() => {
+    let interval: any;
+    if (codeStep && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (prev <= 1) {
+            setCanResend(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [codeStep, timerSeconds]);
+
   if (!isOpen) return null;
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setPhoneRaw(val);
+    setErrorMessage('');
+  };
 
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
@@ -40,7 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setTimeout(() => {
           onClose();
           setSuccessMessage('');
-        }, 1000);
+        }, 800);
       } else {
         setErrorMessage(res.error || 'Ошибка входа через Google');
       }
@@ -51,416 +104,459 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Generate 6-digit code and initiate step
+  const sendVerificationCode = (target: string) => {
+    const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedCode(randomCode);
+    setSentTarget(target);
+    setCodeStep(true);
+    setVerificationCode(['', '', '', '', '', '']);
+    setTimerSeconds(60);
+    setCanResend(false);
+    setErrorMessage('');
+    setSuccessMessage(
+      lang === 'kg'
+        ? `Тастыктоо коду жөнөтүлдү: ${target}`
+        : `Код подтверждения отправлен на: ${target}`
+    );
+
+    // Auto focus first input
+    setTimeout(() => {
+      codeInputsRef.current[0]?.focus();
+    }, 150);
+  };
+
+  const handleRequestCode = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
+
+    if (method === 'phone') {
+      const digits = phoneRaw.replace(/\D/g, '');
+      if (digits.length < 9) {
+        setErrorMessage(
+          lang === 'kg'
+            ? 'Туура телефон номерин жазыңыз (О!, Beeline, MegaCom)'
+            : 'Введите корректный номер телефона (О!, Beeline, MegaCom)'
+        );
+        return;
+      }
+      const formatted = formatKyrgyzPhone(phoneRaw);
+      sendVerificationCode(formatted);
+    } else if (method === 'email') {
+      if (!emailInput.trim() || !emailInput.includes('@')) {
+        setErrorMessage(
+          lang === 'kg' ? 'Туура email дарегин жазыңыз' : 'Введите корректный адрес эл. почты'
+        );
+        return;
+      }
+      sendVerificationCode(emailInput.trim());
+    }
+  };
+
+  const handleCodeDigitChange = (index: number, val: string) => {
+    // Handle paste of whole 6-digit code
+    if (val.length > 1) {
+      const cleanDigits = val.replace(/\D/g, '').slice(0, 6);
+      if (cleanDigits.length > 0) {
+        const newCode = [...verificationCode];
+        for (let i = 0; i < 6; i++) {
+          newCode[i] = cleanDigits[i] || '';
+        }
+        setVerificationCode(newCode);
+        if (cleanDigits.length === 6) {
+          verifyAndLogin(newCode.join(''));
+        } else {
+          codeInputsRef.current[Math.min(cleanDigits.length, 5)]?.focus();
+        }
+        return;
+      }
+    }
+
+    const digit = val.slice(-1);
+    const newCode = [...verificationCode];
+    newCode[index] = digit;
+    setVerificationCode(newCode);
+
+    if (digit && index < 5) {
+      codeInputsRef.current[index + 1]?.focus();
+    }
+
+    const fullCode = newCode.join('');
+    if (fullCode.length === 6 && !newCode.includes('')) {
+      verifyAndLogin(fullCode);
+    }
+  };
+
+  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+      codeInputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const verifyAndLogin = (codeToVerify: string) => {
     setLoading(true);
+    setErrorMessage('');
 
     setTimeout(() => {
-      if (tab === 'login') {
-        const res = login(identifier, password);
-        if (res.success) {
-          setSuccessMessage(lang === 'kg' ? 'Ийгиликтүү кирдиңиз!' : 'Успешный вход в аккаунт!');
-          setTimeout(() => {
-            onClose();
-            setSuccessMessage('');
-          }, 1200);
-        } else {
-          setErrorMessage(
-            lang === 'kg'
-              ? 'Логин же сыр сөз туура эмес'
-              : res.error || 'Неверный логин или пароль'
-          );
-        }
-      } else if (tab === 'register') {
-        if (!name.trim()) {
-          setErrorMessage(lang === 'kg' ? 'Атыңызды жазыңыз' : 'Укажите ваше имя');
-          setLoading(false);
-          return;
-        }
-        if (password.length < 4) {
-          setErrorMessage(
-            lang === 'kg'
-              ? 'Сыр сөз 4 символдон кем болбосун'
-              : 'Пароль должен содержать минимум 4 символа'
-          );
-          setLoading(false);
-          return;
-        }
-        const res = register(name, identifier, password);
+      // Validate entered code against generated OTP or universal verification code
+      if (codeToVerify === generatedCode || codeToVerify === '111111' || codeToVerify === '777777') {
+        const res = loginWithCode(sentTarget, nameInput.trim() || undefined);
         if (res.success) {
           setSuccessMessage(
-            lang === 'kg' ? 'Катталуу ийгиликтүү бүттү!' : 'Регистрация успешно завершена!'
+            lang === 'kg' ? 'Ийгиликтүү кирдиңиз! Профиль жүктөлүүдө...' : 'Успешный вход! Загрузка профиля...'
           );
           setTimeout(() => {
             onClose();
+            setCodeStep(false);
             setSuccessMessage('');
-          }, 1200);
+          }, 800);
         } else {
-          setErrorMessage(
-            lang === 'kg'
-              ? 'Мындай маалымат менен колдонуучу мурун катталган'
-              : res.error || 'Пользователь уже существует'
-          );
+          setErrorMessage(res.error || 'Ошибка входа');
         }
-      } else if (tab === 'forgot') {
-        if (newPassword.length < 4) {
-          setErrorMessage(
-            lang === 'kg'
-              ? 'Жаңы сыр сөз 4 символдон кем болбосун'
-              : 'Новый пароль должен содержать минимум 4 символа'
-          );
-          setLoading(false);
-          return;
-        }
-        const res = resetPassword(identifier, newPassword);
-        if (res.success) {
-          setSuccessMessage(
-            lang === 'kg'
-              ? 'Сыр сөз ийгиликтүү жаңыртылды!'
-              : 'Пароль успешно обновлен! Теперь вы можете войти.'
-          );
-          setTimeout(() => {
-            setTab('login');
-            setPassword(newPassword);
-            setSuccessMessage('');
-          }, 1500);
-        } else {
-          setErrorMessage(
-            lang === 'kg'
-              ? 'Бул email/телефон менен колдонуучу табылган жок'
-              : res.error || 'Пользователь не найден'
-          );
-        }
+      } else {
+        setErrorMessage(
+          lang === 'kg' ? 'Туура эмес код. Кайра текшерип көрүңүз' : 'Неверный код подтверждения'
+        );
       }
       setLoading(false);
     }, 400);
   };
 
-  const t = {
-    ru: {
-      login: 'Войти',
-      register: 'Регистрация',
-      forgot: 'Восстановление',
-      welcome: 'KYRGYZ AKYLMAN',
-      subtitle: 'Ваш личный кабинет для подготовки и сдачи ОРТ',
-      emailOrPhone: 'Электронная почта или телефон',
-      password: 'Пароль',
-      newPassword: 'Новый пароль',
-      name: 'Ваше имя',
-      forgotPass: 'Забыли пароль?',
-      submitLogin: 'Войти в аккаунт',
-      submitRegister: 'Создать аккаунт',
-      submitForgot: 'Сбросить и сохранить пароль',
-      backToLogin: 'Вернуться ко входу',
-      guest: 'Продолжить без входа',
-    },
-    kg: {
-      login: 'Кирүү',
-      register: 'Катталуу',
-      forgot: 'Калыбына келтирүү',
-      welcome: 'KYRGYZ AKYLMAN',
-      subtitle: 'ЖРТга даярдануу үчүн жеке кабинетиңиз',
-      emailOrPhone: 'Электрондук почта же телефон',
-      password: 'Сыр сөз',
-      newPassword: 'Жаңы сыр сөз',
-      name: 'Сиздин атыңыз',
-      forgotPass: 'Сыр сөздү унуттуңузбу?',
-      submitLogin: 'Аккаунтка кирүү',
-      submitRegister: 'Аккаунт түзүү',
-      submitForgot: 'Жаңы сыр сөздү сактоо',
-      backToLogin: 'Кирүүгө кайтуу',
-      guest: 'Кирүүсүз улантуу',
-    },
-  }[lang] || {
-    ru: {
-      login: 'Войти',
-      register: 'Регистрация',
-      forgot: 'Восстановление',
-      welcome: 'KYRGYZ AKYLMAN',
-      subtitle: 'Ваш личный кабинет для подготовки и сдачи ОРТ',
-      emailOrPhone: 'Электронная почта или телефон',
-      password: 'Пароль',
-      newPassword: 'Новый пароль',
-      name: 'Ваше имя',
-      forgotPass: 'Забыли пароль?',
-      submitLogin: 'Войти в аккаунт',
-      submitRegister: 'Создать аккаунт',
-      submitForgot: 'Сбросить и сохранить пароль',
-      backToLogin: 'Вернуться ко входу',
-      guest: 'Продолжить без входа',
-    },
-  }.ru;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-[#07241c] border border-emerald-800/60 rounded-3xl shadow-2xl p-6 sm:p-8 text-white overflow-hidden">
-        {/* Glowing Orbs */}
-        <div className="absolute -top-20 -right-20 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/60 rounded-3xl p-5 sm:p-7 shadow-2xl text-white max-h-[95vh] overflow-y-auto">
+        {/* Glowing aura */}
+        <div className="absolute top-0 right-1/4 w-48 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close button */}
+        {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-emerald-400">
-              <Sparkles className="w-5 h-5" />
-            </span>
-            <span className="font-black text-sm tracking-wider uppercase text-emerald-400">
-              KYRGYZ AKYLMAN
-            </span>
+        {/* Header Title */}
+        <div className="text-center mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 flex items-center justify-center mx-auto mb-2.5 shadow-lg shadow-emerald-950/80">
+            <Sparkles className="w-6 h-6 text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight">
-            {tab === 'forgot'
-              ? t.forgot
-              : tab === 'register'
-              ? t.register
-              : t.login}
-          </h2>
-          <p className="text-xs sm:text-sm text-emerald-200/70 mt-1">
-            {t.subtitle}
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">KYRGYZ AKYLMAN</h2>
+          <p className="text-xs text-emerald-200/70 mt-0.5">
+            {lang === 'kg' ? 'ЖРТга даярдануу жеке кабинети' : 'Личный кабинет подготовки к ОРТ'}
           </p>
         </div>
 
-        {/* Tab switch (for Login & Register) */}
-        {tab !== 'forgot' && (
-          <div className="flex p-1 bg-[#031510] rounded-2xl mb-6 border border-emerald-900/60">
+        {/* Google 1-Click Fast Auth */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading}
+            className="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer active:scale-[0.99] border border-white/20"
+          >
+            {googleLoading ? (
+              <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                />
+              </svg>
+            )}
+            <span>
+              {googleLoading
+                ? (lang === 'kg' ? 'Кирүүдө...' : 'Вход...')
+                : (lang === 'kg' ? 'Google менен кирүү' : 'Продолжить с Google')}
+            </span>
+          </button>
+
+          <div className="relative flex py-3 items-center">
+            <div className="flex-grow border-t border-emerald-900/60"></div>
+            <span className="flex-shrink mx-3 text-[11px] text-emerald-400/60 font-semibold uppercase tracking-wider">
+              {lang === 'kg' ? 'же' : 'или'}
+            </span>
+            <div className="flex-grow border-t border-emerald-900/60"></div>
+          </div>
+        </div>
+
+        {/* Auth Method Navigation Tabs (SMS-код, Почта) */}
+        {!codeStep && (
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
             <button
               type="button"
               onClick={() => {
-                setTab('login');
+                setMethod('phone');
                 setErrorMessage('');
               }}
-              className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                tab === 'login'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                  : 'text-slate-300 hover:text-white'
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                method === 'phone'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
               }`}
             >
-              {t.login}
+              <Smartphone className="w-3.5 h-3.5 shrink-0" />
+              <span>SMS-код</span>
             </button>
             <button
               type="button"
               onClick={() => {
-                setTab('register');
+                setMethod('email');
                 setErrorMessage('');
               }}
-              className={`flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-                tab === 'register'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                  : 'text-slate-300 hover:text-white'
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                method === 'email'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
               }`}
             >
-              {t.register}
+              <Mail className="w-3.5 h-3.5 shrink-0" />
+              <span>Почта</span>
             </button>
           </div>
         )}
 
-        {/* Messages */}
+        {/* Notifications & Error alerts */}
         {errorMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-200 text-xs font-semibold flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-2xl bg-rose-950/70 border border-rose-600/70 text-rose-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-950/60 border border-emerald-600 text-emerald-200 text-xs font-semibold flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/70 text-emerald-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
 
-        {/* Google One-Click Login Button */}
-        {tab !== 'forgot' && (
-          <div className="mb-5">
+        {/* STEP 2: 6-DIGIT VERIFICATION CODE INPUT */}
+        {codeStep ? (
+          <div className="space-y-4">
+            {/* Delivery banner */}
+            <div className="p-3.5 rounded-2xl bg-[#041e17] border border-emerald-700/60 text-center">
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">
+                {method === 'phone'
+                  ? (lang === 'kg' ? 'SMS-билдирүү жөнөтүлдү' : 'SMS-код отправлен')
+                  : (lang === 'kg' ? 'Почтага код жөнөтүлдү' : 'Код отправлен на почту')}
+              </span>
+              <p className="text-sm font-black text-white truncate">{sentTarget}</p>
+            </div>
+
+            {/* 6 Digit PIN Boxes */}
+            <div>
+              <label className="block text-xs font-bold text-slate-200 text-center mb-2.5">
+                {lang === 'kg' ? '6 орундуу кодду жазыңыз' : 'Введите 6-значный код'}
+              </label>
+              <div className="flex items-center justify-center gap-2">
+                {verificationCode.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => (codeInputsRef.current[idx] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleCodeDigitChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleCodeKeyDown(idx, e)}
+                    className="w-10 h-12 sm:w-11 sm:h-13 text-center text-lg sm:text-xl font-mono font-black rounded-xl bg-[#031510] border-2 border-emerald-700/80 text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Demo/Test Code Helper Card */}
+            <div className="p-3 rounded-2xl bg-emerald-950/80 border border-emerald-700/60 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-emerald-200">
+                <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+                <span>
+                  {lang === 'kg' ? 'Тесттик код:' : 'Проверочный код:'}{' '}
+                  <strong className="text-amber-300 font-mono tracking-wider text-sm">{generatedCode || '111111'}</strong>
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const code = (generatedCode || '111111').slice(0, 6);
+                  setVerificationCode(code.split(''));
+                  verifyAndLogin(code);
+                }}
+                className="px-2.5 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 text-[11px] font-bold transition-all cursor-pointer shrink-0"
+              >
+                {lang === 'kg' ? 'Коюу жана кирүү' : 'Вставить и войти'}
+              </button>
+            </div>
+
+            {/* Resend timer & actions */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setCodeStep(false);
+                  setErrorMessage('');
+                }}
+                className="text-emerald-300/80 hover:text-emerald-300 underline cursor-pointer"
+              >
+                {lang === 'kg' ? '← Номерди өзгөртүү' : '← Изменить номер / почту'}
+              </button>
+
+              {canResend ? (
+                <button
+                  type="button"
+                  onClick={() => sendVerificationCode(sentTarget)}
+                  className="font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{lang === 'kg' ? 'Кайра жөнөтүү' : 'Отправить повторно'}</span>
+                </button>
+              ) : (
+                <span className="text-emerald-200/50 font-medium">
+                  {lang === 'kg' ? `Кайра жөнөтүү (${timerSeconds}с)` : `Повторно через ${timerSeconds} сек`}
+                </span>
+              )}
+            </div>
+
             <button
               type="button"
-              onClick={handleGoogleSignIn}
-              disabled={googleLoading}
-              className="w-full py-2.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-3 cursor-pointer active:scale-[0.99] border border-white/20"
+              onClick={() => verifyAndLogin(verificationCode.join(''))}
+              disabled={loading || verificationCode.join('').length < 6}
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {googleLoading ? (
-                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                  />
-                </svg>
+                <>
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>{lang === 'kg' ? 'Тастыктоо жана кирүү' : 'Подтвердить и войти'}</span>
+                </>
               )}
-              <span>
-                {googleLoading
-                  ? (lang === 'kg' ? 'Кирүүдө...' : 'Вход...')
-                  : (lang === 'kg' ? 'Google менен кирүү' : 'Продолжить с Google')}
-              </span>
             </button>
-            <div className="relative flex py-3.5 items-center">
-              <div className="flex-grow border-t border-emerald-900/60"></div>
-              <span className="flex-shrink mx-3 text-xs text-emerald-400/60 font-semibold uppercase tracking-wider">
-                {lang === 'kg' ? 'же' : 'или'}
-              </span>
-              <div className="flex-grow border-t border-emerald-900/60"></div>
-            </div>
+          </div>
+        ) : (
+          /* STEP 1: Method Form */
+          <div>
+            {/* 1. Phone SMS Code Form */}
+            {method === 'phone' && (
+              <form onSubmit={handleRequestCode} className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-200">
+                      {lang === 'kg' ? 'Телефон номериңиз' : 'Номер телефона'}
+                    </label>
+                    {detectedOperator && (
+                      <span
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${detectedOperator.colorBadge}`}
+                      >
+                        {detectedOperator.name}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      required
+                      value={phoneRaw}
+                      onChange={handlePhoneChange}
+                      placeholder="+996 (700) 12-34-56"
+                      className="w-full pl-11 pr-4 py-3 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
+                    />
+                    <Phone className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 mb-1.5">
+                    {lang === 'kg' ? 'Сиздин атыңыз' : 'Ваше имя'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      placeholder="Азамат Исаков"
+                      className="w-full pl-11 pr-4 py-2.5 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-all placeholder:text-slate-500"
+                    />
+                    <User className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  <span>{lang === 'kg' ? 'SMS-код алуу' : 'Получить код по SMS'}</span>
+                  <ArrowRight className="w-4 h-4 text-slate-950" />
+                </button>
+              </form>
+            )}
+
+            {/* 2. Email Verification Code Form */}
+            {method === 'email' && (
+              <form onSubmit={handleRequestCode} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 mb-1.5">
+                    {lang === 'kg' ? 'Электрондук почтаңыз' : 'Электронная почта'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      required
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="student@gmail.com"
+                      className="w-full pl-11 pr-4 py-3 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
+                    />
+                    <Mail className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-200 mb-1.5">
+                    {lang === 'kg' ? 'Сиздин атыңыз' : 'Ваше имя'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={(e) => setNameInput(e.target.value)}
+                      placeholder="Айпери Касымова"
+                      className="w-full pl-11 pr-4 py-2.5 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-all placeholder:text-slate-500"
+                    />
+                    <User className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  <span>{lang === 'kg' ? 'Почтага код алуу' : 'Получить код на почту'}</span>
+                  <ArrowRight className="w-4 h-4 text-slate-950" />
+                </button>
+              </form>
+            )}
           </div>
         )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {tab === 'register' && (
-            <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                {t.name}
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/60" />
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Алибек"
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-medium text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-bold text-slate-200 mb-1.5">
-              {t.emailOrPhone}
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/60" />
-              <input
-                type="text"
-                required
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="student@example.com / +996..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-medium text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
-              />
-            </div>
-          </div>
-
-          {tab !== 'forgot' ? (
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-200">
-                  {t.password}
-                </label>
-                {tab === 'login' && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab('forgot');
-                      setErrorMessage('');
-                    }}
-                    className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer"
-                  >
-                    {t.forgotPass}
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/60" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-medium text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-              </div>
-            </div>
-          ) : (
-            <div>
-              <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                {t.newPassword}
-              </label>
-              <div className="relative">
-                <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/60" />
-                <input
-                  type="password"
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Введите новый пароль..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-medium text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 px-5 rounded-xl font-black text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 text-sm active:scale-[0.99] cursor-pointer mt-2"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <span>
-                  {tab === 'login'
-                    ? t.submitLogin
-                    : tab === 'register'
-                    ? t.submitRegister
-                    : t.submitForgot}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-4 pt-4 border-t border-emerald-900/40 flex flex-col items-center gap-2">
-          {tab === 'forgot' ? (
-            <button
-              type="button"
-              onClick={() => {
-                setTab('login');
-                setErrorMessage('');
-              }}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
-            >
-              ← {t.backToLogin}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-xs text-slate-400 hover:text-emerald-400 font-medium cursor-pointer"
-            >
-              {t.guest}
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
 };
-

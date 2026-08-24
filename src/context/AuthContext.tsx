@@ -104,17 +104,17 @@ export function computeSubscriptionStatus(user: UserProfile | null): UserSubscri
       stageTitleKg: isPrem ? 'Премиум жазылуу' : 'Жеткиликтүү жазылуу',
       stageDescriptionRu: 'Подписка активна до 1 июня 2027 года.',
       stageDescriptionKg: 'Жазылуу 2027-жылдын 1-июнуна чейин активдүү.',
-      badgeLabelRu: isPrem ? 'VIP Премиум' : 'Доступный',
-      badgeLabelKg: isPrem ? 'VIP Премиум' : 'Жеткиликтүү',
+      badgeLabelRu: isPrem ? 'VIP Премиум (до 2027)' : 'Доступный (до 2027)',
+      badgeLabelKg: isPrem ? 'VIP Премиум (2027-ж. чейин)' : 'Жеткиликтүү (2027-ж. чейин)',
     };
   }
 
-  // Trial timeline based on registration timestamp
+  // Trial timeline based on registration timestamp:
   const regTimestamp = user.registeredAt ? new Date(user.registeredAt).getTime() : Date.now();
   const msPassed = Math.max(0, Date.now() - regTimestamp);
   const totalHoursElapsed = msPassed / (1000 * 60 * 60);
 
-  // 1. Day 1: 0 - 24 hours -> Premium trial
+  // 1. 0 - 24 hours -> VIP Premium trial (24 hours)
   if (totalHoursElapsed < 24) {
     const msRemaining = Math.max(0, 24 * 60 * 60 * 1000 - msPassed);
     const hoursRemainingInStage = Math.floor(msRemaining / (1000 * 60 * 60));
@@ -127,38 +127,16 @@ export function computeSubscriptionStatus(user: UserProfile | null): UserSubscri
       hoursRemainingInStage,
       minutesRemainingInStage,
       totalHoursElapsed,
-      stageTitleRu: 'Премиальная подписка (1-й день пробного периода)',
-      stageTitleKg: 'Премиум жазылуу (1-күн сынамык мөөнөтү)',
-      stageDescriptionRu: 'Вам открыт полный Премиум-доступ на 24 часа: теория, фоторазборы, видеоуроки и домашние задания. Через 24 часа подписка перейдет в «Доступную».',
-      stageDescriptionKg: 'Сизге 24 саатка толук Премиум-мүмкүнчүлүк ачылды: теория, сүрөттөр, видеосабактар жана үй тапшырмасы. 24 сааттан кийин жазылуу «Жеткиликтүү» болуп өзгөрөт.',
-      badgeLabelRu: `Премиум (Пробный: ${hoursRemainingInStage}ч ${minutesRemainingInStage}м)`,
-      badgeLabelKg: `Премиум (Сыноо: ${hoursRemainingInStage}с ${minutesRemainingInStage}м)`,
+      stageTitleRu: 'Временный VIP Премиум-доступ (24 часа)',
+      stageTitleKg: 'Убактылуу VIP Премиум-мүмкүнчүлүк (24 саат)',
+      stageDescriptionRu: `Вам предоставлен временный VIP Премиум-доступ на 24 часа. До окончания осталось: ${hoursRemainingInStage} ч. ${minutesRemainingInStage} мин.`,
+      stageDescriptionKg: `Сизге 24 сааттык убактылуу VIP Премиум-мүмкүнчүлүк берилди. Калган убакыт: ${hoursRemainingInStage} саат ${minutesRemainingInStage} мүнөт.`,
+      badgeLabelRu: `⏳ Премиум: ${hoursRemainingInStage}ч ${minutesRemainingInStage}м`,
+      badgeLabelKg: `⏳ Премиум: ${hoursRemainingInStage}с ${minutesRemainingInStage}м`,
     };
   }
 
-  // 2. Day 2: 24 - 48 hours -> Standard trial
-  if (totalHoursElapsed < 48) {
-    const msRemaining = Math.max(0, 48 * 60 * 60 * 1000 - msPassed);
-    const hoursRemainingInStage = Math.floor(msRemaining / (1000 * 60 * 60));
-    const minutesRemainingInStage = Math.floor((msRemaining % (1000 * 60 * 60)) / (1000 * 60));
-
-    return {
-      effectivePlan: 'standard',
-      isPaid: false,
-      trialStage: 'trial_standard',
-      hoursRemainingInStage,
-      minutesRemainingInStage,
-      totalHoursElapsed,
-      stageTitleRu: 'Доступная подписка (2-й день пробного периода)',
-      stageTitleKg: 'Жеткиликтүү жазылуу (2-күн сынамык мөөнөтү)',
-      stageDescriptionRu: 'Ваша 24-часовая Премиум-подписка истекла. Сейчас активен пробный режим «Доступная подписка» (Теория и фоторазборы). Через 24 часа доступ станет базовым бесплатным.',
-      stageDescriptionKg: 'Сиздин 24 сааттык Премиум-жазылууңуз бүттү. Азыр 24 саатка «Жеткиликтүү жазылуу» (Теория жана сүрөт-талдоолор) иштеп жатат. Андан соң акысыз режимге өтөт.',
-      badgeLabelRu: `Доступный (Пробный: ${hoursRemainingInStage}ч ${minutesRemainingInStage}м)`,
-      badgeLabelKg: `Жеткиликтүү (Сыноо: ${hoursRemainingInStage}с ${minutesRemainingInStage}м)`,
-    };
-  }
-
-  // 3. Day 3+: Expired trial -> Free plan
+  // 2. Expired trial -> Free plan (after 24 hours)
   return {
     effectivePlan: 'free',
     isPaid: false,
@@ -168,8 +146,8 @@ export function computeSubscriptionStatus(user: UserProfile | null): UserSubscri
     totalHoursElapsed,
     stageTitleRu: 'Бесплатный тариф (Пробный период завершен)',
     stageTitleKg: 'Акысыз тариф (Сыноо мөөнөтү бүттү)',
-    stageDescriptionRu: 'Ваш бесплатный 48-часовой пробный период завершен. Оформите «Доступную» или «Премиальную» подписку для продолжения подготовки.',
-    stageDescriptionKg: 'Сиздин акысыз 48 сааттык сыноо мөөнөтүңүз аяктады. Даярданууну улантуу үчүн «Жеткиликтүү» же «Премиум» жазылууну тандаңыз.',
+    stageDescriptionRu: 'Ваш бесплатный 24-часовой пробный период завершен. Оформите «Доступную» или «Премиальную» подписку для продолжения полной подготовки.',
+    stageDescriptionKg: 'Сиздин акысыз 24 сааттык сыноо мөөнөтүңүз аяктады. Толук даярданууну улантуу үчүн «Жеткиликтүү» же «Премиум» жазылууну тандаңыз.',
     badgeLabelRu: 'Бесплатный',
     badgeLabelKg: 'Акысыз',
   };
@@ -297,6 +275,7 @@ interface AuthContextType {
   closeTrialWelcomeModal: () => void;
   login: (identifier: string, pass: string) => { success: boolean; error?: string };
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
+  loginWithCode: (identifier: string, name?: string) => { success: boolean; error?: string };
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
@@ -490,6 +469,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
+  const loginWithCode = (identifier: string, name?: string) => {
+    const trimmedId = identifier.trim();
+    if (!trimmedId) {
+      return { success: false, error: 'Укажите номер телефона или email' };
+    }
+
+    const isAdminAccount = trimmedId.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const users = getUsers();
+    const existing = users.find(
+      (u) => u.identifier.trim().toLowerCase() === trimmedId.toLowerCase()
+    );
+
+    if (existing) {
+      const updatedUser: UserProfile = {
+        ...existing,
+        ...(name && name.trim() ? { name: name.trim() } : {}),
+        ...(isAdminAccount
+          ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
+          : {}),
+      };
+      const updatedUsers = users.map((u) =>
+        u.identifier.trim().toLowerCase() === trimmedId.toLowerCase() ? updatedUser : u
+      );
+      saveUsers(updatedUsers);
+      setUser(updatedUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      return { success: true };
+    } else {
+      // Auto-register new student via phone or email code
+      const newUser: UserProfile = {
+        id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
+        name: name?.trim() || (trimmedId.includes('@') ? trimmedId.split('@')[0] : 'Ученик (' + trimmedId.slice(-4) + ')'),
+        identifier: trimmedId,
+        password: '',
+        targetScore: isAdminAccount ? 240 : 215,
+        targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
+        registeredAt: new Date().toISOString(),
+        testHistory: [],
+        subscriptionPlan: isAdminAccount ? 'premium' : 'free',
+        subscriptionExpiry: '2027-06-01',
+        isPaid: isAdminAccount,
+        hasSeenWelcomeGift: false,
+      };
+
+      const filtered = users.filter((u) => u.identifier.trim().toLowerCase() !== trimmedId.toLowerCase());
+      filtered.unshift(newUser);
+      saveUsers(filtered);
+      setUser(newUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      if (!isAdminAccount) {
+        setIsTrialWelcomeOpen(true);
+      }
+      return { success: true };
+    }
+  };
+
   const loginWithGoogle = async () => {
     try {
       const result = await firebaseLoginWithGoogle();
@@ -561,6 +596,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsTrialWelcomeOpen(false);
     localStorage.removeItem(CURRENT_USER_KEY);
+    try {
+      sessionStorage.clear();
+    } catch {}
+    // Cleanly redirect and reload the site to instantly remove all member-accessible elements
+    window.location.href = '/';
   };
 
   const updateProfile = (data: Partial<UserProfile>) => {
@@ -726,6 +766,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closeTrialWelcomeModal,
         login,
         register,
+        loginWithCode,
         loginWithGoogle,
         logout,
         resetPassword,

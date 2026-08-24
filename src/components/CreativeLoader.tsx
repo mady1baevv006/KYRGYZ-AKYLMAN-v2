@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, BookOpen, Calculator, Award, Zap } from 'lucide-react';
+import { Sparkles, BookOpen } from 'lucide-react';
+import { BouncingDots } from './BouncingDots';
 
 interface CreativeLoaderProps {
   text?: string;
@@ -45,40 +46,16 @@ export const CreativeLoader: React.FC<CreativeLoaderProps> = ({
         <div className="absolute w-80 h-80 rounded-full bg-teal-400/10 blur-[80px] pointer-events-none -translate-y-12" />
         <div className="absolute w-64 h-64 rounded-full bg-emerald-600/10 blur-[70px] pointer-events-none translate-y-16" />
 
-        {/* Orbit Rings & Mathematical Core */}
-        <div className="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center mb-6">
-          {/* Outer Dashed Spinning Ring */}
-          <div className="absolute inset-0 rounded-full border-2 border-dashed border-emerald-500/40 animate-[spin_12s_linear_infinite]" />
-          
-          {/* Outer Orbit Glowing Particles */}
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-500/60 text-[11px] font-mono font-black text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-pulse">
-            π
+        {/* Central Brand Badge */}
+        <div className="relative z-10 flex items-center justify-center mb-2">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#06261d] via-[#093527] to-[#0d4a37] border-2 border-emerald-400/80 flex items-center justify-center text-emerald-300 shadow-2xl shadow-emerald-500/50">
+            <BookOpen className="w-7 h-7 text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
           </div>
-          <div className="absolute top-1/2 -right-4 -translate-y-1/2 px-2 py-0.5 rounded-md bg-emerald-950/80 border border-teal-500/60 text-[11px] font-mono font-black text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.5)]">
-            ∑
-          </div>
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-400/60 text-[11px] font-mono font-black text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)] animate-pulse">
-            √x
-          </div>
-          <div className="absolute top-1/2 -left-4 -translate-y-1/2 px-2 py-0.5 rounded-md bg-emerald-950/80 border border-teal-400/60 text-[11px] font-mono font-black text-teal-200 shadow-[0_0_12px_rgba(45,212,191,0.5)]">
-            ∫
-          </div>
+        </div>
 
-          {/* Middle Counter-Rotating Pulse Ring */}
-          <div className="absolute inset-3 rounded-full border border-teal-400/50 animate-[spin_7s_linear_infinite_reverse]" />
-          
-          {/* Inner Glowing Ring */}
-          <div className="absolute inset-6 rounded-full border-2 border-emerald-400/70 shadow-lg shadow-emerald-500/40 animate-pulse" />
-
-          {/* Inner Corner Diamonds */}
-          <div className="absolute top-2 right-2 text-[10px] font-mono text-emerald-400/80 animate-ping">✦</div>
-          <div className="absolute bottom-2 left-2 text-[10px] font-mono text-teal-400/80 animate-ping">✦</div>
-
-          {/* Central Logo Symbol */}
-          <div className="relative z-10 w-20 h-20 sm:w-22 sm:h-22 rounded-3xl bg-gradient-to-tr from-[#06261d] via-[#093527] to-[#0d4a37] border-2 border-emerald-400/80 flex items-center justify-center text-emerald-300 shadow-2xl shadow-emerald-500/50 transform hover:scale-105 transition-transform">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-emerald-500/20 to-teal-400/20 animate-pulse" />
-            <BookOpen className="w-10 h-10 text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-          </div>
+        {/* Video Bouncing Dots Wave */}
+        <div className="relative z-10 my-2">
+          <BouncingDots size="md" />
         </div>
 
         {/* Text & Stage Indicator */}
@@ -112,19 +89,12 @@ export const CreativeLoader: React.FC<CreativeLoaderProps> = ({
     );
   }
 
-  // Inline / Document Box Loader (used for switching tabs or loading documents)
+  // Inline / Document Box Loader
   return (
-    <div className="py-10 px-6 flex flex-col items-center justify-center rounded-3xl bg-[#041a14]/90 border border-emerald-800/60 text-center text-white my-4 relative overflow-hidden">
+    <div className="py-8 px-6 flex flex-col items-center justify-center rounded-3xl bg-[#041a14]/90 border border-emerald-800/60 text-center text-white my-4 relative overflow-hidden">
       <div className="absolute w-40 h-40 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
-
-      <div className="relative w-16 h-16 flex items-center justify-center mb-3">
-        <div className="absolute inset-0 rounded-full border border-dashed border-emerald-400/40 animate-[spin_8s_linear_infinite]" />
-        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/60 text-emerald-300 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <Calculator className="w-5 h-5 animate-pulse" />
-        </div>
-      </div>
-
-      <h4 className="text-sm font-black text-white">{text}</h4>
+      <BouncingDots size="sm" />
+      <h4 className="text-sm font-black text-white mt-1">{text}</h4>
       {subtext && <p className="text-xs text-emerald-200/60 mt-1">{subtext}</p>}
     </div>
   );
