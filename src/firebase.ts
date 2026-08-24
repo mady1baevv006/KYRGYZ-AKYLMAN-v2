@@ -15,7 +15,6 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Функция для входа
 export const loginWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
@@ -25,7 +24,6 @@ export const loginWithGoogle = async () => {
   }
 };
 
-// Функция для выхода
 export const logout = async () => {
   try {
     await signOut(auth);
