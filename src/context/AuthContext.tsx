@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { loginWithGoogle as firebaseLoginWithGoogle, logoutFirebase } from '../firebase';
 
 export interface UserTestRecord {
   id: string;
@@ -296,6 +297,7 @@ interface AuthContextType {
   closeTrialWelcomeModal: () => void;
   login: (identifier: string, pass: string) => { success: boolean; error?: string };
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
   updateProfile: (data: Partial<UserProfile>) => void;
@@ -488,7 +490,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      const result = await firebaseLoginWithGoogle();
+      if (result.error) {
+        return { success: false, error: result.error };
+      }
+      if (!result.user) {
+        return { success: false, error: 'Пользователь Google не найден' };
+      }
+
+      const email = result.user.email || '';
+      const displayName = result.user.displayName || 'Ученик Google';
+      const photoURL = result.user.photoURL || '/avatars/snow_leopard.svg';
+      const isAdminAccount = email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+      const users = getUsers();
+      const existingUser = users.find((u) => u.identifier.trim().toLowerCase() === email.trim().toLowerCase());
+
+      if (existingUser) {
+        const updatedUser: UserProfile = {
+          ...existingUser,
+          name: displayName || existingUser.name,
+          avatar: photoURL || existingUser.avatar,
+          ...(isAdminAccount
+            ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
+            : {}),
+        };
+        const updatedUsers = users.map((u) =>
+          u.identifier.trim().toLowerCase() === email.trim().toLowerCase() ? updatedUser : u
+        );
+        saveUsers(updatedUsers);
+        setUser(updatedUser);
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+        return { success: true };
+      } else {
+        const newUser: UserProfile = {
+          id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
+          name: displayName,
+          identifier: email,
+          password: '',
+          avatar: photoURL,
+          targetScore: isAdminAccount ? 240 : 215,
+          targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
+          registeredAt: new Date().toISOString(),
+          testHistory: [],
+          subscriptionPlan: isAdminAccount ? 'premium' : 'free',
+          subscriptionExpiry: '2027-06-01',
+          isPaid: isAdminAccount,
+          hasSeenWelcomeGift: false,
+        };
+
+        const filtered = users.filter((u) => u.identifier.trim().toLowerCase() !== email.trim().toLowerCase());
+        filtered.unshift(newUser);
+        saveUsers(filtered);
+        setUser(newUser);
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+        if (!isAdminAccount) {
+          setIsTrialWelcomeOpen(true);
+        }
+        return { success: true };
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Ошибка авторизации через Google' };
+    }
+  };
+
   const logout = () => {
+    logoutFirebase();
     setUser(null);
     setIsTrialWelcomeOpen(false);
     localStorage.removeItem(CURRENT_USER_KEY);
@@ -657,6 +726,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         closeTrialWelcomeModal,
         login,
         register,
+        loginWithGoogle,
         logout,
         resetPassword,
         updateProfile,

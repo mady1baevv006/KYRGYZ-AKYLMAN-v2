@@ -31,6 +31,7 @@ import { KYRGYZ_UNIVERSITIES, USER_AVATARS } from '../data/constants';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
+import { AuthModal } from '../components/AuthModal';
 
 interface ProfilePageProps {
   lang: AppLanguage;
@@ -43,6 +44,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories'>('history');
@@ -195,13 +197,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
           {t.notLoggedInDesc}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => setIsAuthModalOpen(true)}
+            className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/25 cursor-pointer"
+          >
+            {lang === 'kg' ? 'Кирүү / Катталуу' : 'Войти в аккаунт'}
+          </button>
           <Link
             to="/"
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/25 cursor-pointer"
+            className="px-6 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold text-sm transition-all cursor-pointer"
           >
             {t.goHome}
           </Link>
         </div>
+
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          lang={lang}
+        />
       </div>
     );
   }
