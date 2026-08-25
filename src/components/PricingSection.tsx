@@ -12,11 +12,16 @@ import {
   Video,
   Gift,
   GraduationCap,
+  Info,
+  X,
+  Send,
+  HelpCircle,
 } from 'lucide-react';
 import { SubscriptionPlan, AppLanguage } from '../types';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
 import { SubscriptionModal } from './SubscriptionModal';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface PricingSectionProps {
   lang?: AppLanguage;
@@ -26,6 +31,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
   const { user, subscriptionStatus } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSocialDetailsOpen, setIsSocialDetailsOpen] = useState(false);
+
+  useBodyScrollLock(isSocialDetailsOpen);
 
   const isKg = lang === 'kg';
   const isAdmin = Boolean(user?.identifier && user.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase());
@@ -147,50 +155,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
               </div>
             </div>
           )}
-        </div>
-
-        {/* Special Social Support Banner across all 3 columns */}
-        <div className="mb-8 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#04241a] to-[#083526] border-2 border-emerald-500/50 p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left">
-          {/* Subtle background glow & badge */}
-          <div className="absolute top-0 right-0 w-80 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
-            <div className="space-y-2.5 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-black uppercase tracking-wider">
-                <Gift className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{isKg ? 'Социалдык колдоо жана жеңилдиктер' : 'Социальная поддержка и льготы'}</span>
-              </div>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white leading-snug">
-                {isKg ? (
-                  <>
-                    <span className="text-amber-300">«Премиалдуу жазылуу»</span> аярлуу катмардагы окуучуларга толугу менен{' '}
-                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">акысыз берилет</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-amber-300">«Премиальная подписка»</span> предоставляется полностью{' '}
-                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">бесплатно</span>
-                  </>
-                )}
-              </h3>
-              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
-                {isKg
-                  ? 'Биз бир же эки ата-энесинен тең ажыраган окуучуларга (тоголок жана жарым жетимдерге), ден соолугунун мүмкүнчүлүгү чектелген жарандарга (майыптарга), аскердик даярдыктан өткөндөргө / аскер кызматкерлерине, ошондой эле Баткен окуяларына катышкан аскерлердин балдарына Премиум жазылууну белекке беребиз. Документти тастыктоо үчүн мамлекеттик «Түндүк» (Tunduk) тиркемесиндеги маалымкатты же күбөлүктү биздин колдоо кызматына жөнөтүү жетиштүү.'
-                  : 'Мы бесплатно дарим «Премиальную подписку» учащимся, потерявшим одного или обоих родителей (круглые сироты и полусироты), лицам с инвалидностью, прошедшим военную подготовку / военнослужащим, а также детям военных — участников Баткенских событий. Для подтверждения и активации доступа достаточно предоставить подтверждающие цифровые документы / справку из государственного портала «Түндүк» (Tunduk) в нашу службу поддержки.'}
-              </p>
-            </div>
-
-            <div className="shrink-0">
-              <a
-                href="https://t.me/kyrgyzakylman?text=%D0%A1%D0%B0%D0%BB%D0%B0%D0%BC%D0%B0%D1%82%D1%81%D1%8B%D0%B7%D0%B1%D1%8B!%20%D0%9C%D0%B5%D0%BD%20%D0%A2%D2%AF%D0%BD%D0%B4%D2%AF%D0%BA%20%D0%B0%D1%80%D0%BA%D1%8B%D0%BB%D1%83%D1%83%20%D0%B6%D0%B5%D2%A3%D0%B8%D0%BB%D0%B4%D0%B8%D0%BA%D1%82%D2%AF%D2%AF%20%D0%9F%D1%80%D0%B5%D0%BC%D0%B8%D1%83%D0%BC%20%D0%B6%D0%B0%D0%B7%D1%8B%D0%BB%D1%83%D1%83%20%D0%B0%D0%BB%D1%83%D1%83%20%D2%AF%D1%87%D2%AF%D0%BD%20%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%20%D0%B6%D3%A9%D0%BD%D3%A9%D1%82%D3%A9%D0%B9%D2%AF%D0%BD%20%D0%B4%D0%B5%D0%B3%D0%B5%D0%BD%20%D1%8D%D0%BB%D0%B5%D0%BC."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer whitespace-nowrap"
-              >
-                <ShieldCheck className="w-4 h-4 text-slate-950" />
-                <span>{isKg ? 'Документти жөнөтүү (Түндүк)' : 'Отправить документы (Түндүк)'}</span>
-              </a>
-            </div>
-          </div>
         </div>
 
         {/* 3 Plans Comparison Grid: Free (Subtle), Standard (Vibrant Emerald), Premium (VIP Gold) */}
@@ -500,6 +464,62 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
           </div>
         </div>
 
+        {/* Special Social Support Banner placed UNDER the subscription cards */}
+        <div className="mt-8 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#04241a] to-[#083526] border-2 border-emerald-500/60 p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-80 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+            <div className="space-y-2.5 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-black uppercase tracking-wider">
+                <Gift className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{isKg ? 'Социалдык колдоо жана жеңилдиктер' : 'Социальная поддержка и льготы'}</span>
+              </div>
+
+              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white leading-snug">
+                {isKg ? (
+                  <>
+                    <span className="text-amber-300">«Премиалдуу жазылуу»</span> толугу менен{' '}
+                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">акысыз берилет</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-amber-300">«Премиальная подписка»</span> предоставляется полностью{' '}
+                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">бесплатно</span>
+                  </>
+                )}
+              </h3>
+
+              <p className="text-xs sm:text-sm text-emerald-100 font-semibold leading-relaxed">
+                {isKg
+                  ? 'Сироталарга, жарым жетимдерге, ден соолугунун мүмкүнчүлүгү чектелген жарандарга (майыптарга), аскер кызматкерлерине жана Баткен окуяларынын катышуучуларынын балдарына.'
+                  : 'Сиротам, полусиротам, лицам с инвалидностью, военнослужащим и детям участников Баткенских событий.'}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsSocialDetailsOpen(true)}
+                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-emerald-400/40 text-emerald-200 hover:text-white font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-95 flex-1 sm:flex-initial"
+              >
+                <Info className="w-4 h-4 text-emerald-300" />
+                <span>{isKg ? 'Кененирээк' : 'Подробнее'}</span>
+              </button>
+
+              <a
+                href="https://t.me/kyrgyzakylman?text=%D0%A1%D0%B0%D0%BB%D0%B0%D0%BC%D0%B0%D1%82%D1%81%D1%8B%D0%B7%D0%B1%D1%8B!%20%D0%9C%D0%B5%D0%BD%20%D0%B6%D0%B5%D2%A3%D0%B8%D0%BB%D0%B4%D0%B8%D0%BA%D1%82%D2%AF%D2%AF%20%D0%9F%D1%80%D0%B5%D0%BC%D0%B8%D1%83%D0%BC%20%D0%B6%D0%B0%D0%B7%D1%8B%D0%BB%D1%83%D1%83%20%D0%B0%D0%BB%D1%83%D1%83%20%D2%AF%D1%87%D2%AF%D0%BD%20%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%20%D0%B6%D3%A9%D0%BD%D3%A9%D1%82%D3%A9%D0%B9%D2%AF%D0%BD%20%D0%B4%D0%B5%D0%B3%D0%B5%D0%BD%20%D1%8D%D0%BB%D0%B5%D0%BC."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer whitespace-nowrap flex-1 sm:flex-initial"
+              >
+                <ShieldCheck className="w-4 h-4 text-slate-950" />
+                <span>{isKg ? 'Документти жөнөтүү' : 'Отправить документы'}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Security & Support Guarantee Note */}
         <div className="mt-8 p-4 rounded-2xl bg-[#041a14]/90 border border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-emerald-200/75">
           <div className="flex items-center gap-2">
@@ -521,6 +541,86 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
           </a>
         </div>
       </div>
+
+      {/* Social Benefits Details Modal */}
+      {isSocialDetailsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            className="relative w-full max-w-lg bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border-2 border-emerald-500/70 rounded-3xl p-5 sm:p-7 shadow-2xl text-white max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setIsSocialDetailsOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 shrink-0">
+                <Gift className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">
+                  {isKg ? 'Социалдык колдоо шарттары' : 'Условия социальной поддержки'}
+                </h3>
+                <span className="text-xs text-amber-300 font-bold block">
+                  {isKg ? 'Премиум мүмкүнчүлүк — 100% акысыз' : 'Премиум-доступ — 100% бесплатно'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+              <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-700/50 space-y-2">
+                <span className="font-bold text-white block text-sm">
+                  {isKg ? 'Кимдерге акысыз берилет?' : 'Кому предоставляется бесплатный доступ?'}
+                </span>
+                <ul className="space-y-1.5 text-xs text-emerald-200/90 list-disc list-inside">
+                  <li>{isKg ? 'Бир же эки ата-энесинен ажыраган окуучуларга (сирота жана полусирота)' : 'Круглым сиротам и полусиротам (потерявшим одного или обоих родителей)'}</li>
+                  <li>{isKg ? 'Ден соолугунун мүмкүнчүлүгү чектелген жарандарга (I, II, III топтогу майыптарга)' : 'Лицам с инвалидностью (I, II, III группы)'}</li>
+                  <li>{isKg ? 'Аскер кызматкерлерине жана аскердик даярдыктан өткөндөргө' : 'Военнослужащим и проходящим военную службу'}</li>
+                  <li>{isKg ? 'Баткен окуяларынын катышуучуларынын балдарына' : 'Детям военнослужащих — участников Баткенских событий'}</li>
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-700/50 space-y-1.5">
+                <span className="font-bold text-white block text-sm">
+                  {isKg ? 'Кандай документтер керек?' : 'Какие документы необходимы?'}
+                </span>
+                <p className="text-xs text-emerald-200/90">
+                  {isKg
+                    ? 'Мамлекеттик «Түндүк» (Tunduk) тиркемесиндеги санарип маалымкат, туулгандыгы/каза болгондугу тууралуу күбөлүк же тиешелүү күбөлүктүн сүрөтү жетиштүү.'
+                    : 'Достаточно прислать цифровую справку из приложения «Түндүк» (Tunduk), свидетельство или удостоверение в электронном виде.'}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[#229ED9]/15 border border-[#229ED9]/40 space-y-2">
+                <span className="font-bold text-white block text-sm">
+                  {isKg ? 'Кантип активдештирүү керек?' : 'Как активировать доступ?'}
+                </span>
+                <p className="text-xs text-[#b0e2f9]">
+                  {isKg
+                    ? 'Биздин расмий Telegram-колдоо кызматыбызга жазып, маалымкатты жөнөтүңүз. Биз текшерип, 10-15 мүнөттүн ичинде аккаунтуңузга Премиумду активдештирип беребиз.'
+                    : 'Напишите в нашу официальную поддержку в Telegram и отправьте документ. Мы оперативно проверим и активируем полный Премиум на ваш аккаунт.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <a
+                href="https://t.me/kyrgyzakylman?text=%D0%A1%D0%B0%D0%BB%D0%B0%D0%BC%D0%B0%D1%82%D1%81%D1%8B%D0%B7%D0%B1%D1%8B!%20%D0%9C%D0%B5%D0%BD%20%D0%B6%D0%B5%D2%A3%D0%B8%D0%BB%D0%B4%D0%B8%D0%BA%D1%82%D2%AF%D2%AF%20%D0%9F%D1%80%D0%B5%D0%BC%D0%B8%D1%83%D0%BC%20%D0%B6%D0%B0%D0%B7%D1%8B%D0%BB%D1%83%D1%83%20%D0%B0%D0%BB%D1%83%D1%83%20%D2%AF%D1%87%D2%AF%D0%BD%20%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%20%D0%B6%D3%A9%D0%BD%D3%A9%D1%82%D3%A9%D0%B9%D2%AF%D0%BD%20%D0%B4%D0%B5%D0%B3%D0%B5%D0%BD%20%D1%8D%D0%BB%D0%B5%D0%BC."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/30 cursor-pointer"
+              >
+                <Send className="w-4 h-4 text-slate-950" />
+                <span>{isKg ? 'Telegram аркылуу жөнөтүү' : 'Отправить в Telegram'}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Checkout / Subscription Modal */}
       <SubscriptionModal

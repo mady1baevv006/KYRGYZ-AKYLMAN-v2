@@ -56,15 +56,6 @@ export const TrialNoticeBanner: React.FC<TrialNoticeBannerProps> = ({
         </div>
 
         <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
-          {onOpenTrialDetails && (
-            <button
-              type="button"
-              onClick={onOpenTrialDetails}
-              className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-emerald-700/60 text-xs font-bold text-emerald-200 hover:text-white transition-all cursor-pointer"
-            >
-              {isKg ? 'Шарттар' : 'Условия'}
-            </button>
-          )}
           {onOpenUpgradeModal && (
             <button
               type="button"

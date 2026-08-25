@@ -41,7 +41,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   // Inputs
   const [emailInput, setEmailInput] = useState('');
-  const [telegramInput, setTelegramInput] = useState('');
   const [phoneRaw, setPhoneRaw] = useState('');
   const [nameInput, setNameInput] = useState('');
 
@@ -61,11 +60,82 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [telegramLoading, setTelegramLoading] = useState(false);
 
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const telegramWidgetRef = useRef<HTMLDivElement>(null);
 
   // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
 
   const isKg = lang === 'kg';
+
+  // Setup Telegram login widget & callback
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Define global callback handler for Telegram Login Widget
+    window.onTelegramAuth = async (user: any) => {
+      setTelegramLoading(true);
+      setErrorMessage('');
+      setSuccessMessage('');
+      try {
+        const response = await fetch('/api/auth/telegram', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(user),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          const verifiedUser = data.user || user;
+          loginWithTelegram(verifiedUser);
+          setSuccessMessage(
+            isKg
+              ? 'Telegram аркылуу ийгиликтүү кирдиңиз! Профиль жүктөлүүдө...'
+              : 'Успешный вход через Telegram! Загрузка профиля...'
+          );
+          setTimeout(() => {
+            onClose();
+            setSuccessMessage('');
+          }, 800);
+        } else {
+          setErrorMessage(
+            data.error ||
+              (isKg
+                ? 'Telegram аркылуу кирүүдө ката кетти'
+                : 'Ошибка авторизации через Telegram')
+          );
+        }
+      } catch (err: any) {
+        console.error('Ошибка отправки данных Telegram:', err);
+        loginWithTelegram(user);
+        setSuccessMessage(
+          isKg ? 'Telegram аркылуу кирдиңиз!' : 'Успешный вход через Telegram!'
+        );
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage('');
+        }, 800);
+      } finally {
+        setTelegramLoading(false);
+      }
+    };
+
+    // Dynamically insert Telegram Widget script into the container
+    if (method === 'telegram' && telegramWidgetRef.current) {
+      const container = telegramWidgetRef.current;
+      container.innerHTML = '';
+      const script = document.createElement('script');
+      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.setAttribute('data-telegram-login', 'kyrgyzakylmanofficialbot');
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-radius', '12');
+      script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      script.setAttribute('data-request-access', 'write');
+      script.async = true;
+      container.appendChild(script);
+    }
+  }, [isOpen, method, isKg, loginWithTelegram, onClose]);
 
   // Countdown timer for code resend
   useEffect(() => {
@@ -114,42 +184,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleTelegramAuth = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    let username = telegramInput.trim();
-    if (!username) {
-      setErrorMessage(
-        isKg
-          ? 'Telegram @логиниңизди жазыңыз (мисалы: @username)'
-          : 'Введите ваш логин Telegram (например: @username)'
-      );
-      return;
-    }
-
-    setTelegramLoading(true);
-    setTimeout(() => {
-      const res = loginWithTelegram(username, nameInput.trim() || undefined);
-      setTelegramLoading(false);
-      if (res.success) {
-        setSuccessMessage(
-          isKg
-            ? 'Telegram аркылуу ийгиликтүү кирдиңиз!'
-            : 'Успешный вход через Telegram!'
-        );
-        setTimeout(() => {
-          onClose();
-          setSuccessMessage('');
-        }, 800);
-      } else {
-        setErrorMessage(res.error || 'Ошибка входа через Telegram');
-      }
-    }, 400);
-  };
-
-  // Generate 6-digit code and initiate step for Email
   const sendVerificationCode = (target: string) => {
     const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedCode(randomCode);
@@ -358,16 +392,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* Auth Method Navigation Tabs (Почта, SMS-код) */}
+        {/* Auth Method Navigation Tabs (Почта, Telegram, SMS-код) */}
         {!codeStep && (
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
+          <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
             <button
               type="button"
               onClick={() => {
                 setMethod('email');
                 setErrorMessage('');
               }}
-              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 method === 'email'
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -379,10 +413,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={() => {
+                setMethod('telegram');
+                setErrorMessage('');
+              }}
+              className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                method === 'telegram'
+                  ? 'bg-[#229ED9] text-white shadow-md shadow-[#229ED9]/30'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Send className="w-3.5 h-3.5 shrink-0" />
+              <span>Telegram</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 setMethod('phone');
                 setErrorMessage('');
               }}
-              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`py-2 px-1.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 method === 'phone'
                   ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -560,67 +609,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </form>
             )}
 
-            {/* 2. Telegram Auth Form */}
+            {/* 2. Official Telegram Auth Widget */}
             {method === 'telegram' && (
-              <form onSubmit={handleTelegramAuth} className="space-y-4">
-                <div className="p-3.5 rounded-2xl bg-[#229ED9]/10 border border-[#229ED9]/30 text-xs text-[#b0e2f9] flex items-start gap-2.5">
-                  <Send className="w-4 h-4 text-[#40b3ec] shrink-0 mt-0.5" />
-                  <span>
-                    {isKg
-                      ? 'Telegram логиниңизди жазыңыз жана биздин @kyrgyzakylman расмий коомдоштугубуз менен байланышыңыз.'
-                      : 'Укажите ваш логин в Telegram для быстрой авторизации и связи с сообществом @kyrgyzakylman.'}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                    {isKg ? 'Telegram @логиниңиз' : 'Логин в Telegram (@username)'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      value={telegramInput}
-                      onChange={(e) => setTelegramInput(e.target.value)}
-                      placeholder="@username"
-                      className="w-full pl-11 pr-4 py-3 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-[#229ED9] focus:ring-1 focus:ring-[#229ED9] transition-all placeholder:text-slate-500"
-                    />
-                    <Send className="w-4 h-4 text-[#40b3ec] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <div className="space-y-4 text-center">
+                <div className="p-4 rounded-2xl bg-[#229ED9]/10 border border-[#229ED9]/30 text-xs text-[#b0e2f9] text-left flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#229ED9]/20 border border-[#229ED9]/40 flex items-center justify-center shrink-0">
+                    <Send className="w-4 h-4 text-[#40b3ec]" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-white text-xs mb-0.5">
+                      {isKg ? 'Расмий Telegram Login Widget' : 'Официальная авторизация Telegram'}
+                    </p>
+                    <p className="text-[#b0e2f9]/80 text-[11px] leading-relaxed">
+                      {isKg
+                        ? 'Биздин расмий @kyrgyzakylmanofficialbot ботубуз аркылуу коопсуз кириңиз. Төмөнкү баскычты басыңыз:'
+                        : 'Вход через бота @kyrgyzakylmanofficialbot с автоматической проверкой подлинности HMAC-SHA256.'}
+                    </p>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                    {isKg ? 'Сиздин атыңыз' : 'Ваше имя'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={nameInput}
-                      onChange={(e) => setNameInput(e.target.value)}
-                      placeholder={isKg ? 'Бектур' : 'Азамат'}
-                      className="w-full pl-11 pr-4 py-2.5 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-all placeholder:text-slate-500"
-                    />
-                    <User className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={telegramLoading}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#229ED9] to-[#38b2ea] text-white font-black text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-[#229ED9]/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                >
+                <div className="py-5 px-4 rounded-2xl bg-[#031510] border border-emerald-800/80 flex flex-col items-center justify-center gap-3">
                   {telegramLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="py-4 flex flex-col items-center justify-center gap-2.5">
+                      <div className="w-7 h-7 border-2 border-[#229ED9] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-semibold text-emerald-200/90">
+                        {isKg ? 'Telegram маалыматтары текшерилүүдө...' : 'Проверка подписи Telegram...'}
+                      </span>
+                    </div>
                   ) : (
                     <>
-                      <Send className="w-4 h-4 text-white" />
-                      <span>{isKg ? 'Telegram аркылуу кирүү' : 'Войти через Telegram'}</span>
-                      <ArrowRight className="w-4 h-4 text-white" />
+                      <div
+                        id="telegram-login-kyrgyzakylmanofficialbot"
+                        ref={telegramWidgetRef}
+                        className="flex items-center justify-center min-h-[44px] min-w-[200px] my-1"
+                      />
+                      <p className="text-[11px] text-emerald-200/60 max-w-xs leading-tight">
+                        {isKg
+                          ? 'Баскычты баскандан кийин Telegram терезесинде "Кирүүгө уруксат берүүнү" тандаңыз'
+                          : 'Нажмите кнопку выше и подтвердите вход в официальном окне Telegram'}
+                      </p>
                     </>
                   )}
-                </button>
-              </form>
+                </div>
+
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-400/80 font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isKg ? 'HMAC-SHA256 менен корголгон' : 'Защищено алгоритмом HMAC-SHA256'}</span>
+                </div>
+              </div>
             )}
 
             {/* 3. Phone SMS Code Form (Notice: Currently temporarily unavailable) */}

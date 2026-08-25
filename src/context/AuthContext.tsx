@@ -18,6 +18,16 @@ export interface UserTestRecord {
   language?: 'ru' | 'kg';
 }
 
+export interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -278,7 +288,7 @@ interface AuthContextType {
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
   loginWithCode: (identifier: string, name?: string) => { success: boolean; error?: string };
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  loginWithTelegram: (username: string, name?: string) => { success: boolean; error?: string };
+  loginWithTelegram: (telegramUserOrUsername: string | TelegramUser, name?: string) => { success: boolean; error?: string };
   extendTrial: () => { success: boolean; error?: string };
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
@@ -594,44 +604,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithTelegram = (username: string, name?: string) => {
-    let cleanUsername = username.trim();
-    if (!cleanUsername) {
-      return { success: false, error: 'Укажите ваш логин Telegram (@username)' };
-    }
-    if (!cleanUsername.startsWith('@')) {
-      cleanUsername = '@' + cleanUsername;
+  const loginWithTelegram = (telegramUserOrUsername: string | TelegramUser, name?: string) => {
+    let cleanUsername = '';
+    let displayName = '';
+    let avatarUrl = '/avatars/snow_leopard.svg';
+    let telegramId: number | undefined;
+
+    if (typeof telegramUserOrUsername === 'object' && telegramUserOrUsername !== null) {
+      telegramId = telegramUserOrUsername.id;
+      if (telegramUserOrUsername.username) {
+        cleanUsername = telegramUserOrUsername.username.startsWith('@')
+          ? telegramUserOrUsername.username
+          : '@' + telegramUserOrUsername.username;
+      } else {
+        cleanUsername = `@tg_${telegramUserOrUsername.id}`;
+      }
+      displayName =
+        [telegramUserOrUsername.first_name, telegramUserOrUsername.last_name]
+          .filter(Boolean)
+          .join(' ')
+          .trim() || cleanUsername;
+      if (telegramUserOrUsername.photo_url) {
+        avatarUrl = telegramUserOrUsername.photo_url;
+      }
+    } else {
+      cleanUsername = String(telegramUserOrUsername || '').trim();
+      if (!cleanUsername) {
+        return { success: false, error: 'Укажите ваш логин Telegram (@username)' };
+      }
+      if (!cleanUsername.startsWith('@')) {
+        cleanUsername = '@' + cleanUsername;
+      }
+      displayName = name?.trim() || cleanUsername;
     }
 
-    const isAdminAccount = cleanUsername.toLowerCase() === '@mady1baevv' || cleanUsername.toLowerCase() === '@kyrgyzakylman';
+    const isAdminAccount =
+      cleanUsername.toLowerCase() === '@mady1baevv' ||
+      cleanUsername.toLowerCase() === '@kyrgyzakylman' ||
+      (telegramId !== undefined && telegramId === 853874930794);
+
     const users = getUsers();
     const existing = users.find(
-      (u) => u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase()
+      (u) =>
+        u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase() ||
+        (telegramId !== undefined && u.id === `tg_${telegramId}`)
     );
 
     if (existing) {
       const updatedUser: UserProfile = {
         ...existing,
-        ...(name && name.trim() ? { name: name.trim() } : {}),
+        name: displayName || existing.name,
+        avatar: avatarUrl !== '/avatars/snow_leopard.svg' ? avatarUrl : existing.avatar,
         ...(isAdminAccount
           ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
           : {}),
       };
       const updatedUsers = users.map((u) =>
-        u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase() ? updatedUser : u
+        u.id === existing.id || u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase()
+          ? updatedUser
+          : u
       );
       saveUsers(updatedUsers);
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       return { success: true };
     } else {
-      const displayName = name?.trim() || cleanUsername;
       const newUser: UserProfile = {
-        id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
+        id: isAdminAccount ? 'admin_mady1baevv' : telegramId ? `tg_${telegramId}` : 'user_' + Date.now(),
         name: displayName,
         identifier: cleanUsername,
         password: '',
-        avatar: '/avatars/snow_leopard.svg',
+        avatar: avatarUrl,
         targetScore: isAdminAccount ? 240 : 215,
         targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
         registeredAt: new Date().toISOString(),
