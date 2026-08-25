@@ -8,6 +8,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { AdminPage } from './pages/AdminPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { TelegramCallbackPage } from './pages/TelegramCallbackPage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { TwinklingStars } from './components/TwinklingStars';
@@ -106,6 +107,8 @@ const AppContent: React.FC<{
           <Route path="/privacy" element={<PrivacyPage lang={lang} />} />
           <Route path="/terms" element={<TermsPage lang={lang} />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/auth/callback" element={<TelegramCallbackPage lang={lang} />} />
+          <Route path="/auth/telegram/callback" element={<TelegramCallbackPage lang={lang} />} />
         </Routes>
       </main>
       {!isTestPage && !isAdminPage && <Footer lang={lang} />}

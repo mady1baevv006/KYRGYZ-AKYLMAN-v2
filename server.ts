@@ -39,23 +39,25 @@ async function startServer() {
         return res.status(400).json({ success: false, error: 'Отсутствует подпись (hash) Telegram' });
       }
 
-      // 1. Sort all fields alphabetically: key=value\n
+      // 1. Filter and sort all valid fields alphabetically: key=value\n
       const checkString = Object.keys(userData)
+        .filter((key) => userData[key] !== undefined && userData[key] !== null && key !== 'hash')
         .sort()
         .map((key) => `${key}=${userData[key]}`)
         .join('\n');
 
       // 2. Compute secret_key = SHA256(botToken)
-      const secretKey = crypto.createHash('sha256').update(botToken).digest();
+      const secretKey = crypto.createHash('sha256').update(botToken.trim()).digest();
 
       // 3. Compute HMAC-SHA256(checkString, secretKey)
       const calculatedHash = crypto.createHmac('sha256', secretKey).update(checkString).digest('hex');
 
       // 4. Safe compare hashes
-      const calculatedBuffer = Buffer.from(calculatedHash, 'hex');
-      const receivedBuffer = Buffer.from(hash, 'hex');
+      const calculatedBuffer = Buffer.from(calculatedHash, 'utf8');
+      const receivedBuffer = Buffer.from(String(hash).toLowerCase(), 'utf8');
 
       if (calculatedBuffer.length !== receivedBuffer.length || !crypto.timingSafeEqual(calculatedBuffer, receivedBuffer)) {
+        console.warn('HMAC mismatch:', { calculatedHash, receivedHash: hash, checkString });
         return res.status(401).json({
           success: false,
           error: 'Недействительная подпись данных Telegram (hash mismatch)',
