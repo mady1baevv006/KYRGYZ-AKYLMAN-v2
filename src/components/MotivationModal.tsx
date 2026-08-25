@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AppLanguage } from '../types';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 const MODAL_TRANSLATIONS = {
   ru: {
@@ -31,6 +32,8 @@ const MODAL_TRANSLATIONS = {
 export const MotivationModal: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+
+  useBodyScrollLock(isOpen);
 
   const t = MODAL_TRANSLATIONS[lang] || MODAL_TRANSLATIONS.ru;
 

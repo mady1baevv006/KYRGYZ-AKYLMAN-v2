@@ -19,6 +19,7 @@ import {
 import { AppLanguage, SubscriptionPlan } from '../types';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface TheoryPlanSelectionModalProps {
   isOpen: boolean;
@@ -34,6 +35,9 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
   lang,
 }) => {
   const { user, subscriptionStatus } = useAuth();
+
+  useBodyScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const isKg = lang === 'kg';
@@ -131,8 +135,8 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                   </div>
                   <p className="text-xs text-emerald-200/70 mt-1">
                     {isKg
-                      ? 'Теорияны окуп, ОРТнын чыныгы мисалдарын сүрөт-талдоолор менен үйрөнүү үчүн эң сонун.'
-                      : 'Идеально для изучения всей текстовой теории и пошаговых фото-разборов задач ОРТ.'}
+                      ? 'Теорияны окуп, ОРТнын чыныгы мисалдарын сүрөт-талдоолор менен үйрөнүү үчүн.'
+                      : 'Все текстовые разделы теории, фото с решениями и расширенная база тестов.'}
                   </p>
                 </div>
 
@@ -141,36 +145,31 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                   <div className="flex items-start gap-2.5 text-emerald-100">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>
-                      <strong className="text-white">{isKg ? 'Бардык теория:' : 'Полная теория:'}</strong>{' '}
-                      {isKg ? 'Алгебра жана Геометрия боюнча бардык блоктор' : 'Все разделы и темы Алгебры и Геометрии'}
+                      <strong className="text-white">{isKg ? 'Теория:' : 'Теория:'}</strong>{' '}
+                      {isKg ? 'Математика, орус жана англис тилдеринин бардык тексттик бөлүмдөрү' : 'Все текстовые разделы Математики, Русского и Английского языка'}
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5 text-emerald-100">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>
-                      <strong className="text-white">{isKg ? 'Сүрөт-чечмелөөлөр:' : 'Фото с решениями:'}</strong>{' '}
-                      {isKg ? 'Чыныгы ЖРТ мисалдарынын чыгарылыш сүрөттөрү жана талдоосу' : 'Пошаговый разбор заданий реального ОРТ на фото'}
+                      <strong className="text-white">{isKg ? 'Фото с решениями:' : 'Фото с решениями:'}</strong>{' '}
+                      {isKg ? 'Теориялардагы чыныгы ЖРТ мисалдарынын этап-этабы менен талдоосу' : 'Пошаговый разбор примеров из реального ОРТ в теориях'}
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5 text-emerald-100">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>
-                      <strong className="text-white">{isKg ? 'Сынамык тесттер:' : 'Пробные тесты:'}</strong>{' '}
-                      {isKg ? 'Кеңейтилген база жана упайларды эсептөө' : 'Расширенная база тестов ЦООМО с разбором'}
+                      <strong className="text-white">{isKg ? 'Пробный тест:' : 'Пробный тест:'}</strong>{' '}
+                      {isKg ? 'Сынамык тесттердин кеңейтилген базасы, анын ичинде ЦООМО' : 'Расширенная база пробных тестов, включая ЦООМО'}
                     </span>
                   </div>
 
                   {/* What is NOT included */}
                   <div className="flex items-start gap-2.5 text-slate-400 opacity-80 pt-1">
                     <XCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                    <span>{isKg ? 'Үй тапшырмалары (тапшырма блогу жок)' : 'Домашние задания по темам'}</span>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 text-slate-400 opacity-80">
-                    <XCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                    <span>{isKg ? 'Теория жана мисалдардын видеороликтери' : 'Видеоролики с теорией и видеоразборами'}</span>
+                    <span>{isKg ? 'Үй тапшырмалары жана видеосабактар' : 'Домашнее задание и авторские видеоуроки'}</span>
                   </div>
                 </div>
               </div>
@@ -252,8 +251,16 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                   <div className="flex items-start gap-2.5 text-emerald-100">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <span>
-                      <strong className="text-white">{isKg ? 'Жеткиликтүү жазылуунун баары:' : 'Всё из Доступной подписки:'}</strong>{' '}
-                      {isKg ? 'Теория жана сүрөт-чечмелөөлөр' : 'Текстовая теория и фото-решения'}
+                      <strong className="text-white">{isKg ? 'Пробный тест:' : 'Пробный тест:'}</strong>{' '}
+                      {isKg ? 'Сынамык тесттердин толук базасы' : 'Полная база пробных тестов'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 text-emerald-100">
+                    <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-white">{isKg ? 'Теория:' : 'Теория:'}</strong>{' '}
+                      {isKg ? 'Математика, орус жана англис тилдеринин бардык бөлүмдөрү' : 'Все разделы Математики, Русского и Английского языка'}
                     </span>
                   </div>
 
@@ -261,7 +268,7 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                     <FileCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <span>
                       <strong className="text-amber-300">{isKg ? '+ Үй тапшырмалары:' : '+ Домашнее задание:'}</strong>{' '}
-                      {isKg ? 'Ар бир тема боюнча бекемдөөчү тапшырмалар' : 'Практические задания по каждой теме с самопроверкой'}
+                      {isKg ? 'Ар бир тема боюнча өзүн-өзү текшерүү менен практикалык тапшырмалар' : 'Практические задания по каждой теме с самопроверкой'}
                     </span>
                   </div>
 
@@ -269,12 +276,9 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                     <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <div>
                       <strong className="text-amber-300 block">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
-                        <span className="text-xs text-amber-200/90">
-                          {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские уроки с объяснением тем'}
-                        </span>
-                      </div>
+                      <span className="text-xs text-amber-200/90 block mt-0.5">
+                        {isKg ? 'Темаларды түшүндүргөн автордук видеосабактар' : 'Авторские видеоуроки с объяснением тем'}
+                      </span>
                     </div>
                   </div>
 
@@ -282,15 +286,23 @@ export const TheoryPlanSelectionModal: React.FC<TheoryPlanSelectionModalProps> =
                     <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <span>
                       <strong className="text-amber-300">{isKg ? '+ Видеоталдоолор:' : '+ Видеоразборы примеров:'}</strong>{' '}
-                      {isKg ? 'ЖРТнын татаал мисалдарын жана тузактарын чыгаруу' : 'Разбор сложных задач и главных ловушек ОРТ'}
+                      {isKg ? 'Татаал тапшырмаларды жана ЖРТнын негизги тузактарын талдоо' : 'Разбор сложных задач и главных ловушек ОРТ'}
                     </span>
                   </div>
 
                   <div className="flex items-start gap-2.5 text-emerald-100">
                     <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                     <span>
-                      <strong className="text-white">{isKg ? 'Жабык Telegram:' : 'Закрытый Telegram-канал:'}</strong>{' '}
-                      {isKg ? 'Сабактар жана ЖОЖдорго тапшыруу колдонмосу' : 'Уроки, рекомендации и руководство по поступлению'}
+                      <strong className="text-white">{isKg ? 'ЖОЖдорго тапшыруу:' : 'Поступление в ВУЗы:'}</strong>{' '}
+                      {isKg ? 'ЖОЖдорго тапшыруу боюнча автордук колдонмо' : 'Авторское руководство по поступлению в ВУЗы'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 text-emerald-100">
+                    <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="text-white">{isKg ? 'Жабык Telegram-канал:' : 'Закрытый Telegram-канал:'}</strong>{' '}
+                      {isKg ? 'Сабактар, кеңештер, сунуштар жана тапшыруу колдонмосу' : 'Уроки, советы, рекомендации и руководство по поступлению'}
                     </span>
                   </div>
                 </div>

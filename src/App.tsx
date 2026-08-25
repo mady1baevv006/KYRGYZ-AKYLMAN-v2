@@ -14,6 +14,7 @@ import { TwinklingStars } from './components/TwinklingStars';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TrialWelcomeModal } from './components/TrialWelcomeModal';
 import { CreativeLoader } from './components/CreativeLoader';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 
 import { AppLanguage } from './types';
 
@@ -108,6 +109,7 @@ const AppContent: React.FC<{
         </Routes>
       </main>
       {!isTestPage && !isAdminPage && <Footer lang={lang} />}
+      <ScrollToTopButton lang={lang} />
       <TrialWelcomeModal
         isOpen={isTrialWelcomeOpen}
         onClose={closeTrialWelcomeModal}

@@ -44,6 +44,7 @@ export const UsersManager: React.FC = () => {
   // Modals state
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
 
   // New user form state
   const [newName, setNewName] = useState('');
@@ -96,15 +97,10 @@ export const UsersManager: React.FC = () => {
 
   const handleDelete = (targetUser: UserProfile) => {
     if (targetUser.identifier.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-      alert('Нельзя удалить главный аккаунт администратора!');
+      showToast('Нельзя удалить главный аккаунт администратора!');
       return;
     }
-    if (!window.confirm(`Вы уверены, что хотите удалить пользователя ${targetUser.name} (${targetUser.identifier})?`)) {
-      return;
-    }
-    adminDeleteUser(targetUser.id);
-    refreshList();
-    showToast(`Пользователь ${targetUser.name} удален.`);
+    setUserToDelete(targetUser);
   };
 
   const handleCreateUserSubmit = (e: React.FormEvent) => {
@@ -491,7 +487,7 @@ export const UsersManager: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleDelete(u)}
-                        className="p-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 transition-colors cursor-pointer border border-rose-800/50"
+                        className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-600 text-rose-400 hover:text-white transition-all cursor-pointer border border-rose-500/40 hover:border-rose-500 active:scale-95 shadow-sm"
                         title="Удалить пользователя"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -789,6 +785,71 @@ export const UsersManager: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Delete User Confirmation */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-[#07241c] border border-rose-600/70 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-white">Удалить пользователя?</h3>
+                <p className="text-xs text-rose-200/80">Это действие невозможно отменить</p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[#041a14] border border-emerald-900/60 space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Имя ученика:</span>
+                <span className="font-bold text-white">{userToDelete.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Логин / Почта / Номер:</span>
+                <span className="font-bold text-emerald-300">{userToDelete.identifier}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Текущий тариф:</span>
+                <span className="font-bold text-amber-300 capitalize">
+                  {userToDelete.subscriptionPlan === 'premium'
+                    ? 'VIP Премиум'
+                    : userToDelete.subscriptionPlan === 'standard'
+                    ? 'Доступная'
+                    : 'Бесплатный'}
+                </span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Вы действительно хотите безвозвратно удалить аккаунт пользователя <strong className="text-white">{userToDelete.name}</strong>? Все сохраненные результаты тестов, баллы и статистика будут удалены.
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setUserToDelete(null)}
+                className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-slate-300 transition-colors cursor-pointer"
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  adminDeleteUser(userToDelete.id);
+                  refreshList();
+                  showToast(`Пользователь ${userToDelete.name} (${userToDelete.identifier}) успешно удален`);
+                  setUserToDelete(null);
+                }}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-xs font-black text-white shadow-lg shadow-rose-600/30 transition-all cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Да, удалить</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

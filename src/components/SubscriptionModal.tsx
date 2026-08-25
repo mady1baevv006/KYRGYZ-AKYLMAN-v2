@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { SubscriptionPlan, AppLanguage } from '../types';
 import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface SubscriptionModalProps {
   plan: SubscriptionPlan | null;
@@ -37,6 +38,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const { user, subscriptionStatus } = useAuth();
   const [waitingForTelegram, setWaitingForTelegram] = useState(false);
   const [selectedBankName, setSelectedBankName] = useState<string | null>(null);
+
+  useBodyScrollLock(isOpen && Boolean(plan));
 
   if (!isOpen || !plan) return null;
 

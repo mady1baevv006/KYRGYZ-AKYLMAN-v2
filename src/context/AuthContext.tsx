@@ -21,7 +21,7 @@ export interface UserTestRecord {
 export interface UserProfile {
   id: string;
   name: string;
-  identifier: string; // email or phone
+  identifier: string; // email or phone or telegram
   password: string;
   avatar?: string;
   targetScore: number;
@@ -32,6 +32,7 @@ export interface UserProfile {
   subscriptionExpiry?: string;
   isPaid?: boolean;
   hasSeenWelcomeGift?: boolean;
+  hasExtendedTrial?: boolean;
 }
 
 export type TrialStage = 'trial_premium' | 'trial_standard' | 'expired' | 'paid';
@@ -277,6 +278,8 @@ interface AuthContextType {
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
   loginWithCode: (identifier: string, name?: string) => { success: boolean; error?: string };
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  loginWithTelegram: (username: string, name?: string) => { success: boolean; error?: string };
+  extendTrial: () => { success: boolean; error?: string };
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
   updateProfile: (data: Partial<UserProfile>) => void;
@@ -591,6 +594,93 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithTelegram = (username: string, name?: string) => {
+    let cleanUsername = username.trim();
+    if (!cleanUsername) {
+      return { success: false, error: 'Укажите ваш логин Telegram (@username)' };
+    }
+    if (!cleanUsername.startsWith('@')) {
+      cleanUsername = '@' + cleanUsername;
+    }
+
+    const isAdminAccount = cleanUsername.toLowerCase() === '@mady1baevv' || cleanUsername.toLowerCase() === '@kyrgyzakylman';
+    const users = getUsers();
+    const existing = users.find(
+      (u) => u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase()
+    );
+
+    if (existing) {
+      const updatedUser: UserProfile = {
+        ...existing,
+        ...(name && name.trim() ? { name: name.trim() } : {}),
+        ...(isAdminAccount
+          ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
+          : {}),
+      };
+      const updatedUsers = users.map((u) =>
+        u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase() ? updatedUser : u
+      );
+      saveUsers(updatedUsers);
+      setUser(updatedUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      return { success: true };
+    } else {
+      const displayName = name?.trim() || cleanUsername;
+      const newUser: UserProfile = {
+        id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
+        name: displayName,
+        identifier: cleanUsername,
+        password: '',
+        avatar: '/avatars/snow_leopard.svg',
+        targetScore: isAdminAccount ? 240 : 215,
+        targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
+        registeredAt: new Date().toISOString(),
+        testHistory: [],
+        subscriptionPlan: isAdminAccount ? 'premium' : 'free',
+        subscriptionExpiry: '2027-06-01',
+        isPaid: isAdminAccount,
+        hasSeenWelcomeGift: false,
+      };
+
+      const filtered = users.filter(
+        (u) => u.identifier.trim().toLowerCase() !== cleanUsername.toLowerCase()
+      );
+      filtered.unshift(newUser);
+      saveUsers(filtered);
+      setUser(newUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      if (!isAdminAccount) {
+        setIsTrialWelcomeOpen(true);
+      }
+      return { success: true };
+    }
+  };
+
+  const extendTrial = () => {
+    if (!user) {
+      return { success: false, error: 'Сначала необходимо войти в аккаунт' };
+    }
+    const updatedUser: UserProfile = {
+      ...user,
+      registeredAt: new Date().toISOString(),
+      subscriptionPlan: 'free',
+      isPaid: false,
+      hasExtendedTrial: true,
+      hasSeenWelcomeGift: false,
+    };
+    setUser(updatedUser);
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+
+    const users = getUsers();
+    const idx = users.findIndex((u) => u.id === user.id);
+    if (idx !== -1) {
+      users[idx] = updatedUser;
+      saveUsers(users);
+    }
+    setIsTrialWelcomeOpen(true);
+    return { success: true };
+  };
+
   const logout = () => {
     logoutFirebase();
     setUser(null);
@@ -768,6 +858,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         loginWithCode,
         loginWithGoogle,
+        loginWithTelegram,
+        extendTrial,
         logout,
         resetPassword,
         updateProfile,

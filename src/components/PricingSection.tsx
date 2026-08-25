@@ -33,7 +33,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
   // Paid users have active subscription until June 1, 2027
   const isPaidUserPremium = (Boolean(user?.isPaid) && (user?.subscriptionPlan === 'premium' || subscriptionStatus.effectivePlan === 'premium')) || isAdmin;
   const isPaidUserStandard = Boolean(user?.isPaid) && user?.subscriptionPlan === 'standard' && !isPaidUserPremium;
-  const isTrialUser = !user?.isPaid && !isAdmin;
+  const isTrialUser = Boolean(user) && !user?.isPaid && !isAdmin && subscriptionStatus.trialStage === 'trial_premium';
 
   const freePlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'free') || SUBSCRIPTION_PLANS[0];
   const standardPlan = SUBSCRIPTION_PLANS.find((p) => p.id === 'standard') || SUBSCRIPTION_PLANS[1];
@@ -149,6 +149,50 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
           )}
         </div>
 
+        {/* Special Social Support Banner across all 3 columns */}
+        <div className="mb-8 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#04241a] to-[#083526] border-2 border-emerald-500/50 p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left">
+          {/* Subtle background glow & badge */}
+          <div className="absolute top-0 right-0 w-80 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
+            <div className="space-y-2.5 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-black uppercase tracking-wider">
+                <Gift className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{isKg ? 'Социалдык колдоо жана жеңилдиктер' : 'Социальная поддержка и льготы'}</span>
+              </div>
+              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-white leading-snug">
+                {isKg ? (
+                  <>
+                    <span className="text-amber-300">«Премиалдуу жазылуу»</span> аярлуу катмардагы окуучуларга толугу менен{' '}
+                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">акысыз берилет</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-amber-300">«Премиальная подписка»</span> предоставляется полностью{' '}
+                    <span className="underline decoration-emerald-400 decoration-2 underline-offset-4">бесплатно</span>
+                  </>
+                )}
+              </h3>
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+                {isKg
+                  ? 'Биз бир же эки ата-энесинен тең ажыраган окуучуларга (тоголок жана жарым жетимдерге), ден соолугунун мүмкүнчүлүгү чектелген жарандарга (майыптарга), аскердик даярдыктан өткөндөргө / аскер кызматкерлерине, ошондой эле Баткен окуяларына катышкан аскерлердин балдарына Премиум жазылууну белекке беребиз. Документти тастыктоо үчүн мамлекеттик «Түндүк» (Tunduk) тиркемесиндеги маалымкатты же күбөлүктү биздин колдоо кызматына жөнөтүү жетиштүү.'
+                  : 'Мы бесплатно дарим «Премиальную подписку» учащимся, потерявшим одного или обоих родителей (круглые сироты и полусироты), лицам с инвалидностью, прошедшим военную подготовку / военнослужащим, а также детям военных — участников Баткенских событий. Для подтверждения и активации доступа достаточно предоставить подтверждающие цифровые документы / справку из государственного портала «Түндүк» (Tunduk) в нашу службу поддержки.'}
+              </p>
+            </div>
+
+            <div className="shrink-0">
+              <a
+                href="https://t.me/kyrgyzakylman?text=%D0%A1%D0%B0%D0%BB%D0%B0%D0%BC%D0%B0%D1%82%D1%81%D1%8B%D0%B7%D0%B1%D1%8B!%20%D0%9C%D0%B5%D0%BD%20%D0%A2%D2%AF%D0%BD%D0%B4%D2%AF%D0%BA%20%D0%B0%D1%80%D0%BA%D1%8B%D0%BB%D1%83%D1%83%20%D0%B6%D0%B5%D2%A3%D0%B8%D0%BB%D0%B4%D0%B8%D0%BA%D1%82%D2%AF%D2%AF%20%D0%9F%D1%80%D0%B5%D0%BC%D0%B8%D1%83%D0%BC%20%D0%B6%D0%B0%D0%B7%D1%8B%D0%BB%D1%83%D1%83%20%D0%B0%D0%BB%D1%83%D1%83%20%D2%AF%D1%87%D2%AF%D0%BD%20%D0%B4%D0%BE%D0%BA%D1%83%D0%BC%D0%B5%D0%BD%D1%82%20%D0%B6%D3%A9%D0%BD%D3%A9%D1%82%D3%A9%D0%B9%D2%AF%D0%BD%20%D0%B4%D0%B5%D0%B3%D0%B5%D0%BD%20%D1%8D%D0%BB%D0%B5%D0%BC."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <ShieldCheck className="w-4 h-4 text-slate-950" />
+                <span>{isKg ? 'Документти жөнөтүү (Түндүк)' : 'Отправить документы (Түндүк)'}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* 3 Plans Comparison Grid: Free (Subtle), Standard (Vibrant Emerald), Premium (VIP Gold) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch">
           {/* 1. БАЗОВАЯ (Muted & Basic) */}
@@ -176,7 +220,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 <p className="text-xs text-slate-400 mt-1">
                   {isKg
                     ? 'ЖРТ форматы менен таанышуу жана базалык билимди текшерүү үчүн.'
-                    : 'Базовое ознакомление с платформой и проверка начального уровня.'}
+                    : 'Базовое ознакомление с платформой и расчет баллов по шкале ЦООМО.'}
                 </p>
               </div>
 
@@ -185,33 +229,28 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 <div className="flex items-start gap-2.5 text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Сынамык тест:' : 'Пробный тест:'}</strong>{' '}
-                    {isKg ? '1 базалык тест жана баллдарды эсептөө' : '1 ознакомительный тест и подсчет баллов'}
+                    <strong className="text-white">{isKg ? 'Пробный тест:' : 'Пробный тест:'}</strong>{' '}
+                    {isKg ? 'ЦООМОнун бардык сынамык тесттери' : 'Все пробные тесты ЦООМО'}
                   </span>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-slate-300">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Калькулятор:' : 'Калькулятор баллов:'}</strong>{' '}
-                    {isKg ? 'ЖРТ шкаласы боюнча автоматтык эсептөө' : 'Точный расчет по шкале ЦООМО'}
+                    <strong className="text-white">{isKg ? 'Калькулятор баллов:' : 'Калькулятор баллов:'}</strong>{' '}
+                    {isKg ? 'ЦООМО шкаласы боюнча эсептөө' : 'Расчет баллов по шкале ЦООМО'}
                   </span>
                 </div>
 
                 {/* Not included in Free */}
                 <div className="flex items-start gap-2.5 text-slate-500 opacity-70 pt-1">
                   <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-                  <span>{isKg ? 'Бардык теория жана конспекттер' : 'Полная база теории по темам'}</span>
+                  <span>{isKg ? 'Тексттик теория жана сүрөт-талдоолор' : 'Все текстовые разделы теории и фото-разборы'}</span>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-slate-500 opacity-70">
                   <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-                  <span>{isKg ? 'Сүрөт-талдоолор жана чыгаруу жолдору' : 'Фоторазборы задач реального ОРТ'}</span>
-                </div>
-
-                <div className="flex items-start gap-2.5 text-slate-500 opacity-70">
-                  <XCircle className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
-                  <span>{isKg ? 'Үй тапшырмалары жана видеосабактар' : 'Домашние задания и видеоуроки'}</span>
+                  <span>{isKg ? 'Үй тапшырмалары жана видеосабактар' : 'Домашние задания и авторские видеоуроки'}</span>
                 </div>
               </div>
             </div>
@@ -254,8 +293,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 </div>
                 <p className="text-xs text-emerald-200/70 mt-1">
                   {isKg
-                    ? 'Теорияны окуп, ОРТнын чыныгы мисалдарын сүрөт-талдоолор менен үйрөнүү үчүн эң сонун.'
-                    : 'Идеально для изучения всей текстовой теории и пошаговых фото-разборов задач ОРТ.'}
+                    ? 'Теорияны окуп, ОРТнын чыныгы мисалдарын сүрөт-талдоолор менен үйрөнүү үчүн.'
+                    : 'Все текстовые разделы теории, фото с решениями и расширенная база тестов.'}
                 </p>
               </div>
 
@@ -264,36 +303,31 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 <div className="flex items-start gap-2.5 text-emerald-100">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Бардык теория:' : 'Полная теория:'}</strong>{' '}
-                    {isKg ? 'Алгебра жана Геометрия боюнча бардык блоктор' : 'Все разделы и темы Алгебры и Геометрии'}
+                    <strong className="text-white">{isKg ? 'Теория:' : 'Теория:'}</strong>{' '}
+                    {isKg ? 'Математика, орус жана англис тилдеринин бардык тексттик бөлүмдөрү' : 'Все текстовые разделы Математики, Русского и Английского языка'}
                   </span>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-emerald-100">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Сүрөт-чечмелөөлөр:' : 'Фото с решениями:'}</strong>{' '}
-                    {isKg ? 'Чыныгы ЖРТ мисалдарынын чыгарылыш сүрөттөрү жана талдоосу' : 'Пошаговый разбор заданий реального ОРТ на фото'}
+                    <strong className="text-white">{isKg ? 'Фото с решениями:' : 'Фото с решениями:'}</strong>{' '}
+                    {isKg ? 'Теориялардагы чыныгы ЖРТ мисалдарынын этап-этабы менен талдоосу' : 'Пошаговый разбор примеров из реального ОРТ в теориях'}
                   </span>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-emerald-100">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Сынамык тесттер:' : 'Пробные тесты:'}</strong>{' '}
-                    {isKg ? 'Кеңейтилген база жана упайларды эсептөө' : 'Расширенная база тестов ЦООМО с разбором'}
+                    <strong className="text-white">{isKg ? 'Пробный тест:' : 'Пробный тест:'}</strong>{' '}
+                    {isKg ? 'Сынамык тесттердин кеңейтилген базасы, анын ичинде ЦООМО' : 'Расширенная база пробных тестов, включая ЦООМО'}
                   </span>
                 </div>
 
                 {/* What is NOT included */}
                 <div className="flex items-start gap-2.5 text-slate-400 opacity-80 pt-1">
                   <XCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                  <span>{isKg ? 'Үй тапшырмалары (тапшырма блогу жок)' : 'Домашние задания по темам'}</span>
-                </div>
-
-                <div className="flex items-start gap-2.5 text-slate-400 opacity-80">
-                  <XCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-                  <span>{isKg ? 'Теория жана мисалдардын видеороликтери' : 'Видеоролики с теорией и видеоразборами'}</span>
+                  <span>{isKg ? 'Үй тапшырмалары жана видеосабактар' : 'Домашнее задание и авторские видеоуроки'}</span>
                 </div>
               </div>
             </div>
@@ -375,45 +409,58 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
                 <div className="flex items-start gap-2.5 text-emerald-100">
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Жеткиликтүү жазылуунун баары:' : 'Всё из Доступной подписки:'}</strong>{' '}
-                    {isKg ? 'Теория жана сүрөт-чечмелөөлөр' : 'Текстовая теория и фото-решения'}
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
-                  <FileCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong className="text-amber-300">{isKg ? '+ Үй тапшырмалары:' : '+ Домашнее задание:'}</strong>{' '}
-                    {isKg ? 'Ар бир тема боюнча бекемдөөчү тапшырмалар' : 'Практические задания по каждой теме с самопроверкой'}
-                  </span>
-                </div>
-
-                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
-                  <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-amber-300 block">{isKg ? '+ Видеороликтер:' : '+ Видеоуроки с теорией:'}</strong>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <GraduationCap className="w-4 h-4 text-amber-400 shrink-0" />
-                      <span className="text-xs text-amber-200/90">
-                        {isKg ? 'Абдраим Турусбековичтин түшүндүрмөсү менен' : 'Авторские видеоуроки с объяснением тем'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
-                  <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>
-                    <strong className="text-amber-300">{isKg ? '+ Видеоталдоолор:' : '+ Видеоразборы примеров:'}</strong>{' '}
-                    {isKg ? 'ЖРТнын татаал мисалдарын жана тузактарын чыгаруу' : 'Разбор сложных задач и главных ловушек ОРТ'}
+                    <strong className="text-white">{isKg ? 'Пробный тест:' : 'Пробный тест:'}</strong>{' '}
+                    {isKg ? 'Сынамык тесттердин толук базасы' : 'Полная база пробных тестов'}
                   </span>
                 </div>
 
                 <div className="flex items-start gap-2.5 text-emerald-100">
                   <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <span>
-                    <strong className="text-white">{isKg ? 'Жабык Telegram:' : 'Закрытый Telegram-канал:'}</strong>{' '}
-                    {isKg ? 'Сабактар жана ЖОЖдорго тапшыруу колдонмосу' : 'Уроки, рекомендации и руководство по поступлению'}
+                    <strong className="text-white">{isKg ? 'Теория:' : 'Теория:'}</strong>{' '}
+                    {isKg ? 'Математика, орус жана англис тилдеринин бардык бөлүмдөрү' : 'Все разделы Математики, Русского и Английского языка'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
+                  <FileCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-amber-300">{isKg ? '+ Домашнее задание:' : '+ Домашнее задание:'}</strong>{' '}
+                    {isKg ? 'Ар бир тема боюнча өзүн-өзү текшерүү менен практикалык тапшырмалар' : 'Практические задания по каждой теме с самопроверкой'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
+                  <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-amber-300 block">{isKg ? '+ Видеоуроки с теорией:' : '+ Видеоуроки с теорией:'}</strong>
+                    <span className="text-xs text-amber-200/90 block mt-0.5">
+                      {isKg ? 'Темаларды түшүндүргөн автордук видеосабактар' : 'Авторские видеоуроки с объяснением тем'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-amber-100 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/30">
+                  <Video className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-amber-300">{isKg ? '+ Видеоразборы примеров:' : '+ Видеоразборы примеров:'}</strong>{' '}
+                    {isKg ? 'Татаал тапшырмаларды жана ЖРТнын негизги тузактарын талдоо' : 'Разбор сложных задач и главных ловушек ОРТ'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-emerald-100">
+                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white">{isKg ? 'ЖОЖдорго тапшыруу:' : 'Поступление в ВУЗы:'}</strong>{' '}
+                    {isKg ? 'ЖОЖдорго тапшыруу боюнча автордук колдонмо' : 'Авторское руководство по поступлению в ВУЗы'}
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2.5 text-emerald-100">
+                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white">{isKg ? 'Жабык Telegram-канал:' : 'Закрытый Telegram-канал:'}</strong>{' '}
+                    {isKg ? 'Сабактар, кеңештер, сунуштар жана тапшыруу колдонмосу' : 'Уроки, советы, рекомендации и руководство по поступлению'}
                   </span>
                 </div>
               </div>

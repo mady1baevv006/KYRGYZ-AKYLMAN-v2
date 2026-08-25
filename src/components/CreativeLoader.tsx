@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, BookOpen } from 'lucide-react';
-import { BouncingDots } from './BouncingDots';
+import React from 'react';
 
 interface CreativeLoaderProps {
   text?: string;
@@ -9,94 +7,61 @@ interface CreativeLoaderProps {
   showQuotes?: boolean;
 }
 
-const ORT_MOTIVATIONAL_QUOTES = [
-  '🎯 Максат: 210+ балл жана Алтын сертификат',
-  '⚡ Логика жана тактык — ОРТда жогорку баллдын ачкычы',
-  '📚 Ар бир суроону кунт коюп окуп, тузактардан сак бол',
-  '💎 Кыргыз Акылман — сенин ишенимдүү өнөктөшүң',
-  '🏆 Математика — бардык так илимдердин башаты',
-];
-
 export const CreativeLoader: React.FC<CreativeLoaderProps> = ({
-  text = 'Жүктөлүүдө...',
-  subtext,
   size = 'fullscreen',
-  showQuotes = true,
 }) => {
-  const [quoteIdx, setQuoteIdx] = useState(0);
-
-  useEffect(() => {
-    if (!showQuotes) return;
-    const interval = setInterval(() => {
-      setQuoteIdx((prev) => (prev + 1) % ORT_MOTIVATIONAL_QUOTES.length);
-    }, 2800);
-    return () => clearInterval(interval);
-  }, [showQuotes]);
-
   if (size === 'fullscreen' || size === 'page') {
     const isFixed = size === 'fullscreen';
     return (
       <div
         className={`${
           isFixed ? 'fixed inset-0 z-[100]' : 'min-h-[70vh] w-full'
-        } flex flex-col items-center justify-center bg-[#031510]/95 backdrop-blur-xl text-white p-4 select-none animate-in fade-in duration-300 overflow-hidden`}
+        } flex items-center justify-center bg-[#031510]/95 backdrop-blur-xl select-none animate-in fade-in duration-300 overflow-hidden`}
       >
-        {/* Glowing Dynamic Orbs & Mesh */}
-        <div className="absolute w-96 h-96 rounded-full bg-emerald-500/15 blur-[100px] animate-pulse pointer-events-none" />
-        <div className="absolute w-80 h-80 rounded-full bg-teal-400/10 blur-[80px] pointer-events-none -translate-y-12" />
-        <div className="absolute w-64 h-64 rounded-full bg-emerald-600/10 blur-[70px] pointer-events-none translate-y-16" />
+        {/* Soft background ambient glow */}
+        <div className="absolute w-96 h-96 rounded-full bg-emerald-500/10 blur-[100px] animate-pulse pointer-events-none" />
 
-        {/* Central Brand Badge */}
-        <div className="relative z-10 flex items-center justify-center mb-2">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#06261d] via-[#093527] to-[#0d4a37] border-2 border-emerald-400/80 flex items-center justify-center text-emerald-300 shadow-2xl shadow-emerald-500/50">
-            <BookOpen className="w-7 h-7 text-emerald-300 drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-          </div>
-        </div>
+        {/* Concentric Animated Circles Only */}
+        <div className="relative flex items-center justify-center w-36 h-36 sm:w-44 sm:h-44">
+          {/* Outermost Pulsing Ring */}
+          <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping opacity-40 [animation-duration:3s]" />
 
-        {/* Video Bouncing Dots Wave */}
-        <div className="relative z-10 my-2">
-          <BouncingDots size="md" />
-        </div>
+          {/* Outer Dashed Orbit Ring (Slow Clockwise) */}
+          <div className="absolute inset-1 rounded-full border-2 border-dashed border-emerald-400/40 animate-spin-slow" />
 
-        {/* Text & Stage Indicator */}
-        <div className="text-center space-y-3 relative z-10 max-w-md px-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-emerald-950/80">
-            <Sparkles className="w-4 h-4 text-emerald-400 animate-spin" />
-            <span>{text}</span>
-          </div>
+          {/* Secondary Smooth Ring with Gradient Borders (Reverse) */}
+          <div className="absolute inset-4 rounded-full border-2 border-t-emerald-400 border-r-teal-300 border-b-transparent border-l-transparent animate-spin-reverse shadow-[0_0_15px_rgba(52,211,153,0.3)]" />
 
-          {subtext && (
-            <p className="text-xs sm:text-sm text-emerald-200/80 font-medium">
-              {subtext}
-            </p>
-          )}
+          {/* Middle Dotted Ring (Clockwise) */}
+          <div className="absolute inset-7 rounded-full border-2 border-dotted border-teal-400/50 animate-spin [animation-duration:4s]" />
 
-          {/* Animated Cycling Quote */}
-          {showQuotes && (
-            <div className="min-h-[2.5rem] flex items-center justify-center">
-              <p className="text-xs sm:text-sm text-emerald-300/90 font-semibold italic bg-emerald-950/60 px-3.5 py-1.5 rounded-xl border border-emerald-800/60 transition-all duration-300 animate-in fade-in">
-                {ORT_MOTIVATIONAL_QUOTES[quoteIdx]}
-              </p>
-            </div>
-          )}
+          {/* Inner Accent Ring with Glowing Edge (Reverse Slow) */}
+          <div className="absolute inset-10 rounded-full border-2 border-b-emerald-300 border-l-teal-400 border-t-transparent border-r-transparent animate-spin-reverse-slow shadow-[0_0_12px_rgba(45,212,191,0.5)]" />
 
-          {/* Animated Emerald Progress Bar */}
-          <div className="w-52 sm:w-64 h-1.5 bg-[#020e0a] rounded-full mx-auto overflow-hidden border border-emerald-800/70 mt-2 shadow-inner">
-            <div className="w-full h-full bg-gradient-to-r from-emerald-500 via-teal-300 to-emerald-400 rounded-full animate-[shimmer_1.5s_infinite_linear] origin-left shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
+          {/* Center Glowing Core Circle with Pulse */}
+          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-300 shadow-[0_0_25px_rgba(52,211,153,0.9)] animate-pulse" />
+
+          {/* Orbiting Satellite Dot */}
+          <div className="absolute inset-0 rounded-full animate-spin [animation-duration:2.5s]">
+            <div className="w-3 h-3 rounded-full bg-teal-300 shadow-[0_0_10px_rgba(94,234,212,0.9)] absolute -top-1.5 left-1/2 -translate-x-1/2" />
           </div>
         </div>
       </div>
     );
   }
 
-  // Inline / Document Box Loader
+  // Small / Box version (circles only)
+  const boxDimension = size === 'sm' ? 'w-16 h-16' : size === 'lg' ? 'w-28 h-28' : 'w-20 h-20';
+
   return (
-    <div className="py-8 px-6 flex flex-col items-center justify-center rounded-3xl bg-[#041a14]/90 border border-emerald-800/60 text-center text-white my-4 relative overflow-hidden">
-      <div className="absolute w-40 h-40 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
-      <BouncingDots size="sm" />
-      <h4 className="text-sm font-black text-white mt-1">{text}</h4>
-      {subtext && <p className="text-xs text-emerald-200/60 mt-1">{subtext}</p>}
+    <div className="py-8 px-6 flex items-center justify-center select-none relative">
+      <div className={`relative flex items-center justify-center ${boxDimension}`}>
+        <div className="absolute inset-0 rounded-full border-2 border-dashed border-emerald-500/30 animate-spin-slow" />
+        <div className="absolute inset-2 rounded-full border-2 border-t-emerald-400 border-r-transparent border-b-teal-300 border-l-transparent animate-spin-reverse" />
+        <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-300 shadow-[0_0_15px_rgba(52,211,153,0.8)] animate-pulse" />
+      </div>
     </div>
   );
 };
+
 

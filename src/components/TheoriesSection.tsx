@@ -334,38 +334,26 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </p>
             </div>
 
-            {/* Key Value Cards Row (2 Main Subjects: Algebra and Geometry) */}
+            {/* Key Value Cards Row (2 Main Subjects: Algebra and Geometry) - purely informative blocks */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              <div
-                onClick={() => handleSelectSubject('algebra')}
-                className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-2 cursor-pointer transition-all group/subcard"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-emerald-400 font-black text-base">
-                    <Calculator className="w-5 h-5" />
-                    <span>{isKg ? '1. Алгебра' : '1. Алгебра'}</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-emerald-400 opacity-60 group-hover/subcard:opacity-100 group-hover/subcard:translate-x-1 transition-all" />
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-2 select-none">
+                <div className="flex items-center gap-2 text-emerald-400 font-black text-base">
+                  <Calculator className="w-5 h-5" />
+                  <span>{isKg ? 'Алгебра' : 'Алгебра'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg
                     ? 'Сандардын түрлөрү, бөлүнүүчүлүк, теңдемелер, барабарсыздыктар, модулдар, маселелер'
                     : 'Числа и делимость, уравнения, неравенства, модули, прогрессии, текстовые задачи'}
                 </p>
               </div>
 
-              <div
-                onClick={() => handleSelectSubject('geometry')}
-                className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-teal-400 space-y-2 cursor-pointer transition-all group/subcard"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-teal-400 font-black text-base">
-                    <Compass className="w-5 h-5" />
-                    <span>{isKg ? '2. Геометрия' : '2. Геометрия'}</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-teal-400 opacity-60 group-hover/subcard:opacity-100 group-hover/subcard:translate-x-1 transition-all" />
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-2 select-none">
+                <div className="flex items-center gap-2 text-teal-400 font-black text-base">
+                  <Compass className="w-5 h-5" />
+                  <span>{isKg ? 'Геометрия' : 'Геометрия'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg
                     ? 'Үч бурчтуктар, төрт бурчтуктар, тегерек жана айлана, аянттар, стереометрия'
                     : 'Треугольники, четырехугольники, окружности, формулы площадей, стереометрия'}
@@ -427,43 +415,34 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </p>
             </div>
 
-            {/* 3 Rectangular Blocks Row */}
+            {/* 3 Informational Blocks Row (no numbers, pure info) */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
-              <div
-                onClick={() => handleSelectSubject('russian')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
                   <FileText className="w-4 h-4" />
-                  <span>{isKg ? '1. Аналогиялар' : '1. Аналогии и дополнения'}</span>
+                  <span>{isKg ? 'Аналогиялар жана сүйлөмдөр' : 'Аналогии и дополнения'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Түр-тек, бөлүк-бүтүн, себеп-натыйжа логикасы' : 'Род-вид, часть-целое, причина-следствие, ловушки'}
                 </p>
               </div>
 
-              <div
-                onClick={() => handleSelectSubject('russian')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
                   <BookOpen className="w-4 h-4" />
-                  <span>{isKg ? '2. Текстти түшүнүү' : '2. Чтение и понимание'}</span>
+                  <span>{isKg ? 'Текстти түшүнүү' : 'Чтение и понимание'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Тексттин мааниси, башкы ой, контекстти талдоо' : 'Анализ микротем, подтекст, аргументация и выводы'}
                 </p>
               </div>
 
-              <div
-                onClick={() => handleSelectSubject('russian')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-emerald-700/40 hover:border-emerald-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
                   <GraduationCap className="w-4 h-4" />
-                  <span>{isKg ? '3. Грамматика' : '3. Практическая грамматика'}</span>
+                  <span>{isKg ? 'Грамматика' : 'Практическая грамматика'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Пунктуация, орфография, синтаксис эрежелери' : 'Пунктуация, орфография, нормы речи и тесты'}
                 </p>
               </div>
@@ -523,43 +502,34 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </p>
             </div>
 
-            {/* 3 Rectangular Blocks Row */}
+            {/* 3 Informational Blocks Row (no numbers, pure info) */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
-              <div
-                onClick={() => handleSelectSubject('english')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-teal-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
                   <BookOpen className="w-4 h-4" />
-                  <span>{isKg ? '1. Тексттерди окуу' : '1. Reading Comprehension'}</span>
+                  <span>{isKg ? 'Тексттерди окуу' : 'Reading Comprehension'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Тексттерди талдоо, сөздүктөр жана суроолор' : 'Понимание текстов, подтекст, главная мысль'}
                 </p>
               </div>
 
-              <div
-                onClick={() => handleSelectSubject('english')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-teal-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
                   <FileText className="w-4 h-4" />
-                  <span>{isKg ? '2. Грамматика' : '2. Grammar & Vocabulary'}</span>
+                  <span>{isKg ? 'Грамматика жана сөздүк' : 'Grammar & Vocabulary'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Англисче чактар, модалдык этиштер жана пассив' : 'Времена глаголов, модальные глаголы, пассив'}
                 </p>
               </div>
 
-              <div
-                onClick={() => handleSelectSubject('english')}
-                className="p-4 rounded-2xl bg-[#02100c]/80 hover:bg-[#041d16] border border-teal-700/40 hover:border-teal-400 space-y-1 cursor-pointer transition-all"
-              >
+              <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-teal-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
                   <GraduationCap className="w-4 h-4" />
-                  <span>{isKg ? '3. Каталарды табуу' : '3. Error Identification'}</span>
+                  <span>{isKg ? 'Каталарды табуу' : 'Error Identification'}</span>
                 </div>
-                <p className="text-xs text-emerald-200/70">
+                <p className="text-xs text-emerald-200/70 leading-relaxed">
                   {isKg ? 'Сүйлөмдөрдөгү типтүү грамматикалык каталар' : 'Типовые грамматические ошибки в тестах ОРТ'}
                 </p>
               </div>
