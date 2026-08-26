@@ -34,7 +34,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Lock background scrolling when modal is open
   useBodyScrollLock(isOpen);
 
-  const { loginWithCode, loginWithGoogle, loginWithTelegram, loginWithWhatsApp } = useAuth();
+  const { loginWithCode, loginWithGoogle, loginWithWhatsApp } = useAuth();
 
   const [method, setMethod] = useState<AuthMethod>('email');
 
@@ -122,17 +122,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Telegram 1-Click Fast Auth
-  // Telegram 1-Click Fast Auth
+  // Telegram 1-Click Fast Popup Auth
   const handleTelegramSignIn = () => {
     setErrorMessage('');
     setSuccessMessage('');
     setTelegramLoading(true);
 
+    // Удаляем предыдущий скрипт, если он был
+    const oldScript = document.getElementById('telegram-widget-script');
+    if (oldScript) oldScript.remove();
+
     // 1. Создаем функцию для получения ответа от Telegram
     (window as any).onTelegramAuth = async (user: any) => {
       try {
-        // Отправляем данные пользователя на ваш бэкенд
         const response = await fetch('/api/auth/telegram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -151,21 +153,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           setErrorMessage(data.message || (isKg ? 'Telegram аркылуу кирүүдө каталык' : 'Ошибка входа через Telegram'));
         }
       } catch (err: any) {
-        setErrorMessage(err?.message || 'Ошибка сервера');
+        setErrorMessage(err?.message || 'Ошибка сервера при авторизации');
       } finally {
         setTelegramLoading(false);
       }
     };
 
-    // 2. Динамически подгружаем и запускаем виджет Telegram
+    // 2. Подгружаем официальный виджет Telegram
     const script = document.createElement('script');
+    script.id = 'telegram-widget-script';
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    // ⚠️ ВАЖНО: Замените 'ВАШ_БОТ_bot' на имя вашего бота (без символа @)
     script.setAttribute('data-telegram-login', 'kyrgyzakylmanofficialbot');
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.setAttribute('data-request-access', 'write');
     script.async = true;
+
+    script.onerror = () => {
+      setTelegramLoading(false);
+      setErrorMessage(isKg ? 'Telegram виджетин жүктөө мүмкүн болбоду' : 'Не удалось загрузить Telegram виджет');
+    };
 
     document.body.appendChild(script);
   };
