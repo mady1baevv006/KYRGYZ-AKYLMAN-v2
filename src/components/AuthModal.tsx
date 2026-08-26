@@ -31,7 +31,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   lang = 'ru',
 }) => {
-  // Lock background scrolling when modal is open
   useBodyScrollLock(isOpen);
 
   const { loginWithCode, loginWithGoogle, loginWithWhatsApp } = useAuth();
@@ -56,14 +55,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [telegramLoading, setTelegramLoading] = useState(false);
   const [whatsappLoading, setWhatsappLoading] = useState(false);
 
   const emailInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const telegramContainerRef = useRef<HTMLDivElement>(null);
 
-  // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
-
   const isKg = lang === 'kg';
 
   // Countdown timer for email code resend
@@ -90,6 +87,51 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setSuccessMessage('');
     }
   }, [isOpen, method]);
+
+  // Инициализация стандартного Telegram-виджета прямо в контейнер
+  useEffect(() => {
+    if (!isOpen || codeStep) return;
+
+    // Глобальная функция обработки авторизации от Telegram
+    (window as any).onTelegramAuth = async (user: any) => {
+      try {
+        const response = await fetch('/api/auth/telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user),
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          setSuccessMessage(isKg ? 'Telegram аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через Telegram!');
+          setTimeout(() => {
+            onClose();
+            setSuccessMessage('');
+            window.location.reload();
+          }, 800);
+        } else {
+          setErrorMessage(data.message || (isKg ? 'Telegram аркылуу кирүүдө каталык' : 'Ошибка входа через Telegram'));
+        }
+      } catch (err: any) {
+        setErrorMessage(err?.message || 'Ошибка сервера при авторизации');
+      }
+    };
+
+    // Очищаем контейнер перед внедрением
+    if (telegramContainerRef.current) {
+      telegramContainerRef.current.innerHTML = '';
+      const script = document.createElement('script');
+      script.src = 'https://telegram.org/js/telegram-widget.js?22';
+      script.setAttribute('data-telegram-login', 'kyrgyzakylmanofficialbot');
+      script.setAttribute('data-size', 'large');
+      script.setAttribute('data-radius', '12');
+      script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      script.setAttribute('data-request-access', 'write');
+      script.async = true;
+
+      telegramContainerRef.current.appendChild(script);
+    }
+  }, [isOpen, codeStep, isKg, onClose]);
 
   if (!isOpen) return null;
 
@@ -120,61 +162,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } finally {
       setGoogleLoading(false);
     }
-  };
-
-  // Telegram 1-Click Fast Popup Auth
-  const handleTelegramSignIn = () => {
-    setErrorMessage('');
-    setSuccessMessage('');
-    setTelegramLoading(true);
-
-    // Удаляем предыдущий скрипт, если он был
-    const oldScript = document.getElementById('telegram-widget-script');
-    if (oldScript) oldScript.remove();
-
-    // 1. Создаем функцию для получения ответа от Telegram
-    (window as any).onTelegramAuth = async (user: any) => {
-      try {
-        const response = await fetch('/api/auth/telegram', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(user),
-        });
-        const data = await response.json();
-
-        if (data.success) {
-          setSuccessMessage(isKg ? 'Telegram аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через Telegram!');
-          setTimeout(() => {
-            onClose();
-            setSuccessMessage('');
-            window.location.reload();
-          }, 800);
-        } else {
-          setErrorMessage(data.message || (isKg ? 'Telegram аркылуу кирүүдө каталык' : 'Ошибка входа через Telegram'));
-        }
-      } catch (err: any) {
-        setErrorMessage(err?.message || 'Ошибка сервера при авторизации');
-      } finally {
-        setTelegramLoading(false);
-      }
-    };
-
-    // 2. Подгружаем официальный виджет Telegram
-    const script = document.createElement('script');
-    script.id = 'telegram-widget-script';
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', 'kyrgyzakylmanofficialbot');
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    script.async = true;
-
-    script.onerror = () => {
-      setTelegramLoading(false);
-      setErrorMessage(isKg ? 'Telegram виджетин жүктөө мүмкүн болбоду' : 'Не удалось загрузить Telegram виджет');
-    };
-
-    document.body.appendChild(script);
   };
 
   // WhatsApp 1-Click Fast Auth
@@ -333,15 +320,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </p>
         </div>
 
-        {/* Quick Fast Google, Telegram & WhatsApp Sign-in buttons */}
+        {/* Fast Auth Buttons Container */}
         {!codeStep && (
           <div className="space-y-2.5 mb-4">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2 items-center">
               {/* 1. Google */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
+                disabled={googleLoading || whatsappLoading || loading}
                 className="h-[42px] px-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-white/20 disabled:opacity-50"
               >
                 {googleLoading ? (
@@ -369,28 +356,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Google</span>
               </button>
 
-              {/* 2. Telegram */}
-              <button
-                type="button"
-                onClick={handleTelegramSignIn}
-                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
-                className="h-[42px] px-2 bg-[#229ED9] hover:bg-[#1b8ec5] text-white font-bold text-xs rounded-xl shadow-md shadow-[#229ED9]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#229ED9]/60 disabled:opacity-50"
-              >
-                {telegramLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.939z" />
-                  </svg>
-                )}
-                <span>Telegram</span>
-              </button>
+              {/* 2. Telegram Native Iframe Widget */}
+              <div
+                ref={telegramContainerRef}
+                className="h-[42px] flex items-center justify-center overflow-hidden"
+              />
 
               {/* 3. WhatsApp */}
               <button
                 type="button"
                 onClick={handleWhatsAppSignIn}
-                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
+                disabled={googleLoading || whatsappLoading || loading}
                 className="h-[42px] px-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-[#25D366]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#25D366]/60 disabled:opacity-50"
               >
                 {whatsappLoading ? (
