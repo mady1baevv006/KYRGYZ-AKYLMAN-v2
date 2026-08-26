@@ -57,7 +57,7 @@ async function startServer() {
     // Данные подлинные: извлекаем пользователя
     const { id, first_name, last_name, username, photo_url } = data;
 
-    // TODO: Здесь сохраняйте в БД или в сессию
+    // Авторизация успешна
     return res.json({
       success: true,
       user: { id, first_name, last_name, username, photo_url },
