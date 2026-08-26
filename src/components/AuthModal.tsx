@@ -59,6 +59,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [googleLoading, setGoogleLoading] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(false);
 
+  // 1-Click Telegram Deep Link & Polling State
+  const [telegramWaiting, setTelegramWaiting] = useState(false);
+  const [telegramToken, setTelegramToken] = useState('');
+  const [telegramDeepLink, setTelegramDeepLink] = useState('');
+
   const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   // Detected Operator
@@ -66,20 +71,91 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const isKg = lang === 'kg';
 
-  // Telegram OAuth Redirect Handler
-  const handleTelegramRedirect = () => {
+  // 1-Click Telegram Auth Handler
+  const handleTelegramOneClick = async () => {
     setTelegramLoading(true);
     setErrorMessage('');
-    const botId = '8877236146';
-    const origin = window.location.origin;
-    const returnTo = `${origin}/auth/callback`;
+    setSuccessMessage('');
 
-    const telegramOAuthUrl = `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(
-      origin
-    )}&return_to=${encodeURIComponent(returnTo)}&request_access=write`;
+    try {
+      const response = await fetch('/api/auth/init-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    window.location.href = telegramOAuthUrl;
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success && data.token) {
+        const link = data.telegramDeepLink || `https://t.me/kyrgyzakylmanofficialbot?start=${data.token}`;
+        setTelegramToken(data.token);
+        setTelegramDeepLink(link);
+        setTelegramWaiting(true);
+
+        // Open Telegram bot directly
+        window.open(link, '_blank', 'noopener,noreferrer');
+      } else {
+        throw new Error(data.error || 'Не удалось сгенерировать токен авторизации');
+      }
+    } catch (err: any) {
+      console.warn('Fallback: локальная генерация токена сессии Telegram', err);
+      const fallbackToken = `auth_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString(36)}`;
+      const link = `https://t.me/kyrgyzakylmanofficialbot?start=${fallbackToken}`;
+      setTelegramToken(fallbackToken);
+      setTelegramDeepLink(link);
+      setTelegramWaiting(true);
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } finally {
+      setTelegramLoading(false);
+    }
   };
+
+  // 2-Second Polling for Telegram 1-Click Status
+  useEffect(() => {
+    if (!isOpen || !telegramWaiting || !telegramToken) return;
+
+    let isMounted = true;
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/auth/check-status?token=${encodeURIComponent(telegramToken)}`, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!isMounted) return;
+
+        if (data.success && data.authorized && data.user) {
+          clearInterval(interval);
+          loginWithTelegram(data.user);
+          setSuccessMessage(
+            isKg
+              ? '🎉 Telegram аркылуу ийгиликтүү кирдиңиз! Профиль ачылууда...'
+              : '🎉 Вы успешно авторизовались через Telegram! Загрузка...'
+          );
+          setTimeout(() => {
+            if (isMounted) {
+              setTelegramWaiting(false);
+              setTelegramToken('');
+              onClose();
+              setSuccessMessage('');
+            }
+          }, 800);
+        }
+      } catch (pollErr) {
+        console.warn('Telegram Polling warning:', pollErr);
+      }
+    }, 2000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isOpen, telegramWaiting, telegramToken, isKg, loginWithTelegram, onClose]);
 
   // Telegram global callback handler fallback
   useEffect(() => {
@@ -362,10 +438,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Google</span>
               </button>
 
-              {/* Stylized Official Telegram OAuth Button */}
+              {/* Stylized Official Telegram 1-Click Button */}
               <button
                 type="button"
-                onClick={handleTelegramRedirect}
+                onClick={handleTelegramOneClick}
                 disabled={telegramLoading || googleLoading}
                 className="w-full sm:w-1/2 h-[42px] px-3 bg-[#229ED9] hover:bg-[#1b8ec5] active:scale-[0.99] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg shadow-[#229ED9]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#229ED9]/60 disabled:opacity-50"
               >
@@ -389,7 +465,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         )}
 
         {/* Auth Method Navigation Tabs (Почта, SMS-код) - Only 2 tabs now */}
-        {!codeStep && (
+        {!codeStep && !telegramWaiting && (
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
             <button
               type="button"
@@ -439,8 +515,58 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* STEP 2: 6-DIGIT VERIFICATION CODE INPUT */}
-        {codeStep ? (
+        {/* TELEGRAM 1-CLICK WAITING STATE */}
+        {telegramWaiting ? (
+          <div className="space-y-4 text-center animate-in fade-in zoom-in-95 duration-200">
+            {/* Telegram Pulse Card */}
+            <div className="p-5 rounded-2xl bg-gradient-to-b from-[#0b3327] to-[#041a14] border border-[#229ED9]/50 shadow-xl relative overflow-hidden">
+              <div className="relative z-10">
+                <div className="w-16 h-16 rounded-full bg-[#229ED9]/20 border-2 border-[#229ED9] flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#229ED9]/30 relative">
+                  <div className="absolute inset-0 rounded-full bg-[#229ED9]/20 animate-ping" />
+                  <Send className="w-7 h-7 text-[#229ED9]" />
+                </div>
+
+                <h3 className="text-base font-black text-white mb-1">
+                  {isKg ? 'Telegram аркылуу 1 клик кирүү' : 'Вход в 1 клик через Telegram'}
+                </h3>
+                <p className="text-xs text-emerald-200/80 leading-relaxed max-w-xs mx-auto mb-4">
+                  {isKg
+                    ? 'Бот ачылды. Кирүүнү ырастоо үчүн Telegram ботто «Запустить» (Start) баскычын басыңыз.'
+                    : 'Мы открыли Telegram. Нажмите кнопку «Запустить» (Start) в боте, и сайт мгновенно авторизует вас.'}
+                </p>
+
+                {/* Status Indicator Chip */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-emerald-500/40 text-emerald-300 text-xs font-medium mb-4">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{isKg ? 'Боттон жооп күтүлүүдө (авто-текшерүү)...' : 'Ожидание ответа от бота...'}</span>
+                </div>
+
+                <div className="space-y-2">
+                  <a
+                    href={telegramDeepLink || `https://t.me/kyrgyzakylmanofficialbot?start=${telegramToken}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-[#229ED9] hover:bg-[#1b8ec5] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#229ED9]/30 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Send className="w-4 h-4 shrink-0" />
+                    <span>{isKg ? 'Telegram ботту ачуу' : 'Открыть Telegram бот'}</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTelegramWaiting(false);
+                      setTelegramToken('');
+                    }}
+                    className="w-full py-2 text-xs text-emerald-300/70 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {isKg ? '← Башка жол менен кирүү' : '← Выбрать другой способ'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : codeStep ? (
           <div className="space-y-4">
             {/* Delivery banner */}
             <div className="p-3.5 rounded-2xl bg-[#041e17] border border-emerald-700/60 text-center">
