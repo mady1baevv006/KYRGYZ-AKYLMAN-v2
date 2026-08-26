@@ -464,8 +464,29 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
           </div>
         </div>
 
-        {/* Special Social Support Banner placed UNDER the subscription cards */}
-        <div className="mt-8 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#04241a] to-[#083526] border-2 border-emerald-500/60 p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left">
+        {/* Security & Support Guarantee Note (compact original bar) */}
+        <div className="mt-8 p-4 rounded-2xl bg-[#041a14]/90 border border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-emerald-200/75">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>
+              {isKg
+                ? 'Төлөмдөр MBANK, Bakai, Компаньон, O!Bank аркылуу коопсуз кабыл алынат'
+                : 'Безопасная оплата через MBANK, Bakai Bank, Компаньон, O!Bank'}
+            </span>
+          </div>
+
+          <a
+            href="https://t.me/kyrgyzakylman"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors flex items-center gap-1"
+          >
+            <span>{isKg ? 'Колдоо кызматы: @kyrgyzakylman' : 'Поддержка в Telegram: @kyrgyzakylman'}</span>
+          </a>
+        </div>
+
+        {/* Special Social Support Banner placed UNDER the compact bar */}
+        <div className="mt-6 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#04241a] to-[#083526] border-2 border-emerald-500/60 p-5 sm:p-7 shadow-2xl relative overflow-hidden text-left">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-80 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
           
@@ -518,27 +539,6 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ lang = 'ru' }) =
               </a>
             </div>
           </div>
-        </div>
-
-        {/* Security & Support Guarantee Note */}
-        <div className="mt-8 p-4 rounded-2xl bg-[#041a14]/90 border border-emerald-800/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-emerald-200/75">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>
-              {isKg
-                ? 'Төлөмдөр MBANK, Bakai, Компаньон, O!Bank аркылуу коопсуз кабыл алынат'
-                : 'Безопасная оплата через MBANK, Bakai Bank, Компаньон, O!Bank'}
-            </span>
-          </div>
-
-          <a
-            href="https://t.me/kyrgyzakylman"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors flex items-center gap-1"
-          >
-            <span>{isKg ? 'Колдоо кызматы: @kyrgyzakylman' : 'Поддержка в Telegram: @kyrgyzakylman'}</span>
-          </a>
         </div>
       </div>
 

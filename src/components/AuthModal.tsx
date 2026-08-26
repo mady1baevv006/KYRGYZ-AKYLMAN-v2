@@ -11,12 +11,11 @@ import {
   RotateCcw,
   ShieldCheck,
   Smartphone,
-  Send,
   AlertTriangle,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { detectKyrgyzOperator, formatKyrgyzPhone } from '../utils/kyrgyzOperators';
+import { detectKyrgyzOperator } from '../utils/kyrgyzOperators';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface AuthModalProps {
@@ -35,7 +34,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Lock background scrolling when modal is open
   useBodyScrollLock(isOpen);
 
-  const { loginWithCode, loginWithGoogle, loginWithTelegram } = useAuth();
+  const { loginWithCode, loginWithGoogle, loginWithTelegram, loginWithWhatsApp } = useAuth();
 
   const [method, setMethod] = useState<AuthMethod>('email');
 
@@ -44,11 +43,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [phoneRaw, setPhoneRaw] = useState('');
   const [nameInput, setNameInput] = useState('');
 
-  // 6-digit Code State
+  // 6-digit Code State for Email OTP
   const [codeStep, setCodeStep] = useState(false);
-  const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
+  const [emailVerificationCode, setEmailVerificationCode] = useState(['', '', '', '', '', '']);
   const [sentTarget, setSentTarget] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
+  const [generatedEmailCode, setGeneratedEmailCode] = useState('');
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
@@ -58,160 +57,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(false);
+  const [whatsappLoading, setWhatsappLoading] = useState(false);
 
-  // 1-Click Telegram Deep Link & Polling State
-  const [telegramWaiting, setTelegramWaiting] = useState(false);
-  const [telegramToken, setTelegramToken] = useState('');
-  const [telegramDeepLink, setTelegramDeepLink] = useState('');
-
-  const codeInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const emailInputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
 
   const isKg = lang === 'kg';
 
-  // 1-Click Telegram Auth Handler
-  const handleTelegramOneClick = async () => {
-    setTelegramLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    try {
-      const response = await fetch('/api/auth/init-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success && data.token) {
-        const link = data.telegramDeepLink || `https://t.me/kyrgyzakylmanofficialbot?start=${data.token}`;
-        setTelegramToken(data.token);
-        setTelegramDeepLink(link);
-        setTelegramWaiting(true);
-
-        // Open Telegram bot directly
-        window.open(link, '_blank', 'noopener,noreferrer');
-      } else {
-        throw new Error(data.error || 'Не удалось сгенерировать токен авторизации');
-      }
-    } catch (err: any) {
-      console.warn('Fallback: локальная генерация токена сессии Telegram', err);
-      const fallbackToken = `auth_${Math.random().toString(36).substring(2, 10)}_${Date.now().toString(36)}`;
-      const link = `https://t.me/kyrgyzakylmanofficialbot?start=${fallbackToken}`;
-      setTelegramToken(fallbackToken);
-      setTelegramDeepLink(link);
-      setTelegramWaiting(true);
-      window.open(link, '_blank', 'noopener,noreferrer');
-    } finally {
-      setTelegramLoading(false);
-    }
-  };
-
-  // 2-Second Polling for Telegram 1-Click Status
-  useEffect(() => {
-    if (!isOpen || !telegramWaiting || !telegramToken) return;
-
-    let isMounted = true;
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/auth/check-status?token=${encodeURIComponent(telegramToken)}`, {
-          method: 'GET',
-          headers: { Accept: 'application/json' },
-        });
-
-        if (!response.ok) return;
-
-        const data = await response.json();
-        if (!isMounted) return;
-
-        if (data.success && data.authorized && data.user) {
-          clearInterval(interval);
-          loginWithTelegram(data.user);
-          setSuccessMessage(
-            isKg
-              ? '🎉 Telegram аркылуу ийгиликтүү кирдиңиз! Профиль ачылууда...'
-              : '🎉 Вы успешно авторизовались через Telegram! Загрузка...'
-          );
-          setTimeout(() => {
-            if (isMounted) {
-              setTelegramWaiting(false);
-              setTelegramToken('');
-              onClose();
-              setSuccessMessage('');
-            }
-          }, 800);
-        }
-      } catch (pollErr) {
-        console.warn('Telegram Polling warning:', pollErr);
-      }
-    }, 2000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, [isOpen, telegramWaiting, telegramToken, isKg, loginWithTelegram, onClose]);
-
-  // Telegram global callback handler fallback
-  useEffect(() => {
-    if (!isOpen) return;
-
-    window.onTelegramAuth = async (user: any) => {
-      setTelegramLoading(true);
-      setErrorMessage('');
-      setSuccessMessage('');
-
-      try {
-        const response = await fetch('/api/auth/telegram', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(user),
-        });
-
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(
-            errData.error || `HTTP ${response.status}: Ошибка проверки подписи Telegram на сервере`
-          );
-        }
-
-        const data = await response.json();
-        if (data.success && data.user) {
-          loginWithTelegram(data.user);
-          setSuccessMessage(
-            isKg
-              ? 'Telegram аркылуу ийгиликтүү кирдиңиз! Профиль жүктөлүүдө...'
-              : 'Успешный вход через Telegram! Загрузка профиля...'
-          );
-          setTimeout(() => {
-            onClose();
-            setSuccessMessage('');
-          }, 600);
-        } else {
-          throw new Error(data.error || 'Ошибка проверки авторизации');
-        }
-      } catch (err: any) {
-        console.error('Ошибка авторизации Telegram:', err);
-        setErrorMessage(
-          err.message ||
-            (isKg
-              ? 'Telegram аркылуу кирүүдө сервердик ката кетти'
-              : 'Ошибка сервера при проверке подписи Telegram')
-        );
-      } finally {
-        setTelegramLoading(false);
-      }
-    };
-  }, [isOpen, isKg, loginWithTelegram, onClose]);
-
-  // Countdown timer for code resend
+  // Countdown timer for email code resend
   useEffect(() => {
     let interval: any;
     if (codeStep && timerSeconds > 0) {
@@ -228,6 +83,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return () => clearInterval(interval);
   }, [codeStep, timerSeconds]);
 
+  // Reset inputs when opening modal or switching methods
+  useEffect(() => {
+    if (isOpen) {
+      setErrorMessage('');
+      setSuccessMessage('');
+    }
+  }, [isOpen, method]);
+
   if (!isOpen) return null;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +99,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMessage('');
   };
 
+  // Google 1-Click Fast Auth
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
     setSuccessMessage('');
@@ -258,12 +122,61 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const sendVerificationCode = (target: string) => {
+  // Telegram 1-Click Fast Auth
+  const handleTelegramSignIn = () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    setTelegramLoading(true);
+    try {
+      const res = loginWithTelegram();
+      if (res.success) {
+        setSuccessMessage(isKg ? 'Telegram аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через Telegram!');
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage('');
+        }, 800);
+      } else {
+        setErrorMessage(res.error || 'Ошибка входа через Telegram');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Ошибка входа через Telegram');
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  // WhatsApp 1-Click Fast Auth
+  const handleWhatsAppSignIn = () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    setWhatsappLoading(true);
+    try {
+      const res = loginWithWhatsApp();
+      if (res.success) {
+        setSuccessMessage(isKg ? 'WhatsApp аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через WhatsApp!');
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage('');
+        }, 800);
+      } else {
+        setErrorMessage(res.error || 'Ошибка входа через WhatsApp');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Ошибка входа через WhatsApp');
+    } finally {
+      setWhatsappLoading(false);
+    }
+  };
+
+  // ==========================================
+  // EMAIL OTP VERIFICATION
+  // ==========================================
+  const sendEmailVerificationCode = (target: string) => {
     const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedCode(randomCode);
+    setGeneratedEmailCode(randomCode);
     setSentTarget(target);
     setCodeStep(true);
-    setVerificationCode(['', '', '', '', '', '']);
+    setEmailVerificationCode(['', '', '', '', '', '']);
     setTimerSeconds(60);
     setCanResend(false);
     setErrorMessage('');
@@ -273,84 +186,70 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         : `Код подтверждения отправлен на: ${target}`
     );
 
-    // Auto focus first input
     setTimeout(() => {
-      codeInputsRef.current[0]?.focus();
+      emailInputsRef.current[0]?.focus();
     }, 150);
   };
 
-  const handleRequestCode = (e: React.FormEvent) => {
+  const handleRequestEmailCode = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (method === 'phone') {
+    if (!emailInput.trim() || !emailInput.includes('@')) {
       setErrorMessage(
-        isKg
-          ? 'SMS-код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Почта, Telegram же Google аркылуу кириңиз.'
-          : 'Вход по SMS временно недоступен. Пожалуйста, используйте вход по почте, через Telegram или Google.'
+        isKg ? 'Туура email дарегин жазыңыз' : 'Введите корректный адрес эл. почты'
       );
       return;
     }
-
-    if (method === 'email') {
-      if (!emailInput.trim() || !emailInput.includes('@')) {
-        setErrorMessage(
-          isKg ? 'Туура email дарегин жазыңыз' : 'Введите корректный адрес эл. почты'
-        );
-        return;
-      }
-      sendVerificationCode(emailInput.trim());
-    }
+    sendEmailVerificationCode(emailInput.trim());
   };
 
-  const handleCodeDigitChange = (index: number, val: string) => {
-    // Handle paste of whole 6-digit code
+  const handleEmailDigitChange = (index: number, val: string) => {
     if (val.length > 1) {
       const cleanDigits = val.replace(/\D/g, '').slice(0, 6);
       if (cleanDigits.length > 0) {
-        const newCode = [...verificationCode];
+        const newCode = [...emailVerificationCode];
         for (let i = 0; i < 6; i++) {
           newCode[i] = cleanDigits[i] || '';
         }
-        setVerificationCode(newCode);
+        setEmailVerificationCode(newCode);
         if (cleanDigits.length === 6) {
-          verifyAndLogin(newCode.join(''));
+          verifyEmailCodeAndLogin(newCode.join(''));
         } else {
-          codeInputsRef.current[Math.min(cleanDigits.length, 5)]?.focus();
+          emailInputsRef.current[Math.min(cleanDigits.length, 5)]?.focus();
         }
         return;
       }
     }
 
-    const digit = val.slice(-1);
-    const newCode = [...verificationCode];
+    const digit = val.slice(-1).replace(/\D/g, '');
+    const newCode = [...emailVerificationCode];
     newCode[index] = digit;
-    setVerificationCode(newCode);
+    setEmailVerificationCode(newCode);
 
     if (digit && index < 5) {
-      codeInputsRef.current[index + 1]?.focus();
+      emailInputsRef.current[index + 1]?.focus();
     }
 
     const fullCode = newCode.join('');
     if (fullCode.length === 6 && !newCode.includes('')) {
-      verifyAndLogin(fullCode);
+      verifyEmailCodeAndLogin(fullCode);
     }
   };
 
-  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
-      codeInputsRef.current[index - 1]?.focus();
+  const handleEmailKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !emailVerificationCode[index] && index > 0) {
+      emailInputsRef.current[index - 1]?.focus();
     }
   };
 
-  const verifyAndLogin = (codeToVerify: string) => {
+  const verifyEmailCodeAndLogin = (codeToVerify: string) => {
     setLoading(true);
     setErrorMessage('');
 
     setTimeout(() => {
-      // Validate entered code against generated OTP or universal verification code
-      if (codeToVerify === generatedCode || codeToVerify === '111111' || codeToVerify === '777777') {
+      if (codeToVerify === generatedEmailCode) {
         const res = loginWithCode(sentTarget, nameInput.trim() || undefined);
         if (res.success) {
           setSuccessMessage(
@@ -379,7 +278,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/60 rounded-3xl p-5 sm:p-7 shadow-2xl text-white max-h-[95vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glowing aura */}
+        {/* Glowing background aura */}
         <div className="absolute top-0 right-1/4 w-48 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
@@ -402,16 +301,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </p>
         </div>
 
-        {/* Quick 1-Click Fast Auth (Google & Official Telegram) */}
+        {/* Quick Fast Google, Telegram & WhatsApp Sign-in buttons */}
         {!codeStep && (
           <div className="space-y-2.5 mb-4">
-            <div className="flex flex-col sm:flex-row items-center gap-2.5">
-              {/* Google Button */}
+            <div className="grid grid-cols-3 gap-2">
+              {/* 1. Google */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={googleLoading}
-                className="w-full sm:w-1/2 h-[42px] px-3 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] border border-white/20"
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
+                className="h-[42px] px-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-white/20 disabled:opacity-50"
               >
                 {googleLoading ? (
                   <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
@@ -438,34 +337,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Google</span>
               </button>
 
-              {/* Stylized Official Telegram 1-Click Button */}
+              {/* 2. Telegram */}
               <button
                 type="button"
-                onClick={handleTelegramOneClick}
-                disabled={telegramLoading || googleLoading}
-                className="w-full sm:w-1/2 h-[42px] px-3 bg-[#229ED9] hover:bg-[#1b8ec5] active:scale-[0.99] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg shadow-[#229ED9]/25 transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#229ED9]/60 disabled:opacity-50"
+                onClick={handleTelegramSignIn}
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
+                className="h-[42px] px-2 bg-[#229ED9] hover:bg-[#1b8ec5] text-white font-bold text-xs rounded-xl shadow-md shadow-[#229ED9]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#229ED9]/60 disabled:opacity-50"
               >
                 {telegramLoading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Send className="w-4 h-4 shrink-0 text-white" />
+                  <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.939z" />
+                  </svg>
                 )}
                 <span>Telegram</span>
               </button>
+
+              {/* 3. WhatsApp */}
+              <button
+                type="button"
+                onClick={handleWhatsAppSignIn}
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
+                className="h-[42px] px-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-[#25D366]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#25D366]/60 disabled:opacity-50"
+              >
+                {whatsappLoading ? (
+                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12.031 0C5.408 0 .034 5.374.034 11.997c0 2.112.552 4.175 1.601 5.993L0 24l6.173-1.618a11.944 11.944 0 0 0 5.858 1.527h.005c6.623 0 11.997-5.374 11.997-12A11.97 11.97 0 0 0 12.031 0zm0 21.942a9.92 9.92 0 0 1-5.06-1.385l-.363-.215-3.762.986 1.004-3.668-.236-.376A9.92 9.92 0 1 1 12.031 21.942zm5.452-7.447c-.299-.15-1.77-.874-2.044-.974-.274-.1-.473-.15-.672.15-.199.299-.77.974-.944 1.173-.174.199-.349.224-.648.075-.299-.15-1.262-.465-2.404-1.484-.888-.792-1.488-1.77-1.662-2.069-.174-.299-.018-.461.131-.61.135-.134.299-.349.449-.523.149-.174.199-.299.299-.498.1-.199.05-.374-.025-.523-.075-.15-.672-1.62-.921-2.219-.243-.583-.49-.504-.672-.513l-.573-.01c-.199 0-.523.075-.797.374-.274.299-1.046 1.022-1.046 2.492s1.071 2.891 1.22 3.09c.149.199 2.107 3.217 5.105 4.512.713.308 1.27.493 1.704.631.716.228 1.368.196 1.884.119.576-.086 1.77-.723 2.019-1.42.249-.698.249-1.296.174-1.42-.075-.125-.274-.2-.573-.349z" />
+                  </svg>
+                )}
+                <span>WhatsApp</span>
+              </button>
             </div>
 
-            <div className="relative flex py-2 items-center">
+            <div className="relative flex py-1.5 items-center">
               <div className="flex-grow border-t border-emerald-900/60"></div>
               <span className="flex-shrink mx-3 text-[10px] text-emerald-400/60 font-semibold uppercase tracking-wider">
-                {isKg ? 'же' : 'или'}
+                {isKg ? 'же ыкманы тандаңыз' : 'или выберите способ'}
               </span>
               <div className="flex-grow border-t border-emerald-900/60"></div>
             </div>
           </div>
         )}
 
-        {/* Auth Method Navigation Tabs (Почта, SMS-код) - Only 2 tabs now */}
-        {!codeStep && !telegramWaiting && (
+        {/* Auth Method Navigation Tabs (Email & Phone) */}
+        {!codeStep && (
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
             <button
               type="button"
@@ -480,8 +398,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               }`}
             >
               <Mail className="w-3.5 h-3.5 shrink-0" />
-              <span>{isKg ? 'Почта' : 'Почта'}</span>
+              <span>{isKg ? 'Электрондук почта' : 'Электронная почта'}</span>
             </button>
+
             <button
               type="button"
               onClick={() => {
@@ -515,60 +434,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* TELEGRAM 1-CLICK WAITING STATE */}
-        {telegramWaiting ? (
-          <div className="space-y-4 text-center animate-in fade-in zoom-in-95 duration-200">
-            {/* Telegram Pulse Card */}
-            <div className="p-5 rounded-2xl bg-gradient-to-b from-[#0b3327] to-[#041a14] border border-[#229ED9]/50 shadow-xl relative overflow-hidden">
-              <div className="relative z-10">
-                <div className="w-16 h-16 rounded-full bg-[#229ED9]/20 border-2 border-[#229ED9] flex items-center justify-center mx-auto mb-3 shadow-lg shadow-[#229ED9]/30 relative">
-                  <div className="absolute inset-0 rounded-full bg-[#229ED9]/20 animate-ping" />
-                  <Send className="w-7 h-7 text-[#229ED9]" />
-                </div>
-
-                <h3 className="text-base font-black text-white mb-1">
-                  {isKg ? 'Telegram аркылуу 1 клик кирүү' : 'Вход в 1 клик через Telegram'}
-                </h3>
-                <p className="text-xs text-emerald-200/80 leading-relaxed max-w-xs mx-auto mb-4">
-                  {isKg
-                    ? 'Бот ачылды. Кирүүнү ырастоо үчүн Telegram ботто «Запустить» (Start) баскычын басыңыз.'
-                    : 'Мы открыли Telegram. Нажмите кнопку «Запустить» (Start) в боте, и сайт мгновенно авторизует вас.'}
-                </p>
-
-                {/* Status Indicator Chip */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 border border-emerald-500/40 text-emerald-300 text-xs font-medium mb-4">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>{isKg ? 'Боттон жооп күтүлүүдө (авто-текшерүү)...' : 'Ожидание ответа от бота...'}</span>
-                </div>
-
-                <div className="space-y-2">
-                  <a
-                    href={telegramDeepLink || `https://t.me/kyrgyzakylmanofficialbot?start=${telegramToken}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3 px-4 rounded-xl bg-[#229ED9] hover:bg-[#1b8ec5] active:scale-95 text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#229ED9]/30 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Send className="w-4 h-4 shrink-0" />
-                    <span>{isKg ? 'Telegram ботту ачуу' : 'Открыть Telegram бот'}</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTelegramWaiting(false);
-                      setTelegramToken('');
-                    }}
-                    className="w-full py-2 text-xs text-emerald-300/70 hover:text-white transition-colors cursor-pointer"
-                  >
-                    {isKg ? '← Башка жол менен кирүү' : '← Выбрать другой способ'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : codeStep ? (
+        {/* EMAIL CODE CONFIRMATION STEP */}
+        {codeStep ? (
           <div className="space-y-4">
-            {/* Delivery banner */}
             <div className="p-3.5 rounded-2xl bg-[#041e17] border border-emerald-700/60 text-center">
               <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">
                 {isKg ? 'Почтага код жөнөтүлдү' : 'Код подтверждения отправлен на почту'}
@@ -576,52 +444,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <p className="text-sm font-black text-white truncate">{sentTarget}</p>
             </div>
 
-            {/* 6 Digit PIN Boxes */}
             <div>
               <label className="block text-xs font-bold text-slate-200 text-center mb-2.5">
                 {isKg ? '6 орундуу кодду жазыңыз' : 'Введите 6-значный код'}
               </label>
               <div className="flex items-center justify-center gap-2">
-                {verificationCode.map((digit, idx) => (
+                {emailVerificationCode.map((digit, idx) => (
                   <input
                     key={idx}
-                    ref={(el) => (codeInputsRef.current[idx] = el)}
+                    ref={(el) => (emailInputsRef.current[idx] = el)}
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={1}
                     value={digit}
-                    onChange={(e) => handleCodeDigitChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleCodeKeyDown(idx, e)}
+                    onChange={(e) => handleEmailDigitChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleEmailKeyDown(idx, e)}
                     className="w-10 h-12 sm:w-11 sm:h-13 text-center text-lg sm:text-xl font-mono font-black rounded-xl bg-[#031510] border-2 border-emerald-700/80 text-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all"
                   />
                 ))}
               </div>
             </div>
 
-            {/* Quick Demo/Test Code Helper Card */}
-            <div className="p-3 rounded-2xl bg-emerald-950/80 border border-emerald-700/60 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2 text-emerald-200">
-                <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>
-                  {isKg ? 'Тесттик код:' : 'Проверочный код:'}{' '}
-                  <strong className="text-amber-300 font-mono tracking-wider text-sm">{generatedCode || '111111'}</strong>
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const code = (generatedCode || '111111').slice(0, 6);
-                  setVerificationCode(code.split(''));
-                  verifyAndLogin(code);
-                }}
-                className="px-2.5 py-1 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 border border-amber-400/40 text-[11px] font-bold transition-all cursor-pointer shrink-0"
-              >
-                {isKg ? 'Коюу жана кирүү' : 'Вставить и войти'}
-              </button>
-            </div>
-
-            {/* Resend timer & actions */}
             <div className="flex items-center justify-between text-xs pt-1">
               <button
                 type="button"
@@ -637,7 +481,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {canResend ? (
                 <button
                   type="button"
-                  onClick={() => sendVerificationCode(sentTarget)}
+                  onClick={() => sendEmailVerificationCode(sentTarget)}
                   className="font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -652,8 +496,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <button
               type="button"
-              onClick={() => verifyAndLogin(verificationCode.join(''))}
-              disabled={loading || verificationCode.join('').length < 6}
+              onClick={() => verifyEmailCodeAndLogin(emailVerificationCode.join(''))}
+              disabled={loading || emailVerificationCode.join('').length < 6}
               className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
@@ -667,11 +511,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           </div>
         ) : (
-          /* STEP 1: Forms */
+          /* EMAIL & PHONE FORMS */
           <div>
-            {/* 1. Email Verification Code Form */}
             {method === 'email' && (
-              <form onSubmit={handleRequestCode} className="space-y-4">
+              <form onSubmit={handleRequestEmailCode} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-200 mb-1.5">
                     {isKg ? 'Электрондук почтаңыз' : 'Электронная почта'}
@@ -716,7 +559,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </form>
             )}
 
-            {/* 2. Phone SMS Code Form (Notice: Currently temporarily unavailable) */}
             {method === 'phone' && (
               <div className="space-y-4">
                 <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs space-y-2">
@@ -730,8 +572,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </div>
                   <p className="text-amber-200/90 leading-relaxed">
                     {isKg
-                      ? 'Уюлдук операторлордун шлюзунда профилактикалык оңдоо иштери жүрүп жатат. Сураныч, Почта, Telegram же Google аркылуу кириңиз.'
-                      : 'На стороне шлюзов операторов связи проводятся технические работы. Пожалуйста, используйте вход через Email, Telegram или Google.'}
+                      ? 'Уюлдук операторлордун шлюзунда профилактикалык оңдоо иштери жүрүп жатат. Сураныч, Почта же Google аркылуу кириңиз.'
+                      : 'На стороне шлюзов операторов связи проводятся технические работы. Пожалуйста, используйте вход по коду через Почту или Google.'}
                   </p>
                 </div>
 
@@ -771,7 +613,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/20"
                   >
                     <Mail className="w-3.5 h-3.5" />
-                    <span>{isKg ? 'Почта менен кирүү' : 'Войти по Почте'}</span>
+                    <span>{isKg ? 'Электрондук почтага өтүү' : 'Войти через эл. почту'}</span>
                   </button>
                 </div>
               </div>

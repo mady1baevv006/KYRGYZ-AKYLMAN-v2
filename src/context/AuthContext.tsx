@@ -288,7 +288,8 @@ interface AuthContextType {
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
   loginWithCode: (identifier: string, name?: string) => { success: boolean; error?: string };
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  loginWithTelegram: (telegramUserOrUsername: string | TelegramUser, name?: string) => { success: boolean; error?: string };
+  loginWithTelegram: (telegramUserOrUsername?: string | TelegramUser, name?: string) => { success: boolean; error?: string };
+  loginWithWhatsApp: (phoneOrUsername?: string, name?: string) => { success: boolean; error?: string };
   extendTrial: () => { success: boolean; error?: string };
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
@@ -316,7 +317,7 @@ const CURRENT_USER_KEY = 'ort_current_user_v2';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
-      const saved = localStorage.getItem(CURRENT_USER_KEY);
+      const saved = localStorage.getItem(CURRENT_USER_KEY) || localStorage.getItem('user');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.identifier?.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
@@ -604,7 +605,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithTelegram = (telegramUserOrUsername: string | TelegramUser, name?: string) => {
+  const loginWithTelegram = (telegramUserOrUsername?: string | TelegramUser, name?: string) => {
     let cleanUsername = '';
     let displayName = '';
     let avatarUrl = '/avatars/snow_leopard.svg';
@@ -628,14 +629,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         avatarUrl = telegramUserOrUsername.photo_url;
       }
     } else {
-      cleanUsername = String(telegramUserOrUsername || '').trim();
-      if (!cleanUsername) {
-        return { success: false, error: 'Укажите ваш логин Telegram (@username)' };
+      const raw = String(telegramUserOrUsername || '').trim();
+      if (!raw) {
+        cleanUsername = '@student_' + Math.floor(1000 + Math.random() * 9000);
+      } else {
+        cleanUsername = raw.startsWith('@') ? raw : '@' + raw;
       }
-      if (!cleanUsername.startsWith('@')) {
-        cleanUsername = '@' + cleanUsername;
-      }
-      displayName = name?.trim() || cleanUsername;
+      displayName = name?.trim() || (raw ? cleanUsername : 'Ученик Telegram');
     }
 
     const isAdminAccount =
@@ -667,6 +667,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       saveUsers(updatedUsers);
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return { success: true };
     } else {
       const newUser: UserProfile = {
@@ -692,9 +693,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       saveUsers(filtered);
       setUser(newUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(newUser));
       if (!isAdminAccount) {
         setIsTrialWelcomeOpen(true);
       }
+      return { success: true };
+    }
+  };
+
+  const loginWithWhatsApp = (phoneOrUsername?: string, name?: string) => {
+    let cleanPhone = String(phoneOrUsername || '').trim();
+    if (!cleanPhone) {
+      cleanPhone = '+99670' + Math.floor(1000000 + Math.random() * 9000000);
+    }
+    const displayName = name?.trim() || 'Ученик WhatsApp';
+    const avatarUrl = '/avatars/snow_leopard.svg';
+
+    const users = getUsers();
+    const existing = users.find(
+      (u) => u.identifier.trim().toLowerCase() === cleanPhone.toLowerCase()
+    );
+
+    if (existing) {
+      const updatedUser: UserProfile = {
+        ...existing,
+        name: displayName || existing.name,
+      };
+      const updatedUsers = users.map((u) =>
+        u.id === existing.id || u.identifier.trim().toLowerCase() === cleanPhone.toLowerCase()
+          ? updatedUser
+          : u
+      );
+      saveUsers(updatedUsers);
+      setUser(updatedUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return { success: true };
+    } else {
+      const newUser: UserProfile = {
+        id: 'user_' + Date.now(),
+        name: displayName,
+        identifier: cleanPhone,
+        password: '',
+        avatar: avatarUrl,
+        targetScore: 215,
+        targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
+        registeredAt: new Date().toISOString(),
+        testHistory: [],
+        subscriptionPlan: 'free',
+        subscriptionExpiry: '2027-06-01',
+        isPaid: false,
+        hasSeenWelcomeGift: false,
+      };
+
+      const filtered = users.filter(
+        (u) => u.identifier.trim().toLowerCase() !== cleanPhone.toLowerCase()
+      );
+      filtered.unshift(newUser);
+      saveUsers(filtered);
+      setUser(newUser);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setIsTrialWelcomeOpen(true);
       return { success: true };
     }
   };
@@ -713,6 +773,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setUser(updatedUser);
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
 
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === user.id);
@@ -729,6 +790,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setIsTrialWelcomeOpen(false);
     localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem('user');
     try {
       sessionStorage.clear();
     } catch {}
@@ -902,6 +964,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithCode,
         loginWithGoogle,
         loginWithTelegram,
+        loginWithWhatsApp,
         extendTrial,
         logout,
         resetPassword,
