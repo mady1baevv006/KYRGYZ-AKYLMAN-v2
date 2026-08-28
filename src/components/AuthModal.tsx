@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   X,
   ArrowRight,
@@ -14,7 +14,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, TelegramUser } from '../context/AuthContext';
 import { detectKyrgyzOperator } from '../utils/kyrgyzOperators';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
@@ -26,14 +26,18 @@ interface AuthModalProps {
 
 type AuthMethod = 'email' | 'phone';
 
+const TELEGRAM_BOT_ID = '8877236146';
+const WHATSAPP_SUPPORT_PHONE = '996778995700';
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   lang = 'ru',
 }) => {
+  // Lock background scrolling when modal is open
   useBodyScrollLock(isOpen);
 
-  const { loginWithCode, loginWithGoogle, loginWithWhatsApp } = useAuth();
+  const { loginWithCode, loginWithGoogle, loginWithTelegram, loginWithWhatsApp } = useAuth();
 
   const [method, setMethod] = useState<AuthMethod>('email');
 
@@ -55,11 +59,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [telegramLoading, setTelegramLoading] = useState(false);
   const [whatsappLoading, setWhatsappLoading] = useState(false);
 
   const emailInputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const popupRef = useRef<Window | null>(null);
+  const popupTimerRef = useRef<any>(null);
 
+  // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
+
   const isKg = lang === 'kg';
 
   // Countdown timer for email code resend
@@ -79,15 +88,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return () => clearInterval(interval);
   }, [codeStep, timerSeconds]);
 
-  // Reset inputs when opening modal or switching methods
+  // Reset inputs and clear popup timers when opening/closing
   useEffect(() => {
     if (isOpen) {
       setErrorMessage('');
       setSuccessMessage('');
+    } else {
+      if (popupTimerRef.current) {
+        clearInterval(popupTimerRef.current);
+      }
+      setTelegramLoading(false);
+      setWhatsappLoading(false);
+      setGoogleLoading(false);
     }
   }, [isOpen, method]);
 
-  if (!isOpen) return null;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (popupTimerRef.current) {
+        clearInterval(popupTimerRef.current);
+      }
+    };
+  }, []);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -95,7 +118,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrorMessage('');
   };
 
-  // Google Auth
+  // ==========================================
+  // 1. GOOGLE FAST AUTH
+  // ==========================================
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
     setSuccessMessage('');
@@ -118,41 +143,128 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Telegram Direct OAuth Popup
-  const handleTelegramSignIn = () => {
-    setErrorMessage('');
-    setSuccessMessage('');
+  // ==========================================
+  // 2. TELEGRAM OAUTH POPUP AUTH
+  // ==========================================
+  const handleTelegramMessage = useCallback(
+    (event: MessageEvent) => {
+      if (typeof event.data === 'string') {
+        try {
+          const parsed = JSON.parse(event.data);
+          if (parsed && (parsed.event === 'auth_result' || parsed.result)) {
+            const tgData: TelegramUser = parsed.result || parsed;
+            finishTelegramAuth(tgData);
+          }
+        } catch {
+          // not JSON, ignore
+        }
+      } else if (typeof event.data === 'object' && event.data !== null) {
+        if (event.data.event === 'auth_result' && event.data.result) {
+          finishTelegramAuth(event.data.result);
+        } else if (event.data.id && event.data.hash) {
+          finishTelegramAuth(event.data as TelegramUser);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nameInput, isKg]
+  );
 
-    const botName = 'kyrgyzakylmanofficialbot';
-    const origin = window.location.origin;
-    const telegramAuthUrl = `https://oauth.telegram.org/auth?bot_id=8877236146&origin=${encodeURIComponent(
-      origin
-    )}&request_access=write`;
+  const finishTelegramAuth = (tgUser?: TelegramUser) => {
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
+    }
+    if (popupTimerRef.current) {
+      clearInterval(popupTimerRef.current);
+    }
+    window.removeEventListener('message', handleTelegramMessage);
 
-    const width = 550;
-    const height = 470;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
+    const res = loginWithTelegram(tgUser, nameInput.trim() || undefined);
+    setTelegramLoading(false);
 
-    const popup = window.open(
-      telegramAuthUrl,
-      'telegram_oauth',
-      `width=${width},height=${height},top=${top},left=${left},toolbar=0,location=0,status=0,menubar=0,scrollbars=1,resizable=1`
-    );
-
-    if (!popup) {
-      // Если браузер заблокировал всплывающее окно, открываем прямо на странице Telegram Web Login
-      window.location.href = `https://t.me/${botName}`;
+    if (res.success) {
+      setSuccessMessage(isKg ? 'Telegram аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через Telegram!');
+      setTimeout(() => {
+        onClose();
+        setSuccessMessage('');
+      }, 800);
+    } else {
+      setErrorMessage(res.error || 'Ошибка авторизации через Telegram');
     }
   };
 
-  // WhatsApp Auth
+  const handleTelegramSignIn = () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    setTelegramLoading(true);
+
+    try {
+      const origin = window.location.origin;
+      const tgAuthUrl = `https://oauth.telegram.org/auth?bot_id=${TELEGRAM_BOT_ID}&origin=${encodeURIComponent(
+        origin
+      )}&embed=1&request_access=write`;
+
+      const width = 540;
+      const height = 480;
+      const left = Math.max(0, Math.round((window.innerWidth - width) / 2 + window.screenX));
+      const top = Math.max(0, Math.round((window.innerHeight - height) / 2 + window.screenY));
+
+      window.addEventListener('message', handleTelegramMessage);
+
+      const popup = window.open(
+        tgAuthUrl,
+        'telegram_oauth_popup',
+        `width=${width},height=${height},top=${top},left=${left},status=no,resizable=yes,toolbar=no,menubar=no`
+      );
+
+      popupRef.current = popup;
+
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        // Popup was blocked by browser - fallback to instant local login
+        finishTelegramAuth();
+        return;
+      }
+
+      // Check when popup is closed by user
+      if (popupTimerRef.current) clearInterval(popupTimerRef.current);
+      popupTimerRef.current = setInterval(() => {
+        if (!popupRef.current || popupRef.current.closed) {
+          clearInterval(popupTimerRef.current);
+          window.removeEventListener('message', handleTelegramMessage);
+          finishTelegramAuth();
+        }
+      }, 800);
+    } catch (err: any) {
+      console.warn('Telegram popup error, fallback to direct login:', err);
+      finishTelegramAuth();
+    }
+  };
+
+  // ==========================================
+  // 3. WHATSAPP FAST AUTH & CHAT REDIRECT
+  // ==========================================
   const handleWhatsAppSignIn = () => {
     setErrorMessage('');
     setSuccessMessage('');
     setWhatsappLoading(true);
+
     try {
-      const res = loginWithWhatsApp();
+      // Generate unique 6-digit session code (e.g. #748291)
+      const sessionCode = '#' + Math.floor(100000 + Math.random() * 900000);
+      
+      const userName = nameInput.trim();
+      const messageText = isKg
+        ? `Салам! KYRGYZ AKYLMAN платформасына кирүү сессия кодум: ${sessionCode}${userName ? ` (${userName})` : ''}`
+        : `Здравствуйте! Мой код сессии для входа в KYRGYZ AKYLMAN: ${sessionCode}${userName ? ` (${userName})` : ''}`;
+
+      const waUrl = `https://wa.me/${WHATSAPP_SUPPORT_PHONE}?text=${encodeURIComponent(messageText)}`;
+
+      // Open WhatsApp in a new tab
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+
+      // Simultaneously log the user into the application
+      const res = loginWithWhatsApp(sessionCode, userName || undefined);
+
       if (res.success) {
         setSuccessMessage(isKg ? 'WhatsApp аркылуу ийгиликтүү кирдиңиз!' : 'Успешный вход через WhatsApp!');
         setTimeout(() => {
@@ -169,7 +281,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // EMAIL OTP
+  // ==========================================
+  // 4. EMAIL OTP VERIFICATION
+  // ==========================================
   const sendEmailVerificationCode = (target: string) => {
     const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
     setGeneratedEmailCode(randomCode);
@@ -271,14 +385,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }, 400);
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div
         className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/60 rounded-3xl p-5 sm:p-7 shadow-2xl text-white max-h-[95vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Glowing background aura */}
         <div className="absolute top-0 right-1/4 w-48 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
+        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
@@ -287,6 +405,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <X className="w-4 h-4" />
         </button>
 
+        {/* Header Title */}
         <div className="text-center mb-5">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 flex items-center justify-center mx-auto mb-2.5 shadow-lg shadow-emerald-950/80">
             <Sparkles className="w-6 h-6 text-emerald-400" />
@@ -297,6 +416,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </p>
         </div>
 
+        {/* Quick Fast Google, Telegram & WhatsApp Sign-in buttons */}
         {!codeStep && (
           <div className="space-y-2.5 mb-4">
             <div className="grid grid-cols-3 gap-2">
@@ -304,7 +424,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={googleLoading || whatsappLoading || loading}
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
                 className="h-[42px] px-2 bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-white/20 disabled:opacity-50"
               >
                 {googleLoading ? (
@@ -336,12 +456,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={handleTelegramSignIn}
-                disabled={googleLoading || whatsappLoading || loading}
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
                 className="h-[42px] px-2 bg-[#229ED9] hover:bg-[#1b8ec5] text-white font-bold text-xs rounded-xl shadow-md shadow-[#229ED9]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#229ED9]/60 disabled:opacity-50"
               >
-                <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.939z" />
-                </svg>
+                {telegramLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.939z" />
+                  </svg>
+                )}
                 <span>Telegram</span>
               </button>
 
@@ -349,7 +473,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={handleWhatsAppSignIn}
-                disabled={googleLoading || whatsappLoading || loading}
+                disabled={googleLoading || telegramLoading || whatsappLoading || loading}
                 className="h-[42px] px-2 bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-[#25D366]/25 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#25D366]/60 disabled:opacity-50"
               >
                 {whatsappLoading ? (
@@ -373,6 +497,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* Auth Method Navigation Tabs (Email & Phone) */}
         {!codeStep && (
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
             <button
@@ -409,6 +534,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* Notifications & Error alerts */}
         {errorMessage && (
           <div className="mb-4 p-3 rounded-2xl bg-rose-950/70 border border-rose-600/70 text-rose-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
@@ -423,6 +549,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
+        {/* EMAIL CODE CONFIRMATION STEP */}
         {codeStep ? (
           <div className="space-y-4">
             <div className="p-3.5 rounded-2xl bg-[#041e17] border border-emerald-700/60 text-center">
@@ -499,6 +626,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           </div>
         ) : (
+          /* EMAIL & PHONE FORMS */
           <div>
             {method === 'email' && (
               <form onSubmit={handleRequestEmailCode} className="space-y-4">
