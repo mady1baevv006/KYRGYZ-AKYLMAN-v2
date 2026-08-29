@@ -8,6 +8,7 @@ interface TelegramAuthSession {
   token: string;
   createdAt: number;
   status: 'pending' | 'authenticated' | 'expired';
+  origin?: string;
   user?: {
     id: number;
     first_name: string;
@@ -167,6 +168,9 @@ function handleTelegramMessage(message: any, token: string) {
 
       console.log(`[Telegram Auth] Successfully authenticated user @${from.username || from.id} for session ${matchedToken}`);
 
+      const siteBaseUrl = (session.origin || process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://kyrgyzakylman.com').replace(/\/+$/, '');
+      const returnUrl = `${siteBaseUrl}/?tg_auth=${matchedToken}`;
+
       // Send confirmation message with a button back to the site
       const replyText = `🎉 *Салам, ${from.first_name || 'Окуучу'}!*\n\n✅ Сиз *«Кыргыз Акылман»* платформасына кирүүнү ийгиликтүү ырастадыңыз!\n\nСайттагы баракчаңыз даяр. Сайтка кайтуу үчүн төмөнкү баскычты басыңыз же браузериңизди ачыңыз:`;
 
@@ -182,7 +186,7 @@ function handleTelegramMessage(message: any, token: string) {
               [
                 {
                   text: '🌐 Сайтка өтүү (Кабинетке кирүү)',
-                  url: `https://ais-dev-ujrvp4yp5bjj4vfv3upgnk-853874930794.asia-southeast1.run.app/?tg_auth=${matchedToken}`,
+                  url: returnUrl,
                 },
               ],
             ],
@@ -264,41 +268,90 @@ async function startServer() {
 
   // 1. Get Telegram Bot info & ID
   app.get('/api/telegram/config', (req, res) => {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || (req.headers.origin as string) || 'https://kyrgyzakylman.com';
     res.json({
       ok: true,
       botUsername: currentBotUsername,
       botId,
+      siteUrl,
       hasToken: Boolean(botToken),
     });
   });
 
   // 2. Verify Telegram Login Widget authentication (Official HMAC-SHA-256 verification)
-  app.post('/api/telegram/verify-widget', (req, res) => {
-    const payload = req.body;
-    if (!payload || !payload.hash) {
-      return res.status(400).json({ ok: false, error: 'Отсутствуют данные авторизации или параметр hash' });
+  const handleTelegramVerify = (req: express.Request, res: express.Response) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      const payload = req.body;
+      console.log('[Telegram Auth API] Incoming verification request:', payload ? Object.keys(payload) : null);
+
+      if (!payload || typeof payload !== 'object' || !payload.hash) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Отсутствуют данные авторизации Telegram или параметр hash',
+        });
+      }
+
+      const activeToken = (
+        process.env.TELEGRAM_BOT_TOKEN ||
+        process.env.BOT_TOKEN ||
+        botToken ||
+        '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
+      ).trim();
+
+      if (!activeToken) {
+        return res.status(500).json({
+          ok: false,
+          error: 'Telegram Bot Token не задан в переменных окружения сервера',
+        });
+      }
+
+      const result = verifyTelegramWidgetData(payload, activeToken);
+      if (!result.valid) {
+        console.warn('[Telegram Auth API] Verification failed:', result.error);
+        return res.status(401).json({
+          ok: false,
+          error: result.error || 'Ошибка проверки цифровой подписи Telegram',
+        });
+      }
+
+      console.log(
+        `[Telegram Widget] Successfully verified user @${result.user?.username || result.user?.id} via HMAC-SHA-256`
+      );
+
+      return res.status(200).json({
+        ok: true,
+        user: result.user,
+      });
+    } catch (err: any) {
+      console.error('[Telegram Auth API] Server exception:', err);
+      return res.status(500).json({
+        ok: false,
+        error: err?.message || 'Внутренняя ошибка сервера при обработке авторизации Telegram',
+      });
     }
+  };
 
-    const result = verifyTelegramWidgetData(payload, botToken);
-    if (!result.valid) {
-      return res.status(401).json({ ok: false, error: result.error || 'Ошибка проверки подписи Telegram' });
-    }
-
-    console.log(`[Telegram Widget] Verified user @${result.user?.username || result.user?.id} via HMAC-SHA-256`);
-
-    return res.json({
-      ok: true,
-      user: result.user,
-    });
-  });
+  app.post('/api/telegram/verify-widget', handleTelegramVerify);
+  app.post('/api/auth/telegram', handleTelegramVerify);
+  app.post('/api/telegram/verify', handleTelegramVerify);
 
   // 3. Generate new Telegram Auth Session (for direct bot /start fallback)
   app.post('/api/telegram/create-session', (req, res) => {
     const token = 'akylman_' + crypto.randomBytes(16).toString('hex');
+    const detectedOrigin =
+      req.body?.origin ||
+      (req.headers.origin as string) ||
+      (req.headers.referer ? new URL(req.headers.referer).origin : '') ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.SITE_URL ||
+      'https://kyrgyzakylman.com';
+
     const session: TelegramAuthSession = {
       token,
       createdAt: Date.now(),
       status: 'pending',
+      origin: detectedOrigin,
     };
     authSessions.set(token, session);
 
@@ -308,6 +361,7 @@ async function startServer() {
       token,
       botUrl,
       botUsername: currentBotUsername,
+      origin: detectedOrigin,
     });
   });
 

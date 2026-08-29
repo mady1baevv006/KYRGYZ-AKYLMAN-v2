@@ -136,11 +136,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     let botUrl = '';
     const botUsername = 'kyrgyzakylman_bot';
 
+    const currentOrigin =
+      typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : 'https://kyrgyzakylman.com';
+
     try {
       // 1. Create a session on backend
       const res = await fetch('/api/telegram/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ origin: currentOrigin }),
       });
 
       if (res.ok) {
@@ -218,14 +224,48 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               if (data && typeof data === 'object' && data.hash) {
                 // Official data received from Telegram - verify HMAC-SHA-256 on backend
                 try {
-                  const verifyRes = await fetch('/api/telegram/verify-widget', {
+                  console.log('[Telegram Auth] Received widget data from Telegram:', data);
+
+                  // Send to backend API
+                  const verifyRes = await fetch('/api/auth/telegram', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Accept: 'application/json',
+                    },
                     body: JSON.stringify(data),
                   });
 
-                  const verifyData = await verifyRes.json();
-                  if (verifyData.ok && verifyData.user) {
+                  // Read response text safely first to avoid "Unexpected end of JSON input"
+                  const rawText = await verifyRes.text();
+                  let verifyData: any = null;
+
+                  if (rawText && rawText.trim()) {
+                    try {
+                      verifyData = JSON.parse(rawText);
+                    } catch (parseError) {
+                      console.error('[Telegram Auth Error] Failed to parse server response as JSON:', {
+                        status: verifyRes.status,
+                        statusText: verifyRes.statusText,
+                        body: rawText,
+                        parseError,
+                      });
+                    }
+                  }
+
+                  if (!verifyRes.ok) {
+                    const serverErrorMsg =
+                      verifyData?.error || `Ошибка сервера (${verifyRes.status}): ${rawText || 'Пустой ответ'}`;
+                    console.error('[Telegram Auth HTTP Error]:', {
+                      status: verifyRes.status,
+                      error: serverErrorMsg,
+                    });
+                    setErrorMessage(serverErrorMsg);
+                    return;
+                  }
+
+                  if (verifyData && verifyData.ok && verifyData.user) {
+                    console.log('[Telegram Auth] Success! User verified:', verifyData.user);
                     setSuccessMessage(
                       isKg
                         ? `🎉 Telegram аркылуу ийгиликтүү кирдиңиз (${verifyData.user.username || verifyData.user.first_name})!`
@@ -238,10 +278,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }, 800);
                     return;
                   } else {
-                    setErrorMessage(verifyData.error || 'Ошибка проверки цифровой подписи Telegram');
+                    const validationError =
+                      verifyData?.error || (isKg ? 'Telegram маалыматтарын текшерүүдө ката кетти' : 'Ошибка проверки цифровой подписи Telegram');
+                    console.warn('[Telegram Auth Error] Verification rejected by server:', validationError);
+                    setErrorMessage(validationError);
                   }
                 } catch (verifyErr: any) {
-                  setErrorMessage(verifyErr.message || 'Ошибка связи с сервером при проверке Telegram');
+                  console.error('[Telegram Auth Exception]:', verifyErr);
+                  setErrorMessage(verifyErr?.message || (isKg ? 'Сервер менен байланышуу катасы' : 'Ошибка связи с сервером при проверке Telegram'));
                 }
               } else if (data === false) {
                 // User rejected Telegram popup or closed it
