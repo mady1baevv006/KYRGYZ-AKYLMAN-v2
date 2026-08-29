@@ -11,6 +11,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     tags: ["Математика I", "Математика II", "Аналогии и дополнения", "Чтение и понимание", "Практическая грамматика"],
     status: "available",
     availableSections: [1, 2, 3, 4, 5],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1_Saiv6GNGcyc4w7kjfwZ0LDx8rHmcnTt",
   },
   {
     id: 2,

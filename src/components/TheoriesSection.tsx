@@ -32,7 +32,9 @@ import { THEORIES_DATA, TheoryBlock, TheoryTopic } from '../data/theoriesData';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { TheoryPlanSelectionModal } from './TheoryPlanSelectionModal';
 import { TrialNoticeBanner } from './TrialNoticeBanner';
-import { MathBackgroundElements } from './MathBackgroundElements';
+import { MathSubjectBackground } from './subject-backgrounds/MathSubjectBackground';
+import { RussianSubjectBackground } from './subject-backgrounds/RussianSubjectBackground';
+import { EnglishSubjectBackground } from './subject-backgrounds/EnglishSubjectBackground';
 
 interface TheoriesSectionProps {
   user: UserProfile;
@@ -202,7 +204,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
   const [selectedBlock, setSelectedBlock] = useState<TheoryBlock | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<TheoryTopic | null>(null);
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
-  const [subjectModalMode, setSubjectModalMode] = useState<'math_only' | 'all'>('all');
+  const [subjectModalMode, setSubjectModalMode] = useState<'math_only' | 'russian_only' | 'english_only' | 'all'>('all');
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(null);
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
@@ -224,6 +226,16 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
   const handleOpenMathModal = () => {
     setSubjectModalMode('math_only');
+    setIsSubjectModalOpen(true);
+  };
+
+  const handleOpenRussianModal = () => {
+    setSubjectModalMode('russian_only');
+    setIsSubjectModalOpen(true);
+  };
+
+  const handleOpenEnglishModal = () => {
+    setSubjectModalMode('english_only');
     setIsSubjectModalOpen(true);
   };
 
@@ -292,11 +304,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
       {/* 1. OVERVIEW VIEW (3 Major Subject Blocks: Math, Russian, English) */}
       {/* ------------------------------------------------------------- */}
       {currentView === 'overview' && (
-        <div className="space-y-6">
+        <div className="space-y-7">
           {/* BLOCK 1: ТЕОРИЯ ПО МАТЕМАТИКЕ (Основной предмет) */}
-          <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-emerald-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
-            {/* Mathematical Blueprint Background Elements */}
-            <MathBackgroundElements opacity="opacity-30" variant="math" />
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-emerald-500/50 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* Mathematical Blueprint Background Elements (50% Opacity) */}
+            <MathSubjectBackground className="opacity-50" />
 
             {/* Glowing background accents */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
@@ -334,7 +346,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </p>
             </div>
 
-            {/* Key Value Cards Row (2 Main Subjects: Algebra and Geometry) - purely informative blocks */}
+            {/* Key Value Cards Row (2 Main Subjects: Algebra and Geometry) */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
               <div className="p-4 sm:p-5 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-2 select-none">
                 <div className="flex items-center gap-2 text-emerald-400 font-black text-base">
@@ -374,16 +386,16 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             </div>
           </div>
 
-          {/* BLOCK 2: ТЕОРИЯ ПО РУССКОМУ ЯЗЫКУ (Основной предмет) */}
-          <div className="relative rounded-3xl bg-gradient-to-b from-[#072c23] via-[#052119] to-[#031510] border-2 border-emerald-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
-            {/* Background elements with Russian Literature/Grammar motifs */}
-            <MathBackgroundElements opacity="opacity-25" variant="literature" />
+          {/* BLOCK 2: ТЕОРИЯ ПО РУССКОМУ ЯЗЫКУ */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-emerald-500/50 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* Russian Language & Literature Background */}
+            <RussianSubjectBackground className="opacity-40" />
 
             {/* Glowing accents */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/20 transition-all" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header pill & Methodology Badge */}
+            {/* Header pill & Methodology badge */}
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
                 <BookOpen className="w-4 h-4 text-emerald-400" />
@@ -392,12 +404,12 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-emerald-700/50 shadow-md">
                 <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0">
-                  <BookOpen className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                 </div>
                 <div className="text-left leading-tight">
-                  <span className="text-xs font-bold text-white block">{isKg ? 'Автордук методика' : 'Авторская методика'}</span>
+                  <span className="text-xs font-bold text-white block">{isKg ? 'Орус тили жана адабияты' : 'Русский язык и литература'}</span>
                   <span className="text-[10px] text-emerald-300/80 font-medium">
-                    {isKg ? '3 тематикалык блок' : '3 тематических блока'}
+                    {isKg ? '3 бөлүм • 60 суроо' : '3 тематических блока ОРТ'}
                   </span>
                 </div>
               </div>
@@ -415,15 +427,15 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </p>
             </div>
 
-            {/* 3 Informational Blocks Row (no numbers, pure info) */}
+            {/* 3 Informational Sub-blocks Row */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
               <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
                   <FileText className="w-4 h-4" />
-                  <span>{isKg ? 'Аналогиялар жана сүйлөмдөр' : 'Аналогии и дополнения'}</span>
+                  <span>{isKg ? 'Аналогия жана толуктоо' : 'Аналогия и дополнения'}</span>
                 </div>
                 <p className="text-xs text-emerald-200/70 leading-relaxed">
-                  {isKg ? 'Түр-тек, бөлүк-бүтүн, себеп-натыйжа логикасы' : 'Род-вид, часть-целое, причина-следствие, ловушки'}
+                  {isKg ? 'Түр-тек, бөлүк-бүтүн, себеп-натыйжа логикасы' : 'Род-вид, часть-целое, причина-следствие, контекст'}
                 </p>
               </div>
 
@@ -438,12 +450,12 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </div>
 
               <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-emerald-700/40 space-y-1 select-none">
-                <div className="flex items-center gap-2 text-emerald-400 font-black text-sm">
+                <div className="flex items-center gap-2 text-emerald-300 font-black text-sm">
                   <GraduationCap className="w-4 h-4" />
                   <span>{isKg ? 'Грамматика' : 'Практическая грамматика'}</span>
                 </div>
                 <p className="text-xs text-emerald-200/70 leading-relaxed">
-                  {isKg ? 'Пунктуация, орфография, синтаксис эрежелери' : 'Пунктуация, орфография, нормы речи и тесты'}
+                  {isKg ? 'Пунктуация, орфография, синтаксис эрежелери' : 'Пунктуация, орфография, синтаксис и разбор ошибок'}
                 </p>
               </div>
             </div>
@@ -452,19 +464,19 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="relative z-10 flex flex-wrap items-center gap-4">
               <button
                 type="button"
-                onClick={() => handleSelectSubject('russian')}
+                onClick={handleOpenRussianModal}
                 className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-emerald-500/40 transition-all cursor-pointer group/btn active:scale-95"
               >
-                <span>{isKg ? 'Орус тили теориясын баштоо' : 'Пройти теорию по русскому языку'}</span>
+                <span>{isKg ? 'Орус тили бөлүмүн тандап баштоо' : 'Пройти теорию по русскому языку'}</span>
                 <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
 
-          {/* BLOCK 3: ТЕОРИЯ ПО АНГЛИЙСКОМУ ЯЗЫКУ (Предметный тест ОРТ) */}
-          <div className="relative rounded-3xl bg-gradient-to-b from-[#06241b] via-[#041c15] to-[#02110c] border-2 border-teal-500/40 p-6 sm:p-10 shadow-2xl overflow-hidden group">
-            {/* Background elements with English dictionary/vocab motifs */}
-            <MathBackgroundElements opacity="opacity-25" variant="english" />
+          {/* BLOCK 3: ТЕОРИЯ ПО АНГЛИЙСКОМУ ЯЗЫКУ */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#062920] via-[#051f18] to-[#031510] border-2 border-teal-500/50 p-6 sm:p-10 shadow-2xl overflow-hidden group">
+            {/* British & English Background Elements */}
+            <EnglishSubjectBackground className="opacity-40" />
 
             {/* Glowing accents */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/20 transition-all" />
@@ -479,12 +491,12 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
               <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-teal-700/50 shadow-md">
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-400 flex items-center justify-center text-teal-300 shrink-0">
-                  <GraduationCap className="w-4 h-4" />
+                  <BookOpen className="w-4 h-4" />
                 </div>
                 <div className="text-left leading-tight">
-                  <span className="text-xs font-bold text-white block">{isKg ? 'Предметтик курс' : 'Предметный курс'}</span>
+                  <span className="text-xs font-bold text-white block">{isKg ? 'Англис тили курсу' : 'Курс английского языка'}</span>
                   <span className="text-[10px] text-teal-300/80 font-medium">
-                    {isKg ? 'Англис тили' : 'Английский язык'}
+                    {isKg ? '3 предметтик блок' : '3 профильных блока ОРТ'}
                   </span>
                 </div>
               </div>
@@ -497,12 +509,12 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </h1>
               <p className="text-emerald-100/90 text-sm sm:text-base md:text-lg leading-relaxed">
                 {isKg
-                  ? 'Англис тили — ЖРТнын предметтик тести. Бул бөлүмдө Reading Comprehension, грамматика жана Error Identification боюнча бардык эрежелер камтылган.'
+                  ? 'Англис тили — ЖРТнын предметтик тести. Бул бөлүмдө Reading Comprehension, Grammar & Vocabulary жана Error Identification боюнча бардык эрежелер камтылган.'
                   : 'Английский язык — профильный предметный тест ОРТ. Включает 3 блока: Reading Comprehension, Grammar & Vocabulary и Error Identification с практическими разборами типовых заданий.'}
               </p>
             </div>
 
-            {/* 3 Informational Blocks Row (no numbers, pure info) */}
+            {/* 3 Informational Sub-blocks Row */}
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
               <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-teal-700/40 space-y-1 select-none">
                 <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
@@ -525,7 +537,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               </div>
 
               <div className="p-4 rounded-2xl bg-[#02100c]/80 border border-teal-700/40 space-y-1 select-none">
-                <div className="flex items-center gap-2 text-teal-400 font-black text-sm">
+                <div className="flex items-center gap-2 text-teal-300 font-black text-sm">
                   <GraduationCap className="w-4 h-4" />
                   <span>{isKg ? 'Каталарды табуу' : 'Error Identification'}</span>
                 </div>
@@ -539,10 +551,10 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="relative z-10 flex flex-wrap items-center gap-4">
               <button
                 type="button"
-                onClick={() => handleSelectSubject('english')}
+                onClick={handleOpenEnglishModal}
                 className="px-8 py-4 sm:px-10 sm:py-4.5 rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-300 to-teal-400 hover:brightness-110 text-slate-950 font-black text-sm sm:text-base uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-teal-500/40 transition-all cursor-pointer group/btn active:scale-95"
               >
-                <span>{isKg ? 'Англис тили теориясын баштоо' : 'Пройти теорию по английскому языку'}</span>
+                <span>{isKg ? 'Англис тили бөлүмүн тандап баштоо' : 'Пройти теорию по английскому языку'}</span>
                 <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -592,16 +604,13 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
           {/* Subject Header Card */}
           <div className="relative rounded-3xl bg-gradient-to-r from-[#062920] to-[#041a14] border border-emerald-700/60 p-6 sm:p-8 shadow-xl overflow-hidden">
-            <MathBackgroundElements
-              opacity="opacity-20"
-              variant={
-                selectedSubjectId === 'russian'
-                  ? 'literature'
-                  : selectedSubjectId === 'english'
-                  ? 'english'
-                  : 'math'
-              }
-            />
+            {selectedSubjectId === 'russian' ? (
+              <RussianSubjectBackground className="opacity-25" />
+            ) : selectedSubjectId === 'english' ? (
+              <EnglishSubjectBackground className="opacity-25" />
+            ) : (
+              <MathSubjectBackground className="opacity-25" />
+            )}
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider mb-1">
@@ -659,56 +668,52 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
                 {/* Topics inside this block */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                  {block.topics.map((topic, idx) => (
-                    <div
-                      key={topic.id}
-                      onClick={() => topic.isAvailable && handleSelectTopic(block, topic)}
-                      className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                        topic.isAvailable
-                          ? 'bg-[#041d16] hover:bg-[#072a20] border-emerald-700/60 hover:border-emerald-400 cursor-pointer shadow-md hover:scale-[1.01] active:scale-95 group'
-                          : 'bg-[#031510]/60 border-emerald-900/40 opacity-70 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
-                            topic.isAvailable
-                              ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors'
-                              : 'bg-white/5 border border-white/10 text-slate-400'
-                          }`}
-                        >
-                          {idx + 1}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-sm font-bold text-white truncate group-hover:text-emerald-300 transition-colors">
-                            {isKg ? topic.titleKg : topic.titleRu}
-                          </h4>
-                          <span className="text-[11px] text-emerald-200/60 block">
-                            {topic.isAvailable
-                              ? isKg
-                                ? 'Теория, сүрөт, ДЗ жана видео'
-                                : 'Теория, фото, ДЗ и видеоуроки'
-                              : isKg
-                              ? 'Жакында кошулат'
-                              : 'Скоро будет доступно'}
-                          </span>
-                        </div>
-                      </div>
+                  {block.topics.map((topic, idx) => {
+                    const rawTitle = isKg ? topic.titleKg : topic.titleRu;
+                    const cleanTitle = rawTitle.replace(/^\d+[\.\)\-\s]+/, '').trim();
 
-                      <div className="shrink-0">
-                        {topic.isAvailable ? (
-                          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all">
-                            <ArrowRight className="w-4 h-4" />
+                    return (
+                      <div
+                        key={topic.id}
+                        onClick={() => topic.isAvailable && handleSelectTopic(block, topic)}
+                        className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                          topic.isAvailable
+                            ? 'bg-[#041d16] hover:bg-[#072a20] border-emerald-700/60 hover:border-emerald-400 cursor-pointer shadow-md hover:scale-[1.01] active:scale-95 group'
+                            : 'bg-[#031510]/60 border-emerald-900/40 opacity-70 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${
+                              topic.isAvailable
+                                ? 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-colors'
+                                : 'bg-white/5 border border-white/10 text-slate-400'
+                            }`}
+                          >
+                            {idx + 1}
                           </div>
-                        ) : (
-                          <div className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                            <Lock className="w-3 h-3" />
-                            <span>{isKg ? 'Жакында' : 'Скоро'}</span>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-emerald-300 transition-colors leading-snug break-words">
+                              {cleanTitle}
+                            </h4>
                           </div>
-                        )}
+                        </div>
+
+                        <div className="shrink-0">
+                          {topic.isAvailable ? (
+                            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all">
+                              <ArrowRight className="w-4 h-4" />
+                            </div>
+                          ) : (
+                            <div className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                              <Lock className="w-3 h-3" />
+                              <span>{isKg ? 'Жакында' : 'Скоро'}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -735,20 +740,28 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="text-xs sm:text-sm font-bold text-emerald-300/80 flex items-center gap-2">
               <span>{isKg ? subject.titleKg : subject.titleRu}</span>
               <span>/</span>
-              <span className="text-white">{isKg ? selectedTopic.titleKg : selectedTopic.titleRu}</span>
+              <span className="text-white">
+                {(isKg ? selectedTopic.titleKg : selectedTopic.titleRu).replace(/^\d+[\.\)\-\s]+/, '').trim()}
+              </span>
             </div>
           </div>
 
           {/* Main Topic Header */}
           <div className="relative rounded-3xl bg-gradient-to-r from-[#062920] to-[#041a14] border border-emerald-700/60 p-6 sm:p-8 shadow-xl overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <MathBackgroundElements opacity="opacity-25" variant="banner" />
+            {selectedSubjectId === 'russian' ? (
+              <RussianSubjectBackground className="opacity-25" />
+            ) : selectedSubjectId === 'english' ? (
+              <EnglishSubjectBackground className="opacity-25" />
+            ) : (
+              <MathSubjectBackground className="opacity-25" />
+            )}
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider mb-3">
                 <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{selectedBlock ? (isKg ? selectedBlock.titleKg : selectedBlock.titleRu) : 'Теория'}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
-                {isKg ? selectedTopic.titleKg : selectedTopic.titleRu}
+                {(isKg ? selectedTopic.titleKg : selectedTopic.titleRu).replace(/^\d+[\.\)\-\s]+/, '').trim()}
               </h1>
             </div>
 
@@ -799,107 +812,402 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               {/* ------------------------------------------------------------- */}
               {/* Section 1: Written Theory (Standard + Premium)                 */}
               {/* ------------------------------------------------------------- */}
-              <div className="space-y-4 text-emerald-100 leading-relaxed text-sm sm:text-base font-normal">
-                {/* 1. Натуральные числа */}
-                <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
-                      1
-                    </span>
-                    <span>
-                      {isKg ? 'Натуралдык сандар (ℕ)' : 'Натуральные числа (ℕ)'}
-                    </span>
-                  </h3>
-                  <p className="text-emerald-200/90 text-sm sm:text-base">
-                    {isKg
-                      ? 'Натуралдык сандар — бул нерселерди (буюмдарды) табигый саноодо колдонулуучу сандар.'
-                      : 'Натуральные числа — это числа, которые используются при естественном счете предметов.'}
-                  </p>
-                  <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
-                    <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> 1, 2, 3, 4, 5, ..., 100, ...
-                  </div>
-
-                  {/* ⚠️ Trap Alert Box */}
-                  <div className="p-4 rounded-xl bg-amber-950/40 border-2 border-amber-500/60 text-amber-200 text-xs sm:text-sm font-bold flex items-start gap-3 shadow-lg">
-                    <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-black text-amber-300 uppercase tracking-wider block mb-1">
-                        {isKg ? '⚠️ ЖРТнын башкы тузагы:' : '⚠️ Главная ловушка ОРТ:'}
-                      </span>
-                      <span>
+              <div className="space-y-6 text-emerald-100 leading-relaxed text-sm sm:text-base font-normal">
+                {selectedTopic.id === 'natural-and-integers' ? (
+                  <>
+                    {/* 1. Натуральные числа */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          1
+                        </span>
+                        <span>
+                          {isKg ? 'Натуралдык сандар (ℕ)' : 'Натуральные числа (ℕ)'}
+                        </span>
+                      </h3>
+                      <p className="text-emerald-200/90 text-sm sm:text-base">
                         {isKg
-                          ? 'Нөл (0) натуралдык сан ЭМЕС! Сен «0 буюм» деп санай албайсың.'
-                          : 'Ноль (0) НЕ является натуральным числом! Ты не можешь посчитать «0 предметов».'}
-                      </span>
+                          ? 'Натуралдык сандар — бул нерселерди (буюмдарды) табигый саноодо колдонулуучу сандар.'
+                          : 'Натуральные числа — это числа, которые используются при естественном счете предметов.'}
+                      </p>
+                      <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
+                        <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> 1, 2, 3, 4, 5, ..., 100, ...
+                      </div>
+
+                      {/* ⚠️ Trap Alert Box */}
+                      <div className="p-4 rounded-xl bg-amber-950/40 border-2 border-amber-500/60 text-amber-200 text-xs sm:text-sm font-bold flex items-start gap-3 shadow-lg">
+                        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-black text-amber-300 uppercase tracking-wider block mb-1">
+                            {isKg ? '⚠️ ЖРТнын башкы тузагы:' : '⚠️ Главная ловушка ОРТ:'}
+                          </span>
+                          <span>
+                            {isKg
+                              ? 'Нөл (0) натуралдык сан ЭМЕС! Сен «0 буюм» деп санай албайсың.'
+                              : 'Ноль (0) НЕ является натуральным числом! Ты не можешь посчитать «0 предметов».'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <ul className="space-y-1.5 text-xs sm:text-sm text-emerald-200/80 list-disc list-inside">
+                        <li>
+                          <strong>{isKg ? 'Эң кичине натуралдык сан:' : 'Самое маленькое натуральное число:'}</strong>{' '}
+                          <span className="text-white font-bold">1</span>.
+                        </li>
+                        <li>
+                          <strong>{isKg ? 'Эң чоң натуралдык сан:' : 'Самого большого натурального числа:'}</strong>{' '}
+                          <span className="text-white font-bold">{isKg ? 'жок (чексиз)' : 'не существует (множество натуральных чисел бесконечно)'}</span>.
+                        </li>
+                      </ul>
                     </div>
-                  </div>
 
-                  <ul className="space-y-1.5 text-xs sm:text-sm text-emerald-200/80 list-disc list-inside">
-                    <li>
-                      <strong>{isKg ? 'Эң кичине натуралдык сан:' : 'Самое маленькое натуральное число:'}</strong>{' '}
-                      <span className="text-white font-bold">1</span>.
-                    </li>
-                    <li>
-                      <strong>{isKg ? 'Эң чоң натуралдык сан:' : 'Самого большого натурального числа:'}</strong>{' '}
-                      <span className="text-white font-bold">{isKg ? 'жок (чексиз)' : 'не существует (множество натуральных чисел бесконечно)'}</span>.
-                    </li>
-                  </ul>
-                </div>
-
-                {/* 2. Целые числа */}
-                <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
-                      2
-                    </span>
-                    <span>
-                      {isKg ? 'Бүтүн сандар (ℤ)' : 'Целые числа (ℤ)'}
-                    </span>
-                  </h3>
-                  <p className="text-emerald-200/90 text-sm sm:text-base">
-                    {isKg
-                      ? 'Бүтүн сандар — бул сандардын кеңейтилген тобу. Анын курамына кирет:'
-                      : 'Целые числа — это расширенный набор чисел. В него входят:'}
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm">
-                    <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                      <span className="text-emerald-400 font-bold block mb-0.5">1. {isKg ? 'Натуралдык сандар' : 'Натуральные'}</span>
-                      <span className="text-emerald-200/70 font-mono">1, 2, 3, 4, ...</span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                      <span className="text-teal-400 font-bold block mb-0.5">2. {isKg ? '0 (нөл) саны' : 'Число 0 (нуль)'}</span>
-                      <span className="text-emerald-200/70 font-mono">0</span>
-                    </div>
-                    <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                      <span className="text-rose-400 font-bold block mb-0.5">3. {isKg ? 'Терс бүтүн сандар' : 'Отрицательные целые'}</span>
-                      <span className="text-emerald-200/70 font-mono">-1, -2, -3, ...</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
-                    <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> ..., -4, -3, -2, -1, 0, 1, 2, 3, 4, ...
-                  </div>
-
-                  {/* Important properties */}
-                  <div className="p-4 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2 text-xs sm:text-sm">
-                    <h4 className="font-black text-white uppercase tracking-wider text-[11px] text-emerald-400">
-                      {isKg ? 'ЖРТ үчүн маанилүү касиеттер:' : 'Важные свойства для ОРТ:'}
-                    </h4>
-                    <ul className="space-y-1.5 text-emerald-200/90 list-disc list-inside">
-                      <li>
-                        <strong>{isKg ? 'Нөл (0):' : 'Ноль (0):'}</strong>{' '}
+                    {/* 2. Целые числа */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          2
+                        </span>
+                        <span>
+                          {isKg ? 'Бүтүн сандар (ℤ)' : 'Целые числа (ℤ)'}
+                        </span>
+                      </h3>
+                      <p className="text-emerald-200/90 text-sm sm:text-base">
                         {isKg
-                          ? 'Бул бүтүн сан, бирок ал оң дагы, терс дагы эмес.'
-                          : 'Это целое число, но оно не является ни положительным, ни отрицательным.'}
-                      </li>
-                      <li>
-                        <strong>{isKg ? 'Оң бүтүн сандар:' : 'Положительные целые:'}</strong>{' '}
-                        {isKg ? 'Натуралдык сандар менен бирдей.' : 'Полностью совпадают с натуральными числами.'}
-                      </li>
-                    </ul>
+                          ? 'Бүтүн сандар — бул сандардын кеңейтилген тобу. Анын курамына кирет:'
+                          : 'Целые числа — это расширенный набор чисел. В него входят:'}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm">
+                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
+                          <span className="text-emerald-400 font-bold block mb-0.5">1. {isKg ? 'Натуралдык сандар' : 'Натуральные'}</span>
+                          <span className="text-emerald-200/70 font-mono">1, 2, 3, 4, ...</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
+                          <span className="text-teal-400 font-bold block mb-0.5">2. {isKg ? '0 (нөл) саны' : 'Число 0 (нуль)'}</span>
+                          <span className="text-emerald-200/70 font-mono">0</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
+                          <span className="text-rose-400 font-bold block mb-0.5">3. {isKg ? 'Терс бүтүн сандар' : 'Отрицательные целые'}</span>
+                          <span className="text-emerald-200/70 font-mono">-1, -2, -3, ...</span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
+                        <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> ..., -4, -3, -2, -1, 0, 1, 2, 3, 4, ...
+                      </div>
+
+                      {/* Important properties */}
+                      <div className="p-4 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2 text-xs sm:text-sm">
+                        <h4 className="font-black text-white uppercase tracking-wider text-[11px] text-emerald-400">
+                          {isKg ? 'ЖРТ үчүн маанилүү касиеттер:' : 'Важные свойства для ОРТ:'}
+                        </h4>
+                        <ul className="space-y-1.5 text-emerald-200/90 list-disc list-inside">
+                          <li>
+                            <strong>{isKg ? 'Нөл (0):' : 'Ноль (0):'}</strong>{' '}
+                            {isKg
+                              ? 'Бул бүтүн сан, бирок ал оң дагы, терс дагы эмес.'
+                              : 'Это целое число, но оно не является ни положительным, ни отрицательным.'}
+                          </li>
+                          <li>
+                            <strong>{isKg ? 'Оң бүтүн сандар:' : 'Положительные целые:'}</strong>{' '}
+                            {isKg ? 'Натуралдык сандар менен бирдей.' : 'Полностью совпадают с натуральными числами.'}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </>
+                ) : selectedTopic.id === 'arithmetic-operations-and-brackets' ? (
+                  <>
+                    {/* 1. Компоненты действий */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          1
+                        </span>
+                        <span>
+                          {isKg ? 'Амалдардын компоненттери' : 'Компоненты действий'}
+                        </span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex flex-col gap-1">
+                          <span className="text-emerald-400 font-extrabold text-sm flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono text-xs">+</span>
+                            {isKg ? 'Кошуу' : 'Сложение'}
+                          </span>
+                          <span className="font-mono text-white text-sm">$a + b = c$</span>
+                          <span className="text-emerald-200/70 text-xs">
+                            {isKg ? '(кошулуучу + кошулуучу = сумма)' : '(слагаемое + слагаемое = сумма)'}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex flex-col gap-1">
+                          <span className="text-teal-400 font-extrabold text-sm flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-md bg-teal-500/20 text-teal-300 flex items-center justify-center font-mono text-xs">-</span>
+                            {isKg ? 'Кемитүү' : 'Вычитание'}
+                          </span>
+                          <span className="font-mono text-white text-sm">$a - b = c$</span>
+                          <span className="text-emerald-200/70 text-xs">
+                            {isKg ? '(кемүүчү - кемитүүчү = айырма)' : '(уменьшаемое - вычитаемое = разность)'}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex flex-col gap-1">
+                          <span className="text-emerald-300 font-extrabold text-sm flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono text-xs">·</span>
+                            {isKg ? 'Көбөйтүү' : 'Умножение'}
+                          </span>
+                          <span className="font-mono text-white text-sm">$a \cdot b = c$</span>
+                          <span className="text-emerald-200/70 text-xs">
+                            {isKg ? '(көбөйтүүчү · көбөйтүүчү = көбөйтүндү)' : '(множитель · множитель = произведение)'}
+                          </span>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex flex-col gap-1">
+                          <span className="text-rose-400 font-extrabold text-sm flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-md bg-rose-500/20 text-rose-300 flex items-center justify-center font-mono text-xs">:</span>
+                            {isKg ? 'Бөлүү' : 'Деление'}
+                          </span>
+                          <span className="font-mono text-white text-sm">$a : b = c$</span>
+                          <span className="text-emerald-200/70 text-xs">
+                            {isKg ? '(бөлүнүүчү : бөлүүчү = тийинди)' : '(делимое : делитель = частное)'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/50 text-rose-200 text-xs sm:text-sm font-bold flex items-center gap-2.5">
+                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                        <span>{isKg ? '0гө бөлүүгө болбойт.' : 'На 0 делить нельзя.'}</span>
+                      </div>
+                    </div>
+
+                    {/* 2. Арифметические операции (Правила знаков) */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          2
+                        </span>
+                        <span>
+                          {isKg ? 'Арифметикалык амалдар (Белгилердин эрежелери)' : 'Арифметические операции (Правила знаков)'}
+                        </span>
+                      </h3>
+
+                      {/* Группа 1: Сложение и вычитание */}
+                      <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-3">
+                        <h4 className="text-sm sm:text-base font-extrabold text-emerald-300 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                          <span>{isKg ? '1-топ: Кошуу жана кемитүү (+ жана -)' : 'Группа 1: Сложение и вычитание (+ и -)'}</span>
+                        </h4>
+
+                        <div className="space-y-3 text-xs sm:text-sm">
+                          {/* Case A: Same signs */}
+                          <div className="p-3.5 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2">
+                            <span className="font-bold text-white block">
+                              {isKg ? 'Бирдей белгилер (+ жана +) же (- жана -):' : 'Одинаковые знаки (+ и +) или (- и -):'}
+                            </span>
+                            <p className="text-emerald-200/90">
+                              <strong>{isKg ? 'Эреже:' : 'Правило:'}</strong>{' '}
+                              {isKg
+                                ? 'Сандардын модулдарын кошобуз жана алардын жалпы белгисин коёбуз.'
+                                : 'Складываем модули чисел и ставим их общий знак.'}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-emerald-300 text-xs sm:text-sm pt-1">
+                              <div className="p-2 rounded-lg bg-black/40 border border-emerald-900/60">
+                                $+5 + 3 = +8$ {isKg ? '(же жөн гана 8)' : '(или просто 8)'}
+                              </div>
+                              <div className="p-2 rounded-lg bg-black/40 border border-emerald-900/60">
+                                $-5 - 3 = -8$
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Case B: Different signs */}
+                          <div className="p-3.5 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2">
+                            <span className="font-bold text-white block">
+                              {isKg ? 'Ар башка белгилер (+ жана -) же (- жана +):' : 'Разные знаки (+ и -) или (- и +):'}
+                            </span>
+                            <p className="text-emerald-200/90">
+                              <strong>{isKg ? 'Эреже:' : 'Правило:'}</strong>{' '}
+                              {isKg
+                                ? 'Модулу боюнча чоң сандын модулунан кичинесин кемитебиз жана модулу чоң сандын белгисин коёбуз.'
+                                : 'Из большего по модулю числа вычитаем меньшее и ставим знак большего по модулю числа.'}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-emerald-300 text-xs sm:text-sm pt-1">
+                              <div className="p-2 rounded-lg bg-black/40 border border-emerald-900/60">
+                                $-8 + 3 = -5$ <span className="text-[11px] text-emerald-200/70 font-sans block mt-0.5">({isKg ? 'модуль |-8| > |3|, минус' : 'модуль |-8| > |3|, знак минус'})</span>
+                              </div>
+                              <div className="p-2 rounded-lg bg-black/40 border border-emerald-900/60">
+                                $+8 - 3 = +5$ <span className="text-[11px] text-emerald-200/70 font-sans block mt-0.5">({isKg ? 'модуль |8| > |-3|, плюс' : 'модуль |8| > |-3|, знак плюс'})</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Группа 2: Умножение и деление */}
+                      <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-3">
+                        <h4 className="text-sm sm:text-base font-extrabold text-teal-300 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-teal-400" />
+                          <span>{isKg ? '2-топ: Көбөйтүү жана бөлүү (· жана :)' : 'Группа 2: Умножение и деление (· и :)'}</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
+                          {/* Sign formula */}
+                          <div className="p-3.5 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2">
+                            <span className="font-extrabold text-emerald-400 block uppercase tracking-wider text-[11px]">
+                              {isKg ? 'Белгилердин формуласы:' : 'Формула знаков:'}
+                            </span>
+                            <div className="space-y-1.5 font-mono text-xs sm:text-sm text-emerald-200">
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$(+) \cdot (+) = (+)$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$(+) : (+) = (+)$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$(-) \cdot (-) = (+)$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$(-) : (-) = (+)$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$(-) \cdot (+) = (-)$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$(-) : (+) = (-)$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$(+) \cdot (-) = (-)$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$(+) : (-) = (-)$</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Examples */}
+                          <div className="p-3.5 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2">
+                            <span className="font-extrabold text-teal-400 block uppercase tracking-wider text-[11px]">
+                              {isKg ? 'Мисалдар:' : 'Примеры:'}
+                            </span>
+                            <div className="space-y-1.5 font-mono text-xs sm:text-sm text-emerald-200">
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$4 \cdot 5 = 20$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$20 : 5 = 4$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$-4 \cdot (-5) = 20$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$-20 : (-5) = 4$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$-4 \cdot 5 = -20$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$-20 : 5 = -4$</span>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-black/30 flex justify-between">
+                                <span>$4 \cdot (-5) = -20$</span>
+                                <span className="text-white/40">|</span>
+                                <span>$20 : (-5) = -4$</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Скобки и их раскрытие */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          3
+                        </span>
+                        <span>
+                          {isKg ? 'Кашаалар жана аларды ачуу' : 'Скобки и их раскрытие'}
+                        </span>
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-emerald-200/90 font-medium">
+                        {isKg
+                          ? 'Кашаалар амалдардын тартибин өзгөртөт: алардын ичиндеги амалдар биринчи кезекте аткарылат.'
+                          : 'Скобки меняют приоритет: действия внутри них выполняются в первую очередь.'}
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        {/* Случай 1 */}
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <span className="font-extrabold text-emerald-400 block text-xs sm:text-sm">
+                            {isKg ? '1-учур: Кашаанын алдында «+» белгиси турса' : 'Случай 1: Перед скобкой стоит знак «+»'}
+                          </span>
+                          <p className="text-emerald-200/80 text-xs">
+                            {isKg
+                              ? 'Кашаанын ичиндеги кошулуучулардын белгилери өзгөрбөйт (кашаалар жөн эле алынып салынат).'
+                              : 'Знаки слагаемых внутри скобок не меняются (скобки просто опускаются).'}
+                          </p>
+                          <div className="p-2.5 rounded-lg bg-black/40 font-mono text-emerald-300 text-xs space-y-1">
+                            <div>$a + (b - c) = a + b - c$</div>
+                            <div>$5 + (3 - 2) = 5 + 3 - 2 = 6$</div>
+                          </div>
+                        </div>
+
+                        {/* Случай 2 */}
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <span className="font-extrabold text-teal-400 block text-xs sm:text-sm">
+                            {isKg ? '2-учур: Кашаанын алдында «-» белгиси турса' : 'Случай 2: Перед скобкой стоит знак «-»'}
+                          </span>
+                          <p className="text-emerald-200/80 text-xs">
+                            {isKg
+                              ? 'Кашаанын ичиндеги бардык кошулуучулардын белгилери карама-каршысына өзгөрөт.'
+                              : 'Знаки всех слагаемых внутри скобок меняются на противоположные.'}
+                          </p>
+                          <div className="p-2.5 rounded-lg bg-black/40 font-mono text-teal-300 text-xs space-y-1">
+                            <div>$a - (b - c) = a - b + c$</div>
+                            <div>$a - (b + c) = a - b - c$</div>
+                            <div>$5 - (3 - 2) = 5 - 3 + 2 = 4$</div>
+                            <div>$5 - (-3 + 2) = 5 + 3 - 2 = 6$</div>
+                          </div>
+                        </div>
+
+                        {/* Случай 3 */}
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <span className="font-extrabold text-emerald-300 block text-xs sm:text-sm">
+                            {isKg
+                              ? '3-учур: Кашаага көбөйтүү/бөлүү (Бөлүштүрүүчүлүк касиети)'
+                              : 'Случай 3: Умножение/деление на скобку (Распределительное свойство)'}
+                          </span>
+                          <p className="text-emerald-200/80 text-xs">
+                            {isKg
+                              ? 'Кашаанын сыртындагы көбөйтүүчү кашаанын ичиндеги ар бир кошулуучуга көбөйтүлөт (белгилерди эске алуу менен).'
+                              : 'Множитель за скобкой умножается на каждое слагаемое внутри скобки (с учетом правил знаков).'}
+                          </p>
+                          <div className="p-2.5 rounded-lg bg-black/40 font-mono text-emerald-300 text-xs space-y-1">
+                            <div>$a \cdot (b + c) = a \cdot b + a \cdot c$</div>
+                            <div>$a \cdot (b - c) = a \cdot b - a \cdot c$</div>
+                            <div>$-a \cdot (b - c) = -a \cdot b + a \cdot c$</div>
+                            <div>$3 \cdot (4 - 2) = 3 \cdot 4 - 3 \cdot 2 = 12 - 6 = 6$</div>
+                            <div>$-3 \cdot (4 - 2) = -3 \cdot 4 + 3 \cdot 2 = -12 + 6 = -6$</div>
+                          </div>
+                        </div>
+
+                        {/* Случай 4 */}
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <span className="font-extrabold text-teal-300 block text-xs sm:text-sm">
+                            {isKg ? '4-учур: Биринин ичине бири кирген кашаалар' : 'Случай 4: Вложенные скобки'}
+                          </span>
+                          <p className="text-emerald-200/80 text-xs">
+                            {isKg
+                              ? 'Эгерде кашаалардын бир нече деңгээли болсо ([ { } ]), алар ичтен сыртка карай ачылат.'
+                              : 'Если есть несколько уровней скобок ([ { } ]), они раскрываются изнутри наружу.'}
+                          </p>
+                          <div className="p-2.5 rounded-lg bg-black/40 font-mono text-teal-300 text-xs space-y-1">
+                            <div>$10 - (5 - (2 + 1)) = 10 - (5 - 3) = 10 - 2 = 8$</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 whitespace-pre-line text-sm text-emerald-100">
+                    {isKg ? selectedTopic.contentKg || selectedTopic.contentRu : selectedTopic.contentRu}
                   </div>
-                </div>
+                )}
               </div>
 
               {/* ------------------------------------------------------------- */}
@@ -1286,6 +1594,14 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                       ? isKg
                         ? 'Математика бөлүмүн тандаңыз'
                         : 'Выберите раздел математики'
+                      : subjectModalMode === 'russian_only'
+                      ? isKg
+                        ? 'Орус тили бөлүмүн тандаңыз'
+                        : 'Выберите раздел русского языка'
+                      : subjectModalMode === 'english_only'
+                      ? isKg
+                        ? 'Англис тили бөлүмүн тандаңыз'
+                        : 'Выберите раздел английского языка'
                       : isKg
                       ? 'Бөлүмдү тандаңыз'
                       : 'Выберите предмет теории'}
@@ -1293,8 +1609,16 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                   <span className="text-[11px] text-emerald-200/70 block">
                     {subjectModalMode === 'math_only'
                       ? isKg
-                        ? 'Алгебра же Геометрия'
+                        ? 'Алгебра же Геометрия (2 бөлүм)'
                         : 'Алгебра или Геометрия (2 раздела)'
+                      : subjectModalMode === 'russian_only'
+                      ? isKg
+                        ? 'ЖРТ программасынын 3 бөлүмү'
+                        : '3 тематических блока программы ОРТ'
+                      : subjectModalMode === 'english_only'
+                      ? isKg
+                        ? 'ЖРТ предметтик тестинин 3 бөлүмү'
+                        : '3 профильных блока предметного теста ОРТ'
                       : isKg
                       ? 'ЖРТ программасы боюнча бардык предметтер'
                       : 'Предметы программы ОРТ'}
@@ -1312,68 +1636,73 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
             {/* Choice Cards */}
             <div className="grid grid-cols-1 gap-3.5">
-              {/* Algebra Option */}
-              <button
-                type="button"
-                onClick={() => handleSelectSubject('algebra')}
-                className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
-              >
-                <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
-                    <Calculator className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
-                      {isKg ? 'Алгебра' : 'Алгебра'}
-                    </h4>
-                    <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
-                      {isKg
-                        ? 'Сандар, теңдемелер, барабарсыздыктар, модулдар, прогрессиялар жана маселелер'
-                        : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
-                    </p>
-                    <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
-                      {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </button>
-
-              {/* Geometry Option */}
-              <button
-                type="button"
-                onClick={() => handleSelectSubject('geometry')}
-                className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
-              >
-                <div className="flex items-start gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
-                    <Compass className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
-                      {isKg ? 'Геометрия' : 'Геометрия'}
-                    </h4>
-                    <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
-                      {isKg
-                        ? 'Үч бурчтуктар, төрт бурчтуктар, тегеректер, фигуралардын аянттары жана стереометрия'
-                        : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
-                    </p>
-                    <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
-                      {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </button>
-
-              {/* Russian and English Options (Shown when not math_only) */}
-              {subjectModalMode === 'all' && (
+              {/* 1. MATH ONLY MODE */}
+              {subjectModalMode === 'math_only' && (
                 <>
-                  {/* Russian Language Option */}
+                  {/* Algebra Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('algebra')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
+                        <Calculator className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                          {isKg ? 'Алгебра' : 'Алгебра'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Сандар, теңдемелер, барабарсыздыктар, модулдар, прогрессиялар жана маселелер'
+                            : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
+                          {isKg ? 'Математика • 1-бөлүм' : 'Математика • Раздел 1'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* Geometry Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('geometry')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
+                        <Compass className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
+                          {isKg ? 'Геометрия' : 'Геометрия'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Үч бурчтуктар, төрт бурчтуктар, тегеректер, фигуралардын аянттары жана стереометрия'
+                            : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
+                          {isKg ? 'Математика • 2-бөлүм' : 'Математика • Раздел 2'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+                </>
+              )}
+
+              {/* 2. RUSSIAN ONLY MODE (3 Sub-blocks) */}
+              {subjectModalMode === 'russian_only' && (
+                <>
+                  {/* Russian Sub-block 1: Аналогия и дополнения предложения */}
                   <button
                     type="button"
                     onClick={() => handleSelectSubject('russian')}
@@ -1385,15 +1714,15 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                       </div>
                       <div>
                         <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
-                          {isKg ? 'Орус тили' : 'Русский язык'}
+                          {isKg ? 'Аналогия жана сүйлөмдү толуктоо' : 'Аналогия и дополнения предложения'}
                         </h4>
                         <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
                           {isKg
-                            ? 'Аналогиялар, текстти окуу жана түшүнүү, практикалык грамматика жана ЖРТ тузактары'
-                            : 'Аналогии, чтение и понимание текстов, практическая грамматика и разбор ловушек ОРТ'}
+                            ? 'Түр-тек, бөлүк-бүтүн, себеп-натыйжа логикасы жана контекст боюнча сөздөрдү коюу'
+                            : 'Отношения род-вид, часть-целое, причина-следствие и контекстное дополнение предложений'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
-                          {isKg ? 'Орус тили • Негизги предмет' : 'Русский язык • Основной предмет'}
+                          {isKg ? 'Орус тили • 1-блок' : 'Русский язык • 1-й Блок'}
                         </span>
                       </div>
                     </div>
@@ -1402,7 +1731,128 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                     </div>
                   </button>
 
-                  {/* English Language Option */}
+                  {/* Russian Sub-block 2: Чтение и понимание */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('russian')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                          {isKg ? 'Чтение и понимание (Текстти түшүнүү)' : 'Чтение и понимание'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Микротексттерди талдоо, негизги ой, подтекст, аргументтер жана автордук позиция'
+                            : 'Анализ микротекстов, поиск главной мысли, подтекст, аргументация и авторская позиция'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-300">
+                          {isKg ? 'Орус тили • 2-блок' : 'Русский язык • 2-й Блок'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-300 group-hover:bg-teal-400 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* Russian Sub-block 3: Практическая грамматика */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('russian')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
+                        <GraduationCap className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                          {isKg ? 'Практикалык грамматика' : 'Практическая грамматика'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Орфография жана пунктуация эрежелери, синтаксис, грамматикалык каталарды табуу'
+                            : 'Орфографические и пунктуационные нормы, синтаксис, исправление речевых и грамматических ошибок'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
+                          {isKg ? 'Орус тили • 3-блок' : 'Русский язык • 3-й Блок'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+                </>
+              )}
+
+              {/* 3. ENGLISH ONLY MODE (3 Sub-blocks) */}
+              {subjectModalMode === 'english_only' && (
+                <>
+                  {/* English Sub-block 1: Reading Comprehension */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('english')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-teal-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
+                          Reading Comprehension
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Skimming жана scanning, контексттик сөздүк, негизги идея жана логикалык тыянактар'
+                            : 'Skimming, scanning, контекстное значение слов, главная идея и логические выводы ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
+                          {isKg ? 'Англис тили • 1-блок' : 'English • Block 1'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-400 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* English Sub-block 2: Grammar & Vocabulary */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('english')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-teal-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
+                          Grammar & Vocabulary
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Чактар, Passive Voice, Conditionals, модалдык этиштер, предлогдор жана фразалык этиштер'
+                            : 'Времена глаголов, Passive Voice, Conditionals, модальные глаголы, предлоги и фразовые глаголы'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
+                          {isKg ? 'Англис тили • 2-блок' : 'English • Block 2'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300 group-hover:bg-emerald-400 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* English Sub-block 3: Error Identification */}
                   <button
                     type="button"
                     onClick={() => handleSelectSubject('english')}
@@ -1414,19 +1864,140 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                       </div>
                       <div>
                         <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
-                          {isKg ? 'Англис тили' : 'Английский язык'}
+                          Error Identification
                         </h4>
                         <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
                           {isKg
-                            ? 'Reading Comprehension, грамматика, чактар жана каталарды табуу'
-                            : 'Reading Comprehension, Grammar & Vocabulary, Error Identification'}
+                            ? 'Сүйлөмдөрдүн асты сызылган бөлүктөрүнөн грамматикалык жана синтаксистик каталарды табуу'
+                            : 'Поиск грамматических и синтаксических ошибок в подчеркнутых частях предложений формата ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-300">
+                          {isKg ? 'Англис тили • 3-блок' : 'English • Block 3'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-300 group-hover:bg-teal-400 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+                </>
+              )}
+
+              {/* 4. ALL SUBJECTS MODE (General Switcher) */}
+              {subjectModalMode === 'all' && (
+                <>
+                  {/* Algebra Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('algebra')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-emerald-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 group-hover:scale-105 transition-transform shrink-0">
+                        <Calculator className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-emerald-300 transition-colors">
+                          {isKg ? 'Алгебра' : 'Алгебра'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Сандар, теңдемелер, барабарсыздыктар, модулдар, прогрессиялар жана маселелер'
+                            : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
+                          {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* Geometry Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('geometry')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-emerald-700/60 hover:border-teal-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 group-hover:scale-105 transition-transform shrink-0">
+                        <Compass className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-teal-300 transition-colors">
+                          {isKg ? 'Геометрия' : 'Геометрия'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Үч бурчтуктар, төрт бурчтуктар, тегеректер, фигуралардын аянттары жана стереометрия'
+                            : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
-                          {isKg ? 'Англис тили • Предметтик тест ОРТ' : 'Английский язык • Предметный тест ОРТ'}
+                          {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
                         </span>
                       </div>
                     </div>
                     <div className="w-8 h-8 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 group-hover:bg-teal-500 group-hover:text-slate-950 transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* Russian Language Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('russian')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-blue-700/60 hover:border-blue-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/50 flex items-center justify-center text-blue-300 group-hover:scale-105 transition-transform shrink-0">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-blue-300 transition-colors">
+                          {isKg ? 'Орус тили' : 'Русский язык'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Аналогиялар, текстти окуу жана түшүнүү, практикалык грамматика жана ЖРТ тузактары'
+                            : 'Аналогии, чтение и понимание текстов, практическая грамматика (3 блока ОРТ)'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-blue-400">
+                          {isKg ? 'Орус тили • Негизги предмет' : 'Русский язык • Основной предмет'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0 mt-2">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {/* English Language Option */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectSubject('english')}
+                    className="p-5 rounded-2xl bg-[#041a14] hover:bg-[#062b20] border-2 border-indigo-700/60 hover:border-indigo-400 text-left transition-all flex items-start justify-between gap-4 cursor-pointer group shadow-md hover:scale-[1.01] active:scale-95"
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/50 flex items-center justify-center text-indigo-300 group-hover:scale-105 transition-transform shrink-0">
+                        <GraduationCap className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-base sm:text-lg font-black text-white group-hover:text-indigo-300 transition-colors">
+                          {isKg ? 'Англис тили' : 'Английский язык'}
+                        </h4>
+                        <p className="text-xs text-emerald-200/70 mt-1 leading-snug">
+                          {isKg
+                            ? 'Reading Comprehension, Grammar & Vocabulary, Error Identification'
+                            : 'Reading Comprehension, Grammar & Vocabulary, Error Identification (3 блока)'}
+                        </p>
+                        <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-indigo-400">
+                          {isKg ? 'Англис тили • Предметтик тест ОРТ' : 'Английский язык • Предметный тест ОРТ'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all shrink-0 mt-2">
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </button>
