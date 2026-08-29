@@ -30,12 +30,32 @@ const AppContent: React.FC<{
   lang: AppLanguage;
   setLang: (lang: AppLanguage) => void;
 }> = ({ lang, setLang }) => {
-  const { isTrialWelcomeOpen, closeTrialWelcomeModal } = useAuth();
+  const { isTrialWelcomeOpen, closeTrialWelcomeModal, loginWithTelegram } = useAuth();
   const location = useLocation();
   const isTestPage = location.pathname.startsWith('/test/');
   const isAdminPage = location.pathname === '/admin';
 
+  // Handle Telegram deep link auth return: ?tg_auth=akylman_xxx
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tgAuthToken = params.get('tg_auth');
+    if (tgAuthToken) {
+      fetch(`/api/telegram/check-session?token=${encodeURIComponent(tgAuthToken)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.ok && data.status === 'authenticated' && data.user) {
+            loginWithTelegram(data.user);
+            // Clean url param without page reload
+            const newUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, newUrl);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loginWithTelegram]);
+
   // Multi-device Content Protection across iOS, Android, macOS, Windows
+
   useEffect(() => {
     // 1. Disable context menu (right click / long-press save image)
     const handleContextMenu = (e: MouseEvent) => {

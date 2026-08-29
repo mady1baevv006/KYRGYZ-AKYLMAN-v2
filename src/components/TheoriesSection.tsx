@@ -56,30 +56,103 @@ const HOMEWORK_QUESTIONS_BY_SUBJECT: Record<string, HomeworkQuestion[]> = {
   algebra: [
     {
       id: 1,
-      questionRu: 'Какое наименьшее натуральное число удовлетворяет неравенству 2x - 7 > 0?',
-      questionKg: '2x - 7 > 0 барабарсыздыгын канааттандырган эң кичине натуралдык санды тапкыла:',
-      options: ['0', '3', '4', '5'],
+      questionRu: 'Какое из следующих чисел является натуральным?',
+      questionKg: 'Төмөнкү сандардын кайсынысы натуралдык сан болуп саналат?',
+      options: ['-5', '0', '7', '3.14'],
       correctIdx: 2,
-      explanationRu: '2x > 7 => x > 3.5. Ближайшее натуральное число больше 3.5 — это 4. Помните: 0 не является натуральным числом!',
-      explanationKg: '2x > 7 => x > 3.5. 3.5тен чоң эң кичине натуралдык сан бул 4. Эске салсак: 0 натуралдык сан эмес!',
+      explanationRu: 'Натуральные числа — это числа для счета предметов (1, 2, 3, ...). Число 7 является натуральным. Ноль (0), отрицательные (-5) и дробные (3.14) не являются натуральными.',
+      explanationKg: 'Натуралдык сандар — нерселерди саноо үчүн колдонулуучу сандар (1, 2, 3, ...). 7 саны натуралдык сан. Нөл (0), терс (-5) жана бөлчөк сандар (3.14) натуралдык сан эмес.',
     },
     {
       id: 2,
-      questionRu: 'Сколько целых чисел расположено строго между числами -4.8 и 3.2 на числовой прямой?',
-      questionKg: 'Сан огунда -4.8 жана 3.2 сандарынын арасында канча бүтүн сан жайгашкан?',
-      options: ['7', '8', '9', '6'],
+      questionRu: 'Какое число является наименьшим натуральным числом?',
+      questionKg: 'Эң кичине натуралдык сан кайсы?',
+      options: ['0', '1', '-1', 'Не существует'],
       correctIdx: 1,
-      explanationRu: 'Целые числа в этом интервале: -4, -3, -2, -1, 0, 1, 2, 3. Всего 8 целых чисел.',
-      explanationKg: 'Бул аралыктагы бүтүн сандар: -4, -3, -2, -1, 0, 1, 2, 3. Бардыгы 8 бүтүн сан.',
+      explanationRu: 'Наименьшее натуральное число — это 1. Ноль (0) целое, но не натуральное число.',
+      explanationKg: 'Эң кичине натуралдык сан — 1. Нөл (0) бүтүн сан, бирок натуралдык сан эмес.',
     },
     {
       id: 3,
-      questionRu: 'Произведение любых трех последовательных целых чисел обязательно делится на:',
-      questionKg: 'Каалаган удаалаш үч бүтүн сандын көбөйтүндүсү сөзсүз кайсы санга бөлүнөт?',
-      options: ['4', '6', '9', '12'],
+      questionRu: 'Какое число является противоположным числу -14?',
+      questionKg: '-14 санына карама-каршы сан кайсы?',
+      options: ['-14', '0', '14', '1/14'],
+      correctIdx: 2,
+      explanationRu: 'Противоположные числа отличаются только знаком: для -14 противоположным является +14 (их сумма равна 0).',
+      explanationKg: 'Карама-каршы сандар белгиси менен гана айырмаланат: -14 үчүн карама-каршы сан +14 болот (алардын суммасы 0гө барабар).',
+    },
+    {
+      id: 4,
+      questionRu: 'Чему равна сумма противоположных чисел: 25 + (-25)?',
+      questionKg: 'Карама-каршы сандардын суммасы эмнеге барабар: 25 + (-25)?',
+      options: ['50', '-50', '0', '1'],
+      correctIdx: 2,
+      explanationRu: 'Сумма любых двух противоположных чисел всегда равна нулю: a + (-a) = 0.',
+      explanationKg: 'Каалаган эки карама-каршы сандын суммасы дайыма нөлгө барабар: a + (-a) = 0.',
+    },
+    {
+      id: 5,
+      questionRu: 'Какое из следующих сравнений чисел является верным?',
+      questionKg: 'Төмөнкү сандарды салыштыруулардын кайсынысы туура?',
+      options: ['-15 > -8', '-3 > 2', '-9 < -4', '0 < -6'],
+      correctIdx: 2,
+      explanationRu: 'На числовой прямой -9 лежит левее -4, поэтому -9 < -4. Из двух отрицательных чисел больше то, которое ближе к нулю.',
+      explanationKg: 'Сан огунда -9 саны -4төн солдо жайгашкан, ошондуктан -9 < -4 туура. Эки терс сандын нөлгө жакыны чоңураак.',
+    },
+    {
+      id: 6,
+      questionRu: 'В записи x > 7 (x больше 7), входит ли само число 7 в список подходящих чисел?',
+      questionKg: 'x > 7 (x жетиден чоң) жазылышында, 7 саны туура келүүчү сандардын катарына киреби?',
+      options: [
+        'Да, всегда входит',
+        'Нет, знак «строго больше» (точка выколотая)',
+        'Входит, если x — четное',
+        'Невозможно определить',
+      ],
       correctIdx: 1,
-      explanationRu: 'Среди 3 последовательных чисел как минимум одно четное (делится на 2) и одно кратно 3. Значит их произведение всегда кратно 2 * 3 = 6.',
-      explanationKg: 'Удаалаш 3 сандын ичинен жок дегенде бирөө жуп (2ге бөлүнөт) жана бирөө 3кө бөлүнөт. Демек көбөйтүндүсү дайыма 2 * 3 = 6га бөлүнөт.',
+      explanationRu: 'Знак «>» означает строго больше. Число 7 не входит в список подходящих чисел (на прямой обозначается выколотой точкой).',
+      explanationKg: '«>» белгиси катуу чоң дегенди билдирет. 7 саны жоопко кирбейт (сан огунда ичи бош чекит менен белгиленет).',
+    },
+    {
+      id: 7,
+      questionRu: 'Какая цифра стоит в разряде десятков в числе 4 582?',
+      questionKg: '4 582 санында ондуктар разрядында кайсы цифра турат?',
+      options: ['2', '8', '5', '4'],
+      correctIdx: 1,
+      explanationRu: 'Справа налево: 2 — единицы, 8 — десятки, 5 — сотни, 4 — тысячи. В разряде десятков стоит цифра 8.',
+      explanationKg: 'Оңдон солго: 2 — бирдиктер, 8 — ондуктар, 5 — жүздүктөр, 4 — миңдиктер. Ондуктар разрядында 8 цифрасы турат.',
+    },
+    {
+      id: 8,
+      questionRu: 'Представьте число 639 в виде суммы разрядных слагаемых:',
+      questionKg: '639 санын разряддык кошулуучулардын суммасы түрүндө көрсөтүңүз:',
+      options: [
+        '60 + 30 + 9',
+        '6 · 100 + 3 · 10 + 9 · 1',
+        '6 · 1000 + 3 · 100 + 9',
+        '600 + 39',
+      ],
+      correctIdx: 1,
+      explanationRu: 'Разрядный состав числа 639 = 600 + 30 + 9 = 6 · 100 + 3 · 10 + 9 · 1.',
+      explanationKg: '639 санынын разряддык түзүлүшү = 600 + 30 + 9 = 6 · 100 + 3 · 10 + 9 · 1.',
+    },
+    {
+      id: 9,
+      questionRu: 'Округлите число 748 до десятков по правилам математического округления:',
+      questionKg: '748 санын математикалык тегөрөктөө эрежеси боюнча ондуктарга чейин тегөрөктөңүз:',
+      options: ['740', '750', '700', '800'],
+      correctIdx: 1,
+      explanationRu: 'Смотрим на цифру единиц: 8 ≥ 5, поэтому разряд десятков увеличивается на +1 (4 становится 5). Ответ: 750.',
+      explanationKg: 'Бирдиктер разрядындагы цифраны карайбыз: 8 ≥ 5, ошондуктан ондуктар разряды +1ге көбөйөт (4 саны 5ке айланат). Жообу: 750.',
+    },
+    {
+      id: 10,
+      questionRu: 'В поход идут 23 человека. Каждая палатка вмещает максимум 4 человека. Сколько минимум палаток нужно взять?',
+      questionKg: 'Жөө жүрүшкө 23 адам чыгып жатат. Ар бир чатырга эң көп 4 адам батат. Жок дегенде канча чатыр алуу керек?',
+      options: ['5 палаток', '6 палаток', '4 палатки', '5.75 палатки'],
+      correctIdx: 1,
+      explanationRu: 'Прикладное округление с избытком: 23 : 4 = 5.75. В 5 палаток поместятся только 20 человек, поэтому нужно 6 палаток, чтобы разместить всех.',
+      explanationKg: 'Турмуштук ашыгы менен тегөрөктөө: 23 : 4 = 5.75. 5 чатырга 20 гана адам батат, 3 адам сыртта калбашы үчүн 6 чатыр алуу керек.',
     },
   ],
   geometry: [
@@ -179,6 +252,10 @@ const HOMEWORK_QUESTIONS_BY_SUBJECT: Record<string, HomeworkQuestion[]> = {
       explanationKg: 'Параллелдик түзүлүш: "reading... and writing" болушу керек.',
     },
   ],
+};
+
+const cleanTopicTitle = (title: string) => {
+  return (title || '').replace(/^\d+[\.\)\-\s]+/, '');
 };
 
 export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
@@ -756,10 +833,6 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               <MathSubjectBackground className="opacity-25" />
             )}
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider mb-3">
-                <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{selectedBlock ? (isKg ? selectedBlock.titleKg : selectedBlock.titleRu) : 'Теория'}</span>
-              </div>
               <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
                 {(isKg ? selectedTopic.titleKg : selectedTopic.titleRu).replace(/^\d+[\.\)\-\s]+/, '').trim()}
               </h1>
@@ -815,104 +888,433 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               <div className="space-y-6 text-emerald-100 leading-relaxed text-sm sm:text-base font-normal">
                 {selectedTopic.id === 'natural-and-integers' ? (
                   <>
-                    {/* 1. Натуральные числа */}
-                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
+                    {/* 1. Натуральные и целые числа (N и Z) */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
                       <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
                         <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
                           1
                         </span>
                         <span>
-                          {isKg ? 'Натуралдык сандар (ℕ)' : 'Натуральные числа (ℕ)'}
+                          {isKg ? 'Натуралдык жана бүтүн сандар (ℕ жана ℤ)' : 'Натуральные и целые числа (ℕ и ℤ)'}
                         </span>
                       </h3>
-                      <p className="text-emerald-200/90 text-sm sm:text-base">
-                        {isKg
-                          ? 'Натуралдык сандар — бул нерселерди (буюмдарды) табигый саноодо колдонулуучу сандар.'
-                          : 'Натуральные числа — это числа, которые используются при естественном счете предметов.'}
-                      </p>
-                      <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
-                        <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> 1, 2, 3, 4, 5, ..., 100, ...
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/80 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-emerald-400 font-bold text-sm">
+                              {isKg ? 'Натуралдык сандар (ℕ)' : 'Натуральные числа (ℕ)'}
+                            </span>
+                          </div>
+                          <p className="text-emerald-200/80 leading-relaxed">
+                            {isKg
+                              ? 'Нерселерди (буюмдарды) табигый саноо үчүн колдонулуучу сандар: 1, 2, 3, 4, 5, ...'
+                              : 'Числа для подсчета реальных предметов: 1, 2, 3, 4, 5, ...'}
+                          </p>
+                          <div className="text-[11px] text-emerald-300/90 font-medium">
+                            {isKg ? '• Эң кичине натуралдык сан: 1' : '• Самое маленькое натуральное число: 1'}
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/80 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-teal-400 font-bold text-sm">
+                              {isKg ? 'Бүтүн сандар (ℤ)' : 'Целые числа (ℤ)'}
+                            </span>
+                          </div>
+                          <p className="text-emerald-200/80 leading-relaxed">
+                            {isKg
+                              ? 'Натуралдык сандарды, аларга карама-каршы терс сандарды жана 0 санын камтыйт: ..., -2, -1, 0, 1, 2, ...'
+                              : 'Включают натуральные, отрицательные и ноль (..., -2, -1, 0, 1, 2, ...).'}
+                          </p>
+                          <div className="text-[11px] text-teal-300/90 font-medium">
+                            {isKg
+                              ? '• Эң кичине жана эң чоң бүтүн сан жок, бүтүн сандар чексиз.'
+                              : '• Самого маленького и большого целого числа — нет, целые числа бесконечны.'}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* ⚠️ Trap Alert Box */}
+                      {/* ⚠️ Trap Alert Box: Ноль */}
                       <div className="p-4 rounded-xl bg-amber-950/40 border-2 border-amber-500/60 text-amber-200 text-xs sm:text-sm font-bold flex items-start gap-3 shadow-lg">
                         <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                         <div>
                           <span className="font-black text-amber-300 uppercase tracking-wider block mb-1">
-                            {isKg ? '⚠️ ЖРТнын башкы тузагы:' : '⚠️ Главная ловушка ОРТ:'}
+                            {isKg ? 'Нөлгө басым (0):' : 'Акцент на ноль (0):'}
                           </span>
-                          <span>
+                          <span className="font-normal text-amber-100">
                             {isKg
-                              ? 'Нөл (0) натуралдык сан ЭМЕС! Сен «0 буюм» деп санай албайсың.'
-                              : 'Ноль (0) НЕ является натуральным числом! Ты не можешь посчитать «0 предметов».'}
+                              ? 'Ноль — бүтүн сан, бирок натуралдык сан ЭМЕС!'
+                              : 'Ноль — целое число, но НЕ натуральное!'}
                           </span>
                         </div>
                       </div>
-
-                      <ul className="space-y-1.5 text-xs sm:text-sm text-emerald-200/80 list-disc list-inside">
-                        <li>
-                          <strong>{isKg ? 'Эң кичине натуралдык сан:' : 'Самое маленькое натуральное число:'}</strong>{' '}
-                          <span className="text-white font-bold">1</span>.
-                        </li>
-                        <li>
-                          <strong>{isKg ? 'Эң чоң натуралдык сан:' : 'Самого большого натурального числа:'}</strong>{' '}
-                          <span className="text-white font-bold">{isKg ? 'жок (чексиз)' : 'не существует (множество натуральных чисел бесконечно)'}</span>.
-                        </li>
-                      </ul>
                     </div>
 
-                    {/* 2. Целые числа */}
-                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-3">
+                    {/* 2. Противоположные числа */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
                       <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
                         <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
                           2
                         </span>
                         <span>
-                          {isKg ? 'Бүтүн сандар (ℤ)' : 'Целые числа (ℤ)'}
+                          {isKg ? 'Карама-каршы сандар' : 'Противоположные числа'}
                         </span>
                       </h3>
-                      <p className="text-emerald-200/90 text-sm sm:text-base">
+                      <p className="text-emerald-200/90 text-xs sm:text-sm leading-relaxed">
                         {isKg
-                          ? 'Бүтүн сандар — бул сандардын кеңейтилген тобу. Анын курамына кирет:'
-                          : 'Целые числа — это расширенный набор чисел. В него входят:'}
+                          ? 'Бири-биринен белгиси менен гана айырмаланган эгиз сандар.'
+                          : 'Числа-близнецы, которые отличаются только знаком.'}
                       </p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm">
-                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                          <span className="text-emerald-400 font-bold block mb-0.5">1. {isKg ? 'Натуралдык сандар' : 'Натуральные'}</span>
-                          <span className="text-emerald-200/70 font-mono">1, 2, 3, 4, ...</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex items-center justify-between">
+                          <span className="text-emerald-200/80">{isKg ? 'Мисал:' : 'Пример:'}</span>
+                          <div className="font-mono text-emerald-300 font-bold">
+                            <span>5</span> <span className="text-emerald-500 mx-1.5">↔</span> <span className="text-rose-400">-5</span>
+                          </div>
                         </div>
-                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                          <span className="text-teal-400 font-bold block mb-0.5">2. {isKg ? '0 (нөл) саны' : 'Число 0 (нуль)'}</span>
-                          <span className="text-emerald-200/70 font-mono">0</span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60">
-                          <span className="text-rose-400 font-bold block mb-0.5">3. {isKg ? 'Терс бүтүн сандар' : 'Отрицательные целые'}</span>
-                          <span className="text-emerald-200/70 font-mono">-1, -2, -3, ...</span>
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 flex items-center justify-between">
+                          <span className="text-emerald-200/80">{isKg ? 'Мисал:' : 'Пример:'}</span>
+                          <div className="font-mono text-emerald-300 font-bold">
+                            <span className="text-rose-400">-12</span> <span className="text-emerald-500 mx-1.5">↔</span> <span>12</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-[#02100c] border border-emerald-800/60 font-mono text-xs sm:text-sm text-emerald-300">
-                        <strong>{isKg ? 'Мисал:' : 'Пример:'}</strong> ..., -4, -3, -2, -1, 0, 1, 2, 3, 4, ...
+                      <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-emerald-300">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span>
+                          {isKg
+                            ? 'Башкы касиет: Карама-каршы сандардын суммасы дайыма нөлгө барабар: a + (-a) = 0'
+                            : 'Главное свойство: Сумма противоположных чисел всегда равна нулю: a + (-a) = 0'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 3. Числовая прямая и координатный луч */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          3
+                        </span>
+                        <span>
+                          {isKg ? 'Сан огу жана координаталык шоола' : 'Числовая прямая и координатный луч'}
+                        </span>
+                      </h3>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-1">
+                          <strong className="text-emerald-300 block">
+                            {isKg ? '• Координаталык шоола:' : '• Координатный луч:'}
+                          </strong>
+                          <p className="text-emerald-200/80">
+                            {isKg
+                              ? '0дөн башталып оңго гана кетет (оң сандардын гана зонасы).'
+                              : 'Старт от 0 и только вправо (зона только положительных чисел).'}
+                          </p>
+                        </div>
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-1">
+                          <strong className="text-teal-300 block">
+                            {isKg ? '• Сан түз сызыгы:' : '• Числовая прямая:'}
+                          </strong>
+                          <p className="text-emerald-200/80">
+                            {isKg
+                              ? 'Эки тарапка тең чексиз кеткен жол: сол жакта минус, ортодо 0, оң жакта плюс.'
+                              : 'Бесконечная дорога в обе стороны: слева минус, по центру 0, справа плюс.'}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Important properties */}
-                      <div className="p-4 rounded-xl bg-[#031510] border border-emerald-700/40 space-y-2 text-xs sm:text-sm">
-                        <h4 className="font-black text-white uppercase tracking-wider text-[11px] text-emerald-400">
-                          {isKg ? 'ЖРТ үчүн маанилүү касиеттер:' : 'Важные свойства для ОРТ:'}
-                        </h4>
+                      {/* SVG Visual Graphic of Number Line & Ray */}
+                      <div className="p-4 sm:p-5 rounded-xl bg-[#020e0b] border border-emerald-800/80 space-y-5">
+                        {/* Ray */}
+                        <div>
+                          <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-2">
+                            {isKg ? '1. Координаталык шоола (0дөн баштап оңго)' : '1. Координатный луч (от 0 только вправо)'}
+                          </div>
+                          <div className="overflow-x-auto py-2">
+                            <svg className="w-full min-w-[500px] h-12" viewBox="0 0 600 50">
+                              <defs>
+                                <marker id="arrow-right" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399" />
+                                </marker>
+                              </defs>
+                              {/* Line */}
+                              <line x1="50" y1="25" x2="570" y2="25" stroke="#34d399" strokeWidth="2.5" markerEnd="url(#arrow-right)" />
+                              {/* Points */}
+                              {[
+                                { x: 50, val: '0', isOrigin: true },
+                                { x: 140, val: '1' },
+                                { x: 230, val: '2' },
+                                { x: 320, val: '3' },
+                                { x: 410, val: '4' },
+                                { x: 500, val: '5' },
+                              ].map((pt, i) => (
+                                <g key={i}>
+                                  <line x1={pt.x} y1="18" x2={pt.x} y2="32" stroke="#34d399" strokeWidth="2" />
+                                  <circle cx={pt.x} cy="25" r={pt.isOrigin ? '4' : '3'} fill={pt.isOrigin ? '#10b981' : '#34d399'} />
+                                  <text x={pt.x} y="44" fill="#a7f3d0" fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                                    {pt.val}
+                                  </text>
+                                </g>
+                              ))}
+                              <text x="580" y="29" fill="#34d399" fontSize="12" fontWeight="bold" fontFamily="monospace">X</text>
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* Number Line */}
+                        <div>
+                          <div className="text-[11px] font-bold text-teal-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span>{isKg ? '2. Сан огу (солго терс, оңго оң сандар)' : '2. Числовая прямая (влево минус, вправо плюс)'}</span>
+                            <span className="text-[10px] text-emerald-400 font-normal">← Меньше | Больше →</span>
+                          </div>
+                          <div className="overflow-x-auto py-2">
+                            <svg className="w-full min-w-[500px] h-12" viewBox="0 0 600 50">
+                              <defs>
+                                <marker id="arrow-left" viewBox="0 0 10 10" refX="4" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                  <path d="M 10 0 L 0 5 L 10 10 z" fill="#2dd4bf" />
+                                </marker>
+                                <marker id="arrow-right-teal" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#2dd4bf" />
+                                </marker>
+                              </defs>
+                              {/* Line */}
+                              <line x1="30" y1="25" x2="570" y2="25" stroke="#2dd4bf" strokeWidth="2.5" markerStart="url(#arrow-left)" markerEnd="url(#arrow-right-teal)" />
+                              {/* Points */}
+                              {[
+                                { x: 70, val: '-3', color: '#f87171' },
+                                { x: 150, val: '-2', color: '#f87171' },
+                                { x: 230, val: '-1', color: '#f87171' },
+                                { x: 300, val: '0', color: '#fbbf24', isCenter: true },
+                                { x: 370, val: '1', color: '#34d399' },
+                                { x: 440, val: '2', color: '#34d399' },
+                                { x: 510, val: '3', color: '#34d399' },
+                              ].map((pt, i) => (
+                                <g key={i}>
+                                  <line x1={pt.x} y1="18" x2={pt.x} y2="32" stroke={pt.color} strokeWidth="2" />
+                                  <circle cx={pt.x} cy="25" r={pt.isCenter ? '4.5' : '3'} fill={pt.color} />
+                                  <text x={pt.x} y="44" fill={pt.color} fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                                    {pt.val}
+                                  </text>
+                                </g>
+                              ))}
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-xs sm:text-sm font-semibold text-emerald-300">
+                        {isKg
+                          ? '👉 Башкы ориентир: Сан огунда сан канчалык оңдо турса, ошончолук чоң (эгер B чекити Aдан оңдо болсо, B > A).'
+                          : '👉 Главный ориентир: Чем число правее на прямой, тем оно больше (если B правее A, то B > A).'}
+                      </div>
+                    </div>
+
+                    {/* 4. Сравнение целых чисел */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          4
+                        </span>
+                        <span>
+                          {isKg ? 'Бүтүн сандарды салыштыруу' : 'Сравнение целых чисел'}
+                        </span>
+                      </h3>
+
+                      <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2 text-xs sm:text-sm">
+                        <strong className="text-emerald-300 block text-sm">
+                          {isKg ? '• Белгисин эске алуу менен салыштыруу:' : '• Сравнение с учетом знака:'}
+                        </strong>
                         <ul className="space-y-1.5 text-emerald-200/90 list-disc list-inside">
                           <li>
-                            <strong>{isKg ? 'Нөл (0):' : 'Ноль (0):'}</strong>{' '}
                             {isKg
-                              ? 'Бул бүтүн сан, бирок ал оң дагы, терс дагы эмес.'
-                              : 'Это целое число, но оно не является ни положительным, ни отрицательным.'}
+                              ? 'Кандай гана оң сан болбосун, бардык терс сандан дайыма чоң: '
+                              : 'Любой плюс всегда сильнее любого минуса: '}
+                            <span className="font-mono text-emerald-300 font-bold">-10 &lt; 2</span>
                           </li>
                           <li>
-                            <strong>{isKg ? 'Оң бүтүн сандар:' : 'Положительные целые:'}</strong>{' '}
-                            {isKg ? 'Натуралдык сандар менен бирдей.' : 'Полностью совпадают с натуральными числами.'}
+                            {isKg
+                              ? 'Эки терс сандын нөлгө жакын турганы (модулу кичинеси) чоңураак: '
+                              : 'Из двух минусов больше тот, который ближе к нулю: '}
+                            <span className="font-mono text-emerald-300 font-bold">-3 &gt; -8</span>
                           </li>
                         </ul>
+                      </div>
+
+                      {/* Strict vs Non-strict */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-amber-800/50 space-y-2">
+                          <div className="flex items-center gap-2 text-amber-300 font-bold">
+                            <span className="w-4 h-4 rounded-full border-2 border-amber-400 bg-transparent inline-block" />
+                            <span>{isKg ? 'Катуу салыштыруу (> же <)' : 'Строгое сравнение (> или <)'}</span>
+                          </div>
+                          <p className="text-emerald-200/80 text-xs leading-relaxed">
+                            {isKg
+                              ? 'Чектик сан жоопко кирбейт (сан огунда ичи бош чекит ○ менен белгиленет).'
+                              : 'Граничное число не входит в ответ (на числовой прямой обозначается выколотой точкой ○).'}
+                          </p>
+                          <div className="p-3 rounded-lg bg-black/50 border border-amber-500/20 text-xs text-amber-200/95 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-amber-300">{isKg ? 'Мисал 1:' : 'Пример 1:'}</span>
+                              <span className="font-mono bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-bold">x &gt; 5</span>
+                              <span>→ {isKg ? '6, 7, 8... (5 саны кирбейт)' : 'подходят 6, 7, 8... (число 5 не входит)'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-amber-300">{isKg ? 'Мисал 2:' : 'Пример 2:'}</span>
+                              <span className="font-mono bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-200 font-bold">x &lt; 3</span>
+                              <span>→ {isKg ? '2, 1, 0, -1... (3 саны кирбейт)' : 'подходят 2, 1, 0, -1... (число 3 не входит)'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <div className="flex items-center gap-2 text-emerald-300 font-bold">
+                            <span className="w-4 h-4 rounded-full bg-emerald-400 inline-block" />
+                            <span>{isKg ? 'Катуу эмес салыштыруу (≥ же ≤)' : 'Нестрогое сравнение (≥ или ≤)'}</span>
+                          </div>
+                          <p className="text-emerald-200/80 text-xs leading-relaxed">
+                            {isKg
+                              ? 'Чектик сан дагы жоопко кирет (сан огунда боелгон чекит ● менен белгиленет).'
+                              : 'Граничное число входит в ответ (на числовой прямой обозначается закрашенной точкой ●).'}
+                          </p>
+                          <div className="p-3 rounded-lg bg-black/50 border border-emerald-500/20 text-xs text-emerald-200/95 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-emerald-300">{isKg ? 'Мисал 1:' : 'Пример 1:'}</span>
+                              <span className="font-mono bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-200 font-bold">x ≥ 5</span>
+                              <span>→ {isKg ? '5, 6, 7, 8... (5 саны кирет)' : 'подходят 5, 6, 7, 8... (число 5 входит)'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-emerald-300">{isKg ? 'Мисал 2:' : 'Пример 2:'}</span>
+                              <span className="font-mono bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-200 font-bold">x ≤ -2</span>
+                              <span>→ {isKg ? '-2, -3, -4... (-2 саны кирет)' : 'подходят -2, -3, -4... (число -2 входит)'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 5. Разряды чисел */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          5
+                        </span>
+                        <span>
+                          {isKg ? 'Сандардын разряддары' : 'Разряды чисел'}
+                        </span>
+                      </h3>
+                      <p className="text-emerald-200/90 text-xs sm:text-sm">
+                        {isKg
+                          ? 'Сандагы цифранын ээлеген орду, оңдон солго карай саналат.'
+                          : 'Место цифры в числе, отсчитывается справа налево.'}
+                      </p>
+
+                      <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-3">
+                        <div className="text-xs sm:text-sm text-emerald-300 font-bold">
+                          {isKg ? 'Мисал: 457 санында:' : 'Пример: В числе 457:'}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-700/40">
+                            <div className="text-lg font-black text-white font-mono">4</div>
+                            <div className="text-emerald-300 font-bold">{isKg ? 'Жүздүктөр' : 'Сотни'}</div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-700/40">
+                            <div className="text-lg font-black text-white font-mono">5</div>
+                            <div className="text-teal-300 font-bold">{isKg ? 'Ондуктар' : 'Десятки'}</div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-700/40">
+                            <div className="text-lg font-black text-white font-mono">7</div>
+                            <div className="text-amber-300 font-bold">{isKg ? 'Бирдиктер' : 'Единицы'}</div>
+                          </div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-[#010907] border border-emerald-900 font-mono text-xs text-center text-emerald-300">
+                          457 = 400 + 50 + 7 = 4 · 100 + 5 · 10 + 7 · 1
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 6. Математическое округление */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          6
+                        </span>
+                        <span>
+                          {isKg ? 'Математикалык тегөрөктөө' : 'Математическое округление'}
+                        </span>
+                      </h3>
+                      <p className="text-emerald-200/90 text-xs sm:text-sm">
+                        {isKg
+                          ? 'Ашыкча цифраларды эреже боюнча кесебиз: оң жагындагы кийинки цифраны карайбыз.'
+                          : 'Срезаем лишние цифры по правилу: смотрим на следующую цифру справа.'}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-1.5">
+                          <div className="text-emerald-400 font-bold">0, 1, 2, 3, 4</div>
+                          <p className="text-emerald-200/80">
+                            {isKg
+                              ? 'Разрядды ошол бойдон калтырабыз (ордунда калат): 43 → 40 (3 ордунда калтырат).'
+                              : 'Оставляем разряд как есть: 43 → 40 (цифра 3 оставляет на месте).'}
+                          </p>
+                        </div>
+                        <div className="p-3.5 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-1.5">
+                          <div className="text-amber-300 font-bold">5, 6, 7, 8, 9</div>
+                          <p className="text-emerald-200/80">
+                            {isKg
+                              ? 'Разрядга +1 кошобуз (жогору тегөрөктөө): 47 → 50 (7 жогору тартат).'
+                              : 'Накидываем +1 к разряду (округление вверх): 47 → 50 (7 тянет вверх).'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 7. Прикладное округление (с избытком и недостатком) */}
+                    <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 space-y-4">
+                      <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black flex items-center justify-center">
+                          7
+                        </span>
+                        <span>
+                          {isKg ? 'Турмуштук (колдонмо) тегөрөктөө' : 'Прикладное округление (с избытком и недостатком)'}
+                        </span>
+                      </h3>
+                      <p className="text-emerald-300 font-medium text-xs sm:text-sm">
+                        {isKg
+                          ? 'Математика турмуштук логикага жол берет:'
+                          : 'Математика уступает жизненной логике:'}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <div className="text-emerald-400 font-bold flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-xs">
+                              {isKg ? 'Ашыгы менен' : 'С избытком'}
+                            </span>
+                            <span>{isKg ? '(чоң жагына)' : '(в большую сторону)'}</span>
+                          </div>
+                          <p className="text-emerald-200/90 leading-relaxed">
+                            {isKg
+                              ? '13 адамды 4 орундуу машиналар менен ташуу керек (13 : 4 = 3.25). Үч машинага баары батпайт, ошондуктан 4 машина алабыз.'
+                              : 'Нужно везти 13 человек на 4-местных машинах (13 : 4 = 3.25). В три машины все не влезут, поэтому берем 4 машины.'}
+                          </p>
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-[#02100c] border border-emerald-800/60 space-y-2">
+                          <div className="text-teal-400 font-bold flex items-center gap-1.5">
+                            <span className="px-2 py-0.5 rounded bg-teal-500/20 text-teal-300 text-xs">
+                              {isKg ? 'Кемдиги менен' : 'С недостатком'}
+                            </span>
+                            <span>{isKg ? '(кичине жагына)' : '(в меньшую сторону)'}</span>
+                          </div>
+                          <p className="text-emerald-200/90 leading-relaxed">
+                            {isKg
+                              ? '500 сом бар, китептин баасы 120 сом (500 : 120 = 4.16). 5-китепке акча жетпейт, демек 4 гана китеп сатып ала алабыз.'
+                              : 'Есть 500 сомов, книга стоит 120 сомов (500 : 120 = 4.16). На 5-ю книгу не хватает, значит купить можем только 4 книги.'}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </>
@@ -1230,50 +1632,100 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                     : 'Реальные бланки заданий и пошаговые иллюстрации с разбором решений:'}
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {selectedTopic.photos?.map((photo, pIdx) => (
-                    <div
-                      key={photo.id}
-                      className="relative rounded-2xl bg-[#041a14] border border-emerald-700/60 overflow-hidden shadow-lg hover:border-emerald-400 transition-all group"
-                    >
-                      {/* Mathematical blueprint frame corner marks */}
-                      <div className="absolute top-2 left-2 z-20 font-mono text-[9px] font-black text-white/50 bg-black/60 px-1.5 py-0.5 rounded border border-white/20">
-                        {pIdx === 0 ? '∀x ∈ ℕ: x ≥ 1' : 'Δ = b² - 4ac'}
+                <div className="relative rounded-3xl overflow-hidden">
+                  {/* If user is NOT subscribed to Accessible (Standard) or Premium, lock photos */}
+                  {!isSubscribed && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-[#031510]/90 backdrop-blur-md text-center rounded-3xl border border-emerald-600/50">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-xl shadow-emerald-500/30 mb-3">
+                        <ImageIcon className="w-7 h-7 text-slate-950" />
                       </div>
-                      <div className="absolute top-2 right-2 z-20 font-mono text-[9px] font-black text-white/50 bg-black/60 px-1.5 py-0.5 rounded border border-white/20">
-                        {pIdx === 0 ? 'a² + b² = c²' : 'x ∈ ℤ'}
-                      </div>
-
-                      <div className="relative aspect-[4/3] bg-black/40 overflow-hidden flex items-center justify-center">
-                        <img
-                          src={photo.imageUrl}
-                          alt={photo.titleRu}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setPreviewPhotoUrl(photo.imageUrl)}
-                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs backdrop-blur-xs cursor-pointer"
-                        >
-                          <Eye className="w-5 h-5 text-emerald-400" />
-                          <span>{isKg ? 'Чоңойтуп көрүү' : 'Увеличить фото'}</span>
-                        </button>
-                      </div>
-                      <div className="p-4 bg-[#031510] border-t border-emerald-800/60 space-y-1 relative">
-                        <div className="flex items-center justify-between gap-2">
-                          <h5 className="text-xs sm:text-sm font-bold text-white">
-                            {isKg ? photo.titleKg : photo.titleRu}
-                          </h5>
-                          <span className="font-mono text-[10px] text-white/40 shrink-0">
-                            {pIdx === 0 ? '№1 Math' : '№2 Math'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] sm:text-xs text-emerald-200/70 leading-snug">
-                          {isKg ? photo.descriptionKg : photo.descriptionRu}
-                        </p>
-                      </div>
+                      <h4 className="text-lg sm:text-xl font-black text-white mb-1.5">
+                        {isKg ? 'Сүрөт-материалдар жана чыгаруу жолдору жазылууда жеткиликтүү' : 'Фотоматериалы реального ОРТ и разбор решений'}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-emerald-200/80 max-w-md mb-4 leading-relaxed">
+                        {isKg
+                          ? 'Чыныгы ЖРТ бланкалары, тузактардын сүрөт-анализдери «Доступная» жана «Премиум» жазылууларында ачык.'
+                          : 'Реальные бланки ОРТ с пошаговым разбором решений и ловушек доступны в тарифах «Доступная» (2 000 сом) и «Премиум» (5 000 сом).'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleOpenPlanChoice}
+                        className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/25 flex items-center gap-2 cursor-pointer"
+                      >
+                        <Zap className="w-4 h-4" />
+                        <span>{isKg ? 'Жазылууну активдештирүү' : 'Оформить подписку'}</span>
+                      </button>
                     </div>
-                  ))}
+                  )}
+
+                  {!selectedTopic.photos || selectedTopic.photos.length === 0 ? (
+                    <div className="p-8 rounded-2xl bg-[#041a14] border border-emerald-800/60 text-center flex flex-col items-center justify-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <ImageIcon className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-bold text-white">
+                        {isKg ? 'Азырынча жүктөлө элек' : 'Еще не загружено'}
+                      </p>
+                      <p className="text-xs text-emerald-200/60">
+                        {isKg ? 'Сүрөт-материалдар жакында кошулат.' : 'Фотоматериалы и разборы скоро появятся.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 ${!isSubscribed ? 'filter blur-sm select-none pointer-events-none opacity-30' : ''}`}>
+                      {selectedTopic.photos.map((photo, pIdx) => (
+                        <div
+                          key={photo.id}
+                          className="relative rounded-2xl bg-[#041a14] border border-emerald-700/60 overflow-hidden shadow-lg hover:border-emerald-400 transition-all group"
+                        >
+                          {/* Mathematical blueprint frame corner marks */}
+                          <div className="absolute top-2 left-2 z-20 font-mono text-[9px] font-black text-white/50 bg-black/60 px-1.5 py-0.5 rounded border border-white/20">
+                            {pIdx === 0 ? '∀x ∈ ℕ: x ≥ 1' : 'Δ = b² - 4ac'}
+                          </div>
+                          <div className="absolute top-2 right-2 z-20 font-mono text-[9px] font-black text-white/50 bg-black/60 px-1.5 py-0.5 rounded border border-white/20">
+                            {pIdx === 0 ? 'a² + b² = c²' : 'x ∈ ℤ'}
+                          </div>
+
+                          <div className="relative aspect-[4/3] bg-black/40 overflow-hidden flex items-center justify-center">
+                            {photo.imageUrl ? (
+                              <>
+                                <img
+                                  src={photo.imageUrl}
+                                  alt={photo.titleRu}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => isSubscribed && setPreviewPhotoUrl(photo.imageUrl)}
+                                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white font-bold text-xs backdrop-blur-xs cursor-pointer"
+                                >
+                                  <Eye className="w-5 h-5 text-emerald-400" />
+                                  <span>{isKg ? 'Чоңойтуп көрүү' : 'Увеличить фото'}</span>
+                                </button>
+                              </>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center text-emerald-300/60 p-4 text-center">
+                                <ImageIcon className="w-8 h-8 mb-2 opacity-50 text-emerald-400" />
+                                <span className="text-xs font-bold text-emerald-200/80">{isKg ? 'Азырынча жүктөлө элек' : 'Еще не загружено'}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4 bg-[#031510] border-t border-emerald-800/60 space-y-1 relative">
+                            <div className="flex items-center justify-between gap-2">
+                              <h5 className="text-xs sm:text-sm font-bold text-white">
+                                {isKg ? photo.titleKg : photo.titleRu}
+                              </h5>
+                              <span className="font-mono text-[10px] text-white/40 shrink-0">
+                                {pIdx === 0 ? '№1 Math' : '№2 Math'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] sm:text-xs text-emerald-200/70 leading-snug">
+                              {isKg ? photo.descriptionKg : photo.descriptionRu}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1499,33 +1951,39 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                   <div className={`${!isPremium ? 'filter blur-sm select-none pointer-events-none opacity-40' : ''} space-y-4`}>
                     <div className="relative aspect-video rounded-2xl bg-black border border-emerald-800/80 overflow-hidden shadow-2xl flex items-center justify-center group">
                       {isPlayingVideo ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#020b08]">
-                          <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-400 mb-3 animate-pulse">
-                            <Play className="w-8 h-8 ml-1" />
-                          </div>
-                          <h4 className="text-base font-bold text-white mb-1">
-                            {isKg ? 'Видеосабак ойнотулууда' : 'Видеоурок воспроизводится'}
-                          </h4>
-                          <p className="text-xs text-emerald-200/60 max-w-sm">
-                            {isKg
-                              ? 'Автордук методика: ЖРТ сабактары жана талдоолор'
-                              : 'Авторская методика ОРТ: видеоразбор темы и заданий'}
-                          </p>
+                        <div className="w-full h-full relative">
+                          <iframe
+                            src="https://www.youtube.com/embed/How87IgS9Pw?autoplay=1&rel=0"
+                            title={isKg ? selectedTopic.titleKg : selectedTopic.titleRu}
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setIsPlayingVideo(false)}
+                            className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 hover:bg-black text-white text-xs font-bold border border-white/20 backdrop-blur-md transition-colors cursor-pointer z-10"
+                          >
+                            {isKg ? 'Жабуу' : 'Закрыть видео'}
+                          </button>
                         </div>
                       ) : (
                         <>
                           <img
-                            src="https://res.cloudinary.com/rw9qhk3a/image/upload/v1787233847/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E__12_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg"
+                            src={
+                              selectedTopic.videos?.[0]?.thumbnailUrl ||
+                              'https://img.youtube.com/vi/How87IgS9Pw/maxresdefault.jpg'
+                            }
                             alt="Video Thumbnail"
-                            className="w-full h-full object-cover opacity-40"
+                            className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-between p-4 sm:p-6">
                             <div className="flex items-center justify-between">
                               <span className="px-3 py-1 rounded-xl bg-black/70 border border-emerald-500/40 text-emerald-300 text-xs font-bold backdrop-blur-md">
-                                14:20
+                                {selectedTopic.videos?.[0]?.duration || '15:30'}
                               </span>
                               <span className="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-bold backdrop-blur-md">
-                                Full HD • 1080p
+                                YouTube HD • 1080p
                               </span>
                             </div>
 
@@ -1541,33 +1999,17 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
 
                             <div className="space-y-1">
                               <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
-                                {isKg ? 'Автордук видеоролик' : 'Авторский видеоролик'}
+                                {isKg ? 'Автордук видеоразбор' : 'Авторский видеоразбор'}
                               </span>
-                              <h4 className="text-sm sm:text-base font-bold text-white">
+                              <h4 className="text-sm sm:text-base font-bold text-white line-clamp-2">
                                 {isKg
-                                  ? '1-тема: Натуралдык жана бүтүн сандардын теориясы жана ЖРТ мисалдары'
-                                  : 'Тема 1: Теория натуральных и целых чисел и решение задач ОРТ'}
+                                  ? `${cleanTopicTitle(selectedTopic.titleKg)}: Теманын теориясы жана ЖРТ мисалдары`
+                                  : `${cleanTopicTitle(selectedTopic.titleRu)}: Теория темы и разбор тестов ОРТ`}
                               </h4>
                             </div>
                           </div>
                         </>
                       )}
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-[#031510] border border-emerald-800/60 flex items-center gap-3.5">
-                      <div className="w-11 h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0 shadow-md">
-                        <GraduationCap className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h5 className="text-xs sm:text-sm font-bold text-white">
-                          {isKg ? 'Эксперттик видеосабак' : 'Экспертный видеоурок'}
-                        </h5>
-                        <p className="text-[11px] text-emerald-200/70">
-                          {isKg
-                            ? 'ЖРТ боюнча автордук методика жана мисалдардын толук талдоосу'
-                            : 'Авторская методика подготовки к ОРТ и разбор всех заданий'}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>

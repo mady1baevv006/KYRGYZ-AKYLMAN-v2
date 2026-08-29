@@ -1,6 +1,235 @@
 import express from 'express';
 import path from 'path';
+import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
+
+// --- Telegram Bot Authentication State ---
+interface TelegramAuthSession {
+  token: string;
+  createdAt: number;
+  status: 'pending' | 'authenticated' | 'expired';
+  user?: {
+    id: number;
+    first_name: string;
+    last_name?: string;
+    username?: string;
+    photo_url?: string;
+    auth_date: number;
+  };
+}
+
+const authSessions = new Map<string, TelegramAuthSession>();
+
+// Cleanup expired sessions older than 15 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, session] of authSessions.entries()) {
+    if (now - session.createdAt > 15 * 60 * 1000) {
+      authSessions.delete(token);
+    }
+  }
+}, 60000);
+
+let currentBotUsername = process.env.TELEGRAM_BOT_USERNAME || 'kyrgyzakylman_bot';
+const botToken =
+  process.env.TELEGRAM_BOT_TOKEN ||
+  process.env.BOT_TOKEN ||
+  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM';
+
+// Extract bot ID from token prefix
+const botId = botToken.split(':')[0] || '8778115011';
+
+/**
+ * Verifies the Telegram Login Widget data according to official Telegram specification:
+ * https://core.telegram.org/widgets/login-legacy
+ *
+ * 1. Build data_check_string: alphabetical key=value joined by \n (excluding 'hash')
+ * 2. secret_key = SHA256(botToken)
+ * 3. calculated_hash = HMAC-SHA256(secret_key, data_check_string)
+ * 4. Verify auth_date freshness (<= 86400 seconds)
+ */
+function verifyTelegramWidgetData(
+  data: Record<string, any>,
+  token: string
+): { valid: boolean; error?: string; user?: any } {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Неверные данные авторизации' };
+  }
+
+  const { hash, ...rest } = data;
+  if (!hash) {
+    return { valid: false, error: 'Отсутствует параметр hash' };
+  }
+
+  const authDate = Number(rest.auth_date);
+  if (!authDate || isNaN(authDate)) {
+    return { valid: false, error: 'Некорректная дата auth_date' };
+  }
+
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  // Check auth_date within 24 hours (86400s)
+  if (nowSeconds - authDate > 86400) {
+    return { valid: false, error: 'Срок действия авторизации истек (auth_date устарел)' };
+  }
+
+  // Build sorted data_check_string
+  const checkArr: string[] = [];
+  const keys = Object.keys(rest).sort();
+  for (const key of keys) {
+    const val = rest[key];
+    if (val !== undefined && val !== null && val !== '') {
+      checkArr.push(`${key}=${val}`);
+    }
+  }
+  const dataCheckString = checkArr.join('\n');
+
+  // secret_key is sha256 hash of the bot token
+  const secretKey = crypto.createHash('sha256').update(token).digest();
+
+  // Calculate HMAC-SHA-256 signature
+  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+  if (calculatedHash.toLowerCase() !== String(hash).toLowerCase()) {
+    console.warn('[Telegram Auth] Hash mismatch:', {
+      received: hash,
+      calculated: calculatedHash,
+      dataCheckString,
+    });
+    return { valid: false, error: 'Неверная цифровая подпись Telegram HMAC-SHA-256' };
+  }
+
+  return {
+    valid: true,
+    user: {
+      id: Number(rest.id),
+      first_name: String(rest.first_name || ''),
+      last_name: rest.last_name ? String(rest.last_name) : undefined,
+      username: rest.username ? `@${String(rest.username).replace(/^@/, '')}` : undefined,
+      photo_url: rest.photo_url ? String(rest.photo_url) : undefined,
+      auth_date: authDate,
+    },
+  };
+}
+
+async function setupTelegramBot() {
+  if (!botToken) {
+    console.log('[Telegram Auth] No TELEGRAM_BOT_TOKEN provided. Mock/Dev auth mode enabled.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+    if (res.ok) {
+      const data = (await res.json()) as any;
+      if (data.ok && data.result?.username) {
+        currentBotUsername = data.result.username;
+        console.log(`[Telegram Auth] Connected to @${currentBotUsername}`);
+      }
+    }
+  } catch (err) {
+    console.error('[Telegram Auth] Error connecting to Telegram API:', err);
+  }
+
+  // Start background long polling to capture /start auth_<token>
+  startTelegramPolling(botToken);
+}
+
+function handleTelegramMessage(message: any, token: string) {
+  if (!message || !message.text) return;
+  const text = message.text.trim();
+
+  // Match /start auth_xxx or /start xxx
+  if (text.startsWith('/start')) {
+    const parts = text.split(/\s+/);
+    const payload = parts[1] || '';
+
+    let matchedToken = '';
+    if (authSessions.has(payload)) {
+      matchedToken = payload;
+    } else if (payload.startsWith('auth_') && authSessions.has(payload.replace(/^auth_/, ''))) {
+      matchedToken = payload.replace(/^auth_/, '');
+    } else if (authSessions.has(`auth_${payload}`)) {
+      matchedToken = `auth_${payload}`;
+    }
+
+    if (matchedToken && authSessions.has(matchedToken)) {
+      const session = authSessions.get(matchedToken)!;
+      const from = message.from;
+
+      session.status = 'authenticated';
+      session.user = {
+        id: from.id,
+        first_name: from.first_name || 'Ученик',
+        last_name: from.last_name || '',
+        username: from.username ? `@${from.username}` : `@id${from.id}`,
+        auth_date: Math.floor(Date.now() / 1000),
+      };
+
+      console.log(`[Telegram Auth] Successfully authenticated user @${from.username || from.id} for session ${matchedToken}`);
+
+      // Send confirmation message with a button back to the site
+      const replyText = `🎉 *Салам, ${from.first_name || 'Окуучу'}!*\n\n✅ Сиз *«Кыргыз Акылман»* платформасына кирүүнү ийгиликтүү ырастадыңыз!\n\nСайттагы баракчаңыз даяр. Сайтка кайтуу үчүн төмөнкү баскычты басыңыз же браузериңизди ачыңыз:`;
+
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: message.chat.id,
+          text: replyText,
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🌐 Сайтка өтүү (Кабинетке кирүү)',
+                  url: `https://ais-dev-ujrvp4yp5bjj4vfv3upgnk-853874930794.asia-southeast1.run.app/?tg_auth=${matchedToken}`,
+                },
+              ],
+            ],
+          },
+        }),
+      }).catch((e) => console.error('[Telegram Auth] Failed to send confirmation message:', e));
+    } else {
+      // General greeting for /start without token
+      const greeting = `👋 *Салам, ${message.from?.first_name || 'досум'}!*\n\nБул *«Кыргыз Акылман»* ЖРТ даярдоо платформасынын расмий авторизация боту.\n\nСайтка кирүү үчүн сайттагы *«Telegram аркылуу кирүү»* баскычын басыңыз.`;
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: message.chat.id,
+          text: greeting,
+          parse_mode: 'Markdown',
+        }),
+      }).catch(() => {});
+    }
+  }
+}
+
+async function startTelegramPolling(token: string) {
+  let offset = 0;
+  console.log('[Telegram Auth] Started long polling listener for Telegram updates...');
+
+  while (true) {
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=${offset}&timeout=25`);
+      if (res.ok) {
+        const data = (await res.json()) as any;
+        if (data.ok && Array.isArray(data.result)) {
+          for (const update of data.result) {
+            offset = Math.max(offset, update.update_id + 1);
+            if (update.message) {
+              handleTelegramMessage(update.message, token);
+            }
+          }
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 4000));
+      }
+    } catch {
+      await new Promise((r) => setTimeout(r, 4000));
+    }
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -26,8 +255,107 @@ async function startServer() {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
+      telegramBot: currentBotUsername,
+      hasBotToken: Boolean(botToken),
     });
   });
+
+  // --- Telegram Bot Auth Endpoints ---
+
+  // 1. Get Telegram Bot info & ID
+  app.get('/api/telegram/config', (req, res) => {
+    res.json({
+      ok: true,
+      botUsername: currentBotUsername,
+      botId,
+      hasToken: Boolean(botToken),
+    });
+  });
+
+  // 2. Verify Telegram Login Widget authentication (Official HMAC-SHA-256 verification)
+  app.post('/api/telegram/verify-widget', (req, res) => {
+    const payload = req.body;
+    if (!payload || !payload.hash) {
+      return res.status(400).json({ ok: false, error: 'Отсутствуют данные авторизации или параметр hash' });
+    }
+
+    const result = verifyTelegramWidgetData(payload, botToken);
+    if (!result.valid) {
+      return res.status(401).json({ ok: false, error: result.error || 'Ошибка проверки подписи Telegram' });
+    }
+
+    console.log(`[Telegram Widget] Verified user @${result.user?.username || result.user?.id} via HMAC-SHA-256`);
+
+    return res.json({
+      ok: true,
+      user: result.user,
+    });
+  });
+
+  // 3. Generate new Telegram Auth Session (for direct bot /start fallback)
+  app.post('/api/telegram/create-session', (req, res) => {
+    const token = 'akylman_' + crypto.randomBytes(16).toString('hex');
+    const session: TelegramAuthSession = {
+      token,
+      createdAt: Date.now(),
+      status: 'pending',
+    };
+    authSessions.set(token, session);
+
+    const botUrl = `https://t.me/${currentBotUsername}?start=${token}`;
+    res.json({
+      ok: true,
+      token,
+      botUrl,
+      botUsername: currentBotUsername,
+    });
+  });
+
+  // 3. Check/Poll Telegram Auth Session Status
+  app.get('/api/telegram/check-session', (req, res) => {
+    const token = String(req.query.token || '');
+    if (!token || !authSessions.has(token)) {
+      return res.json({ ok: false, status: 'expired', error: 'Сессия не найдена или истекла' });
+    }
+
+    const session = authSessions.get(token)!;
+    res.json({
+      ok: true,
+      status: session.status,
+      user: session.user || null,
+    });
+  });
+
+  // 4. Mock / Dev Confirm Auth (allows testing in preview or dev mode)
+  app.post('/api/telegram/mock-authenticate', (req, res) => {
+    const { token, username, firstName } = req.body;
+    if (!token || !authSessions.has(token)) {
+      return res.status(404).json({ ok: false, error: 'Сессия не найдена' });
+    }
+
+    const session = authSessions.get(token)!;
+    session.status = 'authenticated';
+    session.user = {
+      id: Math.floor(100000000 + Math.random() * 900000000),
+      first_name: firstName || 'Тестовый Ученик',
+      username: username ? (username.startsWith('@') ? username : `@${username}`) : '@test_student',
+      auth_date: Math.floor(Date.now() / 1000),
+    };
+
+    res.json({ ok: true, session });
+  });
+
+  // 5. Telegram Webhook Endpoint (optional alternative to polling)
+  app.post('/api/telegram/webhook', (req, res) => {
+    const update = req.body;
+    if (update && update.message && botToken) {
+      handleTelegramMessage(update.message, botToken);
+    }
+    res.json({ ok: true });
+  });
+
+  // Initialize bot connection in background
+  setupTelegramBot().catch((e) => console.error('[Telegram Init Error]', e));
 
   // Vite middleware for development vs static build for production
   if (process.env.NODE_ENV !== 'production') {
@@ -50,3 +378,4 @@ async function startServer() {
 }
 
 startServer();
+
