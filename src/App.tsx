@@ -31,7 +31,14 @@ const AppContent: React.FC<{
   lang: AppLanguage;
   setLang: (lang: AppLanguage) => void;
 }> = ({ lang, setLang }) => {
-  const { user, isTrialWelcomeOpen, closeTrialWelcomeModal, loginWithTelegram } = useAuth();
+  const {
+    user,
+    isAuthModalOpen,
+    closeAuthModal,
+    isTrialWelcomeOpen,
+    closeTrialWelcomeModal,
+    loginWithTelegram,
+  } = useAuth();
   const location = useLocation();
   const isTestPage = location.pathname.startsWith('/test/');
   const isAdminPage = location.pathname === '/admin';
@@ -131,10 +138,10 @@ const AppContent: React.FC<{
       </main>
       {!isTestPage && !isAdminPage && <Footer lang={lang} />}
       <ScrollToTopButton lang={lang} />
-      {/* Global Mandatory Auth Guard: Blocks entire UI if user is not authenticated */}
+      {/* Auth Modal with exit close button */}
       <AuthModal
-        isOpen={!user}
-        onClose={() => {}}
+        isOpen={isAuthModalOpen && !user}
+        onClose={closeAuthModal}
         lang={lang}
       />
       <TrialWelcomeModal

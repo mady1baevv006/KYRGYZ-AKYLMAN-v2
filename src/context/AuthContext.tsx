@@ -281,6 +281,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   subscriptionStatus: UserSubscriptionStatus;
+  isAuthModalOpen: boolean;
+  openAuthModal: () => void;
+  closeAuthModal: () => void;
   isTrialWelcomeOpen: boolean;
   openTrialWelcomeModal: () => void;
   closeTrialWelcomeModal: () => void;
@@ -336,8 +339,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
+    // If not logged in on first visit, open auth modal
+    try {
+      const saved = localStorage.getItem(CURRENT_USER_KEY) || localStorage.getItem('user');
+      return !saved;
+    } catch {
+      return true;
+    }
+  });
   const [isTrialWelcomeOpen, setIsTrialWelcomeOpen] = useState(false);
   const [tick, setTick] = useState(0);
+
+  const openAuthModal = () => setIsAuthModalOpen(true);
+  const closeAuthModal = () => setIsAuthModalOpen(false);
 
   // Live timer tick every 30 seconds for accurate countdown
   useEffect(() => {
@@ -956,6 +971,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isAdmin,
         subscriptionStatus,
+        isAuthModalOpen,
+        openAuthModal,
+        closeAuthModal,
         isTrialWelcomeOpen,
         openTrialWelcomeModal,
         closeTrialWelcomeModal,

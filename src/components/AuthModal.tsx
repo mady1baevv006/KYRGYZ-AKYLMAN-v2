@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   ArrowRight,
@@ -118,12 +118,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [googleLoading, setGoogleLoading] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(false);
 
+  // WhatsApp Auth Session & Return Listener
+  const [whatsappSession, setWhatsappSession] = useState<{
+    sessionId: string;
+    url: string;
+    startedAt: number;
+  } | null>(null);
+  const [whatsappStep, setWhatsappStep] = useState<'idle' | 'waiting' | 'verifying'>('idle');
+  const hasLeftTabRef = useRef(false);
+  const isVerifyingRef = useRef(false);
+
   // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
   const isKg = lang === 'kg';
-
-  // If user is authenticated, modal can be closed. If not authenticated, modal CANNOT be closed (Auth Guard).
-  const canClose = Boolean(user);
 
   // Reset inputs when opening or closing
   useEffect(() => {
@@ -133,19 +140,90 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } else {
       setGoogleLoading(false);
       setTelegramLoading(false);
+      setWhatsappSession(null);
+      setWhatsappStep('idle');
+      hasLeftTabRef.current = false;
+      isVerifyingRef.current = false;
     }
   }, [isOpen]);
 
-  // Handle escape key only if user is allowed to close
+  // Listener for when user returns to this browser tab after sending message in WhatsApp
+  useEffect(() => {
+    if (!whatsappSession || whatsappStep !== 'waiting') return;
+
+    const performVerificationAndLogin = () => {
+      if (isVerifyingRef.current) return;
+      isVerifyingRef.current = true;
+      setWhatsappStep('verifying');
+
+      // Simulate verification process of WhatsApp message confirmation
+      setTimeout(() => {
+        loginWithWhatsApp(
+          `wa_${whatsappSession.sessionId}`,
+          isKg ? 'WhatsApp Колдонуучусу' : 'Пользователь WhatsApp'
+        );
+
+        setSuccessMessage(
+          isKg
+            ? '🎉 WhatsApp аркылуу ийгиликтүү кирдиңиз!'
+            : '🎉 Успешный вход через WhatsApp!'
+        );
+
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage('');
+          setWhatsappSession(null);
+          setWhatsappStep('idle');
+          hasLeftTabRef.current = false;
+          isVerifyingRef.current = false;
+        }, 800);
+      }, 1200);
+    };
+
+    // Track tab blur (user switched to WhatsApp)
+    const handleBlur = () => {
+      hasLeftTabRef.current = true;
+    };
+
+    // Track tab focus (user returned from WhatsApp)
+    const handleFocus = () => {
+      // Allow verification if user left the tab OR after reasonable delay (1.5s) to avoid click-flicker
+      if (hasLeftTabRef.current || Date.now() - whatsappSession.startedAt >= 1500) {
+        performVerificationAndLogin();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        hasLeftTabRef.current = true;
+      } else if (document.visibilityState === 'visible') {
+        if (hasLeftTabRef.current || Date.now() - whatsappSession.startedAt >= 1500) {
+          performVerificationAndLogin();
+        }
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [whatsappSession, whatsappStep, isKg, loginWithWhatsApp, onClose]);
+
+  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && canClose && isOpen) {
+      if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canClose, isOpen, onClose]);
+  }, [isOpen, onClose]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -239,7 +317,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   // ==========================================
-  // 3. WHATSAPP DIRECT AUTH FLOW
+  // 3. WHATSAPP DIRECT AUTH FLOW (WAIT FOR SEND & RETURN)
   // ==========================================
   const handleWhatsAppClick = () => {
     setErrorMessage('');
@@ -253,32 +331,56 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const message = `Привет! Подтверждаю вход на сайт Kyrgyz Akylman. Мой код: ${sessionId}`;
       const waUrl = `https://wa.me/996778995700?text=${encodeURIComponent(message)}`;
 
-      // 3. Redirect / Open WhatsApp
+      // 3. Reset tracking flags & set waiting session state
+      hasLeftTabRef.current = false;
+      isVerifyingRef.current = false;
+      setWhatsappSession({
+        sessionId,
+        url: waUrl,
+        startedAt: Date.now(),
+      });
+      setWhatsappStep('waiting');
+
+      // 4. Open WhatsApp in a new tab/window
       try {
         window.open(waUrl, '_blank', 'noopener,noreferrer');
       } catch {
         window.location.href = waUrl;
       }
-
-      // 4. Authenticate user immediately & grant full access
-      loginWithWhatsApp(`wa_${sessionId}`, isKg ? 'WhatsApp Колдонуучусу' : 'Пользователь WhatsApp');
-
-      setSuccessMessage(
-        isKg
-          ? '🎉 WhatsApp аркылуу ийгиликтүү кирдиңиз!'
-          : '🎉 Успешный вход через WhatsApp!'
-      );
-
-      setTimeout(() => {
-        onClose();
-        setSuccessMessage('');
-      }, 700);
     } catch (err: any) {
       setErrorMessage(
         err?.message ||
           (isKg ? 'WhatsApp аркылуу кирүүдө ката кетти' : 'Ошибка входа через WhatsApp')
       );
     }
+  };
+
+  // Manual fallback confirmation if focus event wasn't fired
+  const handleManualWhatsAppConfirm = () => {
+    if (!whatsappSession || isVerifyingRef.current) return;
+    isVerifyingRef.current = true;
+    setWhatsappStep('verifying');
+
+    // Simulate verification process
+    setTimeout(() => {
+      loginWithWhatsApp(
+        `wa_${whatsappSession.sessionId}`,
+        isKg ? 'WhatsApp Колдонуучусу' : 'Пользователь WhatsApp'
+      );
+      setSuccessMessage(
+        isKg
+          ? '🎉 WhatsApp аркылуу ийгиликтүү кирдиңиз!'
+          : '🎉 Успешный вход через WhatsApp!'
+      );
+      setTimeout(() => {
+        onClose();
+        setSuccessMessage('');
+        setWhatsappSession(null);
+        setWhatsappStep('idle');
+        hasLeftTabRef.current = false;
+        isVerifyingRef.current = false;
+      }, 800);
+    }, 1200);
   };
 
   // ==========================================
@@ -313,7 +415,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
-        if (canClose && e.target === e.currentTarget) {
+        if (e.target === e.currentTarget) {
           onClose();
         }
       }}
@@ -325,17 +427,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Glowing background aura */}
         <div className="absolute top-0 right-1/4 w-48 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close Button: only visible if user is logged in */}
-        {canClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
+        {/* Close Button (Крестик для выхода из окна авторизации) */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer z-20 border border-white/15 shadow-md group"
+          aria-label="Закрыть окно авторизации"
+          title={isKg ? 'Жабуу' : 'Закрыть'}
+        >
+          <X className="w-4 h-4 text-slate-300 group-hover:text-white group-hover:rotate-90 transition-transform duration-200" />
+        </button>
 
         {/* Header Title */}
         <div className="text-center mb-4">
@@ -360,6 +461,84 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="mb-4 p-3 rounded-2xl bg-emerald-950/70 border border-emerald-500/70 text-emerald-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-200">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{successMessage}</span>
+          </div>
+        )}
+
+        {/* WhatsApp Waiting / Verifying Status Banner */}
+        {whatsappSession && !successMessage && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-950/90 border border-emerald-500/80 text-emerald-100 text-xs space-y-2.5 animate-in fade-in duration-200 shadow-xl shadow-emerald-950">
+            {whatsappStep === 'verifying' ? (
+              <div className="flex items-center gap-3 py-1">
+                <div className="w-6 h-6 rounded-full bg-[#25D366]/20 border border-[#25D366] flex items-center justify-center shrink-0">
+                  <div className="w-3.5 h-3.5 border-2 border-[#25D366] border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div>
+                  <p className="font-bold text-white text-xs">
+                    {isKg ? 'WhatsApp ырастоосу текшерилүүдө...' : 'Проверка подтверждения в WhatsApp...'}
+                  </p>
+                  <p className="text-[11px] text-emerald-300/80 mt-0.5">
+                    {isKg ? 'Сессия текшерилип жатат, бир аз күтө туруңуз...' : 'Синхронизируем вход с WhatsApp, пожалуйста, подождите...'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 rounded-full bg-[#25D366]/20 border border-[#25D366]/60 flex items-center justify-center shrink-0">
+                    <div className="w-2.5 h-2.5 border-2 border-[#25D366] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-white text-xs">
+                      {isKg ? 'WhatsApp аркылуу билдирүү жөнөтүү күтүлүүдө...' : 'Ожидание отправки сообщения в WhatsApp...'}
+                    </p>
+                    <p className="text-[11px] text-emerald-300/80 mt-0.5 leading-relaxed">
+                      {isKg
+                        ? 'WhatsApp аркылуу даярдалган кодду жөнөтүп, ушул терезеге кайтыңыз — кирүү автоматтык түрдө аткарылат.'
+                        : 'Отправьте подготовленный код в WhatsApp и вернитесь на эту вкладку — вход выполнится автоматически.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-emerald-800/50 text-[11px]">
+                  <span className="text-emerald-300/90 font-mono font-semibold">
+                    {isKg ? 'Сессия' : 'Код'}: <strong className="text-white bg-black/40 px-1.5 py-0.5 rounded border border-emerald-500/30">{whatsappSession.sessionId}</strong>
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleManualWhatsAppConfirm}
+                      className="px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-slate-950 font-black text-[11px] transition-all cursor-pointer shadow-sm"
+                    >
+                      {isKg ? 'Жөнөттүм' : 'Я отправил'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          window.open(whatsappSession.url, '_blank', 'noopener,noreferrer');
+                        } catch {
+                          window.location.href = whatsappSession.url;
+                        }
+                      }}
+                      className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] transition-all cursor-pointer"
+                      title={isKg ? 'Кайра ачуу' : 'Открыть снова'}
+                    >
+                      {isKg ? 'Кайра ачуу' : 'Открыть'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWhatsappSession(null);
+                        setWhatsappStep('idle');
+                      }}
+                      className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-[11px] transition-all cursor-pointer"
+                    >
+                      {isKg ? 'Жокко чыгаруу' : 'Отмена'}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 

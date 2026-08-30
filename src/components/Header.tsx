@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   lang = 'ru',
   setLang,
 }) => {
-  const { user, isVip, isTrial, isAdmin, logout } = useAuth();
+  const { user, isVip, isTrial, isAdmin, logout, openAuthModal } = useAuth();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement>(null);
@@ -294,6 +294,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <button
                 type="button"
+                onClick={openAuthModal}
                 className="group relative inline-flex items-center gap-1 sm:gap-2 px-3.5 sm:px-6 py-1.5 sm:py-2.5 rounded-lg sm:rounded-2xl text-xs sm:text-base font-black text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:via-teal-200 hover:to-emerald-300 shadow-md sm:shadow-lg shadow-emerald-500/20 sm:shadow-emerald-500/30 hover:shadow-emerald-400/45 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shrink-0"
               >
                 <span>{t.loginBtn}</span>
