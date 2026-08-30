@@ -12,6 +12,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { TwinklingStars } from './components/TwinklingStars';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthModal } from './components/AuthModal';
 import { TrialWelcomeModal } from './components/TrialWelcomeModal';
 import { CreativeLoader } from './components/CreativeLoader';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
@@ -30,7 +31,7 @@ const AppContent: React.FC<{
   lang: AppLanguage;
   setLang: (lang: AppLanguage) => void;
 }> = ({ lang, setLang }) => {
-  const { isTrialWelcomeOpen, closeTrialWelcomeModal, loginWithTelegram } = useAuth();
+  const { user, isTrialWelcomeOpen, closeTrialWelcomeModal, loginWithTelegram } = useAuth();
   const location = useLocation();
   const isTestPage = location.pathname.startsWith('/test/');
   const isAdminPage = location.pathname === '/admin';
@@ -130,6 +131,12 @@ const AppContent: React.FC<{
       </main>
       {!isTestPage && !isAdminPage && <Footer lang={lang} />}
       <ScrollToTopButton lang={lang} />
+      {/* Global Mandatory Auth Guard: Blocks entire UI if user is not authenticated */}
+      <AuthModal
+        isOpen={!user}
+        onClose={() => {}}
+        lang={lang}
+      />
       <TrialWelcomeModal
         isOpen={isTrialWelcomeOpen}
         onClose={closeTrialWelcomeModal}
