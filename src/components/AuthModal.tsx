@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   ArrowRight,
@@ -118,16 +118,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [googleLoading, setGoogleLoading] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(false);
 
-  // WhatsApp Auth Session & Return Listener
-  const [whatsappSession, setWhatsappSession] = useState<{
-    sessionId: string;
-    url: string;
-    startedAt: number;
-  } | null>(null);
-  const [whatsappStep, setWhatsappStep] = useState<'idle' | 'waiting' | 'verifying'>('idle');
-  const hasLeftTabRef = useRef(false);
-  const isVerifyingRef = useRef(false);
-
   // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
   const isKg = lang === 'kg';
@@ -140,79 +130,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } else {
       setGoogleLoading(false);
       setTelegramLoading(false);
-      setWhatsappSession(null);
-      setWhatsappStep('idle');
-      hasLeftTabRef.current = false;
-      isVerifyingRef.current = false;
     }
   }, [isOpen]);
-
-  // Listener for when user returns to this browser tab after sending message in WhatsApp
-  useEffect(() => {
-    if (!whatsappSession || whatsappStep !== 'waiting') return;
-
-    const performVerificationAndLogin = () => {
-      if (isVerifyingRef.current) return;
-      isVerifyingRef.current = true;
-      setWhatsappStep('verifying');
-
-      // Simulate verification process of WhatsApp message confirmation
-      setTimeout(() => {
-        loginWithWhatsApp(
-          `wa_${whatsappSession.sessionId}`,
-          isKg ? 'WhatsApp Колдонуучусу' : 'Пользователь WhatsApp'
-        );
-
-        setSuccessMessage(
-          isKg
-            ? '🎉 WhatsApp аркылуу ийгиликтүү кирдиңиз!'
-            : '🎉 Успешный вход через WhatsApp!'
-        );
-
-        setTimeout(() => {
-          onClose();
-          setSuccessMessage('');
-          setWhatsappSession(null);
-          setWhatsappStep('idle');
-          hasLeftTabRef.current = false;
-          isVerifyingRef.current = false;
-        }, 800);
-      }, 1200);
-    };
-
-    // Track tab blur (user switched to WhatsApp)
-    const handleBlur = () => {
-      hasLeftTabRef.current = true;
-    };
-
-    // Track tab focus (user returned from WhatsApp)
-    const handleFocus = () => {
-      // Allow verification if user left the tab OR after reasonable delay (1.5s) to avoid click-flicker
-      if (hasLeftTabRef.current || Date.now() - whatsappSession.startedAt >= 1500) {
-        performVerificationAndLogin();
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        hasLeftTabRef.current = true;
-      } else if (document.visibilityState === 'visible') {
-        if (hasLeftTabRef.current || Date.now() - whatsappSession.startedAt >= 1500) {
-          performVerificationAndLogin();
-        }
-      }
-    };
-
-    window.addEventListener('blur', handleBlur);
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('blur', handleBlur);
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [whatsappSession, whatsappStep, isKg, loginWithWhatsApp, onClose]);
 
   // Handle escape key
   useEffect(() => {
@@ -317,95 +236,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   // ==========================================
-  // 3. WHATSAPP DIRECT AUTH FLOW (WAIT FOR SEND & RETURN)
+  // 3. WHATSAPP DIRECT AUTH (TEMPORARILY DISABLED)
   // ==========================================
   const handleWhatsAppClick = () => {
-    setErrorMessage('');
     setSuccessMessage('');
-
-    try {
-      // 1. Generate random 6-character auth token
-      const sessionId = Math.random().toString(36).substring(2, 8).toUpperCase();
-
-      // 2. Format prefilled WhatsApp message
-      const message = `Привет! Подтверждаю вход на сайт Kyrgyz Akylman. Мой код: ${sessionId}`;
-      const waUrl = `https://wa.me/996778995700?text=${encodeURIComponent(message)}`;
-
-      // 3. Reset tracking flags & set waiting session state
-      hasLeftTabRef.current = false;
-      isVerifyingRef.current = false;
-      setWhatsappSession({
-        sessionId,
-        url: waUrl,
-        startedAt: Date.now(),
-      });
-      setWhatsappStep('waiting');
-
-      // 4. Open WhatsApp in a new tab/window
-      try {
-        window.open(waUrl, '_blank', 'noopener,noreferrer');
-      } catch {
-        window.location.href = waUrl;
-      }
-    } catch (err: any) {
-      setErrorMessage(
-        err?.message ||
-          (isKg ? 'WhatsApp аркылуу кирүүдө ката кетти' : 'Ошибка входа через WhatsApp')
-      );
-    }
-  };
-
-  // Manual fallback confirmation if focus event wasn't fired
-  const handleManualWhatsAppConfirm = () => {
-    if (!whatsappSession || isVerifyingRef.current) return;
-    isVerifyingRef.current = true;
-    setWhatsappStep('verifying');
-
-    // Simulate verification process
-    setTimeout(() => {
-      loginWithWhatsApp(
-        `wa_${whatsappSession.sessionId}`,
-        isKg ? 'WhatsApp Колдонуучусу' : 'Пользователь WhatsApp'
-      );
-      setSuccessMessage(
-        isKg
-          ? '🎉 WhatsApp аркылуу ийгиликтүү кирдиңиз!'
-          : '🎉 Успешный вход через WhatsApp!'
-      );
-      setTimeout(() => {
-        onClose();
-        setSuccessMessage('');
-        setWhatsappSession(null);
-        setWhatsappStep('idle');
-        hasLeftTabRef.current = false;
-        isVerifyingRef.current = false;
-      }, 800);
-    }, 1200);
+    setErrorMessage(
+      isKg
+        ? 'Сайт даярдоо процессинде: WhatsApp аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
+        : 'Сайт в процессе подготовки: вход через WhatsApp временно недоступен. Пожалуйста, используйте Google или Telegram.'
+    );
   };
 
   // ==========================================
-  // 4. EMAIL 6-DIGIT CODE (DISABLED IN DEV MODE)
+  // 4. EMAIL 6-DIGIT CODE (TEMPORARILY DISABLED)
   // ==========================================
   const handleEmailFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage(
       isKg
-        ? 'Сайт даярдоо процессинде: Почтадагы 6 орундуу код аркылуу кирүү азырынча иштебейт. Сураныч, Google же Telegram аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход через 6-значный код почты пока не работает. Пожалуйста, используйте Google или Telegram.'
+        ? 'Сайт даярдоо процессинде: Почтадагы 6 орундуу код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
+        : 'Сайт в процессе подготовки: вход через 6-значный код почты временно недоступен. Пожалуйста, используйте Google или Telegram.'
     );
   };
 
   // ==========================================
-  // 5. SMS METHOD (DISABLED IN DEV MODE)
+  // 5. SMS METHOD (TEMPORARILY DISABLED)
   // ==========================================
   const handlePhoneFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage(
       isKg
-        ? 'Сайт даярдоо процессинде: SMS-код аркылуу кирүү азырынча иштебейт. Сураныч, Google же Telegram аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход по SMS-коду пока не работает. Пожалуйста, используйте Google или Telegram.'
+        ? 'Сайт даярдоо процессинде: SMS-код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
+        : 'Сайт в процессе подготовки: вход по SMS-коду временно недоступен. Пожалуйста, используйте Google или Telegram.'
     );
   };
 
@@ -464,84 +328,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* WhatsApp Waiting / Verifying Status Banner */}
-        {whatsappSession && !successMessage && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-950/90 border border-emerald-500/80 text-emerald-100 text-xs space-y-2.5 animate-in fade-in duration-200 shadow-xl shadow-emerald-950">
-            {whatsappStep === 'verifying' ? (
-              <div className="flex items-center gap-3 py-1">
-                <div className="w-6 h-6 rounded-full bg-[#25D366]/20 border border-[#25D366] flex items-center justify-center shrink-0">
-                  <div className="w-3.5 h-3.5 border-2 border-[#25D366] border-t-transparent rounded-full animate-spin" />
-                </div>
-                <div>
-                  <p className="font-bold text-white text-xs">
-                    {isKg ? 'WhatsApp ырастоосу текшерилүүдө...' : 'Проверка подтверждения в WhatsApp...'}
-                  </p>
-                  <p className="text-[11px] text-emerald-300/80 mt-0.5">
-                    {isKg ? 'Сессия текшерилип жатат, бир аз күтө туруңуз...' : 'Синхронизируем вход с WhatsApp, пожалуйста, подождите...'}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 rounded-full bg-[#25D366]/20 border border-[#25D366]/60 flex items-center justify-center shrink-0">
-                    <div className="w-2.5 h-2.5 border-2 border-[#25D366] border-t-transparent rounded-full animate-spin" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-white text-xs">
-                      {isKg ? 'WhatsApp аркылуу билдирүү жөнөтүү күтүлүүдө...' : 'Ожидание отправки сообщения в WhatsApp...'}
-                    </p>
-                    <p className="text-[11px] text-emerald-300/80 mt-0.5 leading-relaxed">
-                      {isKg
-                        ? 'WhatsApp аркылуу даярдалган кодду жөнөтүп, ушул терезеге кайтыңыз — кирүү автоматтык түрдө аткарылат.'
-                        : 'Отправьте подготовленный код в WhatsApp и вернитесь на эту вкладку — вход выполнится автоматически.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1 border-t border-emerald-800/50 text-[11px]">
-                  <span className="text-emerald-300/90 font-mono font-semibold">
-                    {isKg ? 'Сессия' : 'Код'}: <strong className="text-white bg-black/40 px-1.5 py-0.5 rounded border border-emerald-500/30">{whatsappSession.sessionId}</strong>
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={handleManualWhatsAppConfirm}
-                      className="px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-slate-950 font-black text-[11px] transition-all cursor-pointer shadow-sm"
-                    >
-                      {isKg ? 'Жөнөттүм' : 'Я отправил'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        try {
-                          window.open(whatsappSession.url, '_blank', 'noopener,noreferrer');
-                        } catch {
-                          window.location.href = whatsappSession.url;
-                        }
-                      }}
-                      className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] transition-all cursor-pointer"
-                      title={isKg ? 'Кайра ачуу' : 'Открыть снова'}
-                    >
-                      {isKg ? 'Кайра ачуу' : 'Открыть'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWhatsappSession(null);
-                        setWhatsappStep('idle');
-                      }}
-                      className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-[11px] transition-all cursor-pointer"
-                    >
-                      {isKg ? 'Жокко чыгаруу' : 'Отмена'}
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
         {/* Quick Fast Google, Telegram & WhatsApp Sign-in buttons */}
         <div className="space-y-2.5 mb-4">
           <div className="grid grid-cols-3 gap-2">
@@ -577,7 +363,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <span>Google</span>
             </button>
 
-            {/* 2. Telegram (UNIFIED FOR ALL DEVICES) */}
+            {/* 2. Telegram (UNIFIED FOR ALL DEVICES - WORKING) */}
             <button
               type="button"
               onClick={handleTelegramClick}
@@ -594,7 +380,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <span>Telegram</span>
             </button>
 
-            {/* 3. WhatsApp (CLICK SHOWS NOTIFICATION) */}
+            {/* 3. WhatsApp (TEMPORARILY UNAVAILABLE - SHOWS NOTICE) */}
             <button
               type="button"
               onClick={handleWhatsAppClick}
@@ -655,6 +441,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div>
           {method === 'email' && (
             <form onSubmit={handleEmailFormSubmit} className="space-y-4">
+              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs space-y-2">
+                <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                  <span>
+                    {isKg
+                      ? 'Электрондук почта аркылуу кирүү убактылуу жеткиликсиз'
+                      : 'Вход через эл. почту временно недоступен'}
+                  </span>
+                </div>
+                <p className="text-amber-200/90 leading-relaxed">
+                  {isKg
+                    ? 'Сайт даярдоо процессинде. Почтадагы 6 орундуу код аркылуу кирүү убактылуу өчүрүлгөн. Сураныч, Google же Telegram аркылуу кириңиз.'
+                    : 'Сайт находится на стадии подготовки. Вход по 6-значному коду на почту временно отключен. Пожалуйста, используйте вход через Google или Telegram.'}
+                </p>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1.5">
                   {isKg ? 'Электрондук почтаңыз' : 'Электронная почта'}
