@@ -1,96 +1,63 @@
 import crypto from 'crypto';
 
-function verifyTelegramWidgetData(
-  data: Record<string, any>,
-  token: string
-): { valid: boolean; error?: string; user?: any } {
+const BOT_TOKEN = (
+  process.env.TELEGRAM_BOT_TOKEN ||
+  process.env.BOT_TOKEN ||
+  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
+).trim();
+
+function verifyTelegramAuth(data: Record<string, any>): { valid: boolean; error?: string; userData?: any } {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Отсутствуют данные авторизации' };
   }
 
-  const cleanToken = (token || process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM')
-    .trim()
-    .replace(/^["']|["']$/g, '');
-
-  const receivedHash = String(data.hash || '').trim().toLowerCase();
-  if (!receivedHash) {
+  const { hash, ...userData } = data;
+  if (!hash) {
     return { valid: false, error: 'Отсутствует обязательный параметр hash' };
   }
 
-  const authDate = Number(data.auth_date);
-  if (!authDate || isNaN(authDate)) {
-    return { valid: false, error: 'Некорректная дата auth_date' };
-  }
-
-  const nowSeconds = Math.floor(Date.now() / 1000);
-  if (nowSeconds - authDate > 86400 * 3) {
-    // 3 days window to allow minor timezone / device clock differences
-    return { valid: false, error: 'Срок действия авторизации истек (auth_date устарел)' };
-  }
-
-  // Telegram official Login Widget keys
-  const telegramStandardKeys = ['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username'];
-
-  // Variation A: Only standard Telegram keys
-  const standardCheckArr: string[] = [];
-  telegramStandardKeys.sort().forEach((key) => {
-    const val = data[key];
-    if (val !== undefined && val !== null && val !== '') {
-      standardCheckArr.push(`${key}=${val}`);
-    }
-  });
-  const standardDataCheckString = standardCheckArr.join('\n');
-
-  // Variation B: All keys excluding 'hash'
-  const allCheckArr: string[] = [];
-  Object.keys(data)
-    .filter((k) => k !== 'hash')
+  // 1. Формируем data-check-string (сортировка по алфавиту)
+  const dataCheckString = Object.keys(userData)
     .sort()
-    .forEach((key) => {
-      const val = data[key];
-      if (val !== undefined && val !== null && val !== '') {
-        allCheckArr.push(`${key}=${val}`);
-      }
-    });
-  const allDataCheckString = allCheckArr.join('\n');
+    .map((key) => `${key}=${userData[key]}`)
+    .join('\n');
 
-  // Key derivation 1: Classic Widget secret_key = SHA256(bot_token)
-  const widgetSecretKey = crypto.createHash('sha256').update(cleanToken).digest();
-  const hashWidgetStandard = crypto.createHmac('sha256', widgetSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
-  const hashWidgetAll = crypto.createHmac('sha256', widgetSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+  // 2. Секретный ключ для Login Widget: SHA256 от токена
+  const secretKey = crypto
+    .createHash('sha256')
+    .update(BOT_TOKEN)
+    .digest();
 
-  // Key derivation 2: WebApp secret_key = HMAC-SHA256("WebAppData", bot_token)
-  const webAppSecretKey = crypto.createHmac('sha256', 'WebAppData').update(cleanToken).digest();
-  const hashWebAppStandard = crypto.createHmac('sha256', webAppSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
-  const hashWebAppAll = crypto.createHmac('sha256', webAppSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+  // 3. Вычисляем хэш
+  const calculatedHash = crypto
+    .createHmac('sha256', secretKey)
+    .update(dataCheckString)
+    .digest('hex');
 
-  const isMatched =
-    receivedHash === hashWidgetStandard ||
-    receivedHash === hashWidgetAll ||
-    receivedHash === hashWebAppStandard ||
-    receivedHash === hashWebAppAll;
+  console.log('--- DEBUG TELEGRAM AUTH ---');
+  console.log('Data String:\n', dataCheckString);
+  console.log('Calculated:', calculatedHash);
+  console.log('Received:', hash);
 
-  if (!isMatched) {
-    console.error('[Telegram Auth API Error] Hash mismatch details:', {
-      receivedHash,
-      calculatedWidgetStandard: hashWidgetStandard,
-      calculatedWidgetAll: hashWidgetAll,
-      calculatedWebAppStandard: hashWebAppStandard,
-      standardDataCheckString,
-      botTokenPrefix: cleanToken.substring(0, 10) + '...',
-    });
-    return { valid: false, error: 'Неверная цифровая подпись Telegram HMAC-SHA-256' };
+  const isValid = calculatedHash.toLowerCase() === String(hash).trim().toLowerCase();
+
+  if (!isValid) {
+    return {
+      valid: false,
+      error: 'Неверная цифровая подпись Telegram HMAC-SHA-256',
+    };
   }
 
   return {
     valid: true,
-    user: {
-      id: Number(data.id),
-      first_name: String(data.first_name || ''),
-      last_name: data.last_name ? String(data.last_name) : undefined,
-      username: data.username ? `@${String(data.username).replace(/^@/, '')}` : undefined,
-      photo_url: data.photo_url ? String(data.photo_url) : undefined,
-      auth_date: authDate,
+    userData: {
+      id: Number(userData.id),
+      first_name: String(userData.first_name || ''),
+      last_name: userData.last_name ? String(userData.last_name) : undefined,
+      username: userData.username ? `@${String(userData.username).replace(/^@/, '')}` : undefined,
+      photo_url: userData.photo_url ? String(userData.photo_url) : undefined,
+      auth_date: Number(userData.auth_date),
+      ...userData,
     },
   };
 }
@@ -162,13 +129,7 @@ export default async function handler(req: any, res: any) {
       return res.status ? res.status(400).json(resp) : new Response(JSON.stringify(resp), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const botToken = (
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.BOT_TOKEN ||
-      '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
-    ).trim();
-
-    const result = verifyTelegramWidgetData(payload, botToken);
+    const result = verifyTelegramAuth(payload);
     if (!result.valid) {
       const resp = {
         success: false,
@@ -178,12 +139,12 @@ export default async function handler(req: any, res: any) {
       return res.status ? res.status(401).json(resp) : new Response(JSON.stringify(resp), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
-    console.log(`[Telegram Auth Vercel] Successfully verified user @${result.user?.username || result.user?.id}`);
+    console.log(`[Telegram Auth Vercel] Successfully verified user @${result.userData?.username || result.userData?.id}`);
 
     const resp = {
       success: true,
       ok: true,
-      user: result.user,
+      user: result.userData,
     };
     return res.status ? res.status(200).json(resp) : new Response(JSON.stringify(resp), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err: any) {
@@ -211,13 +172,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const botToken = (
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.BOT_TOKEN ||
-      '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
-    ).trim();
-
-    const result = verifyTelegramWidgetData(payload, botToken);
+    const result = verifyTelegramAuth(payload);
     if (!result.valid) {
       return new Response(JSON.stringify({ success: false, ok: false, error: result.error }), {
         status: 401,
@@ -225,7 +180,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, ok: true, user: result.user }), {
+    return new Response(JSON.stringify({ success: true, ok: true, user: result.userData }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
@@ -245,13 +200,7 @@ export async function GET(request: Request) {
       payload[k] = v;
     }
 
-    const botToken = (
-      process.env.TELEGRAM_BOT_TOKEN ||
-      process.env.BOT_TOKEN ||
-      '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
-    ).trim();
-
-    const result = verifyTelegramWidgetData(payload, botToken);
+    const result = verifyTelegramAuth(payload);
     if (!result.valid) {
       return new Response(JSON.stringify({ success: false, ok: false, error: result.error }), {
         status: 401,
@@ -259,7 +208,7 @@ export async function GET(request: Request) {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, ok: true, user: result.user }), {
+    return new Response(JSON.stringify({ success: true, ok: true, user: result.userData }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });

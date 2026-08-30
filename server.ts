@@ -32,103 +32,55 @@ setInterval(() => {
 }, 60000);
 
 let currentBotUsername = process.env.TELEGRAM_BOT_USERNAME || 'kyrgyzakylman_bot';
-const botToken =
+const BOT_TOKEN = (
   process.env.TELEGRAM_BOT_TOKEN ||
   process.env.BOT_TOKEN ||
-  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM';
+  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
+).trim();
+const botToken = BOT_TOKEN;
 
 // Extract bot ID from token prefix
-const botId = botToken.split(':')[0] || '8778115011';
+const botId = BOT_TOKEN.split(':')[0] || '8778115011';
 
 /**
- * Verifies the Telegram Login Widget / WebApp data according to official Telegram specification:
- * https://core.telegram.org/widgets/login-legacy
- *
- * 1. Build data_check_string: alphabetical key=value joined by \n (excluding 'hash')
- * 2. secret_key = SHA256(botToken) [Widget] OR HMAC-SHA256("WebAppData", botToken) [WebApp]
- * 3. calculated_hash = HMAC-SHA256(secret_key, data_check_string)
- * 4. Verify auth_date freshness
+ * Verifies the Telegram Login Widget auth hash according to official Telegram specification.
  */
-function verifyTelegramWidgetData(
-  data: Record<string, any>,
-  token: string
-): { valid: boolean; error?: string; user?: any } {
+function verifyTelegramAuth(data: Record<string, any>): { valid: boolean; error?: string; userData?: any } {
   if (!data || typeof data !== 'object') {
-    return { valid: false, error: 'Неверные данные авторизации' };
+    return { valid: false, error: 'Отсутствуют данные авторизации' };
   }
 
-  const cleanToken = (token || process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM')
-    .trim()
-    .replace(/^["']|["']$/g, '');
-
-  const receivedHash = String(data.hash || '').trim().toLowerCase();
-  if (!receivedHash) {
+  const { hash, ...userData } = data;
+  if (!hash) {
     return { valid: false, error: 'Отсутствует параметр hash' };
   }
 
-  const authDate = Number(data.auth_date);
-  if (!authDate || isNaN(authDate)) {
-    return { valid: false, error: 'Некорректная дата auth_date' };
-  }
-
-  // Allow up to 3 days window to prevent issues with timezone/clock skew
-  const nowSeconds = Math.floor(Date.now() / 1000);
-  if (nowSeconds - authDate > 86400 * 3) {
-    return { valid: false, error: 'Срок действия авторизации истек (auth_date устарел)' };
-  }
-
-  // Telegram official Login Widget keys
-  const telegramStandardKeys = ['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username'];
-
-  // Construct data_check_string variations:
-  // Variation A: Only standard Telegram keys present in data
-  const standardCheckArr: string[] = [];
-  telegramStandardKeys.sort().forEach((key) => {
-    const val = data[key];
-    if (val !== undefined && val !== null && val !== '') {
-      standardCheckArr.push(`${key}=${val}`);
-    }
-  });
-  const standardDataCheckString = standardCheckArr.join('\n');
-
-  // Variation B: All keys excluding 'hash'
-  const allCheckArr: string[] = [];
-  Object.keys(data)
-    .filter((k) => k !== 'hash')
+  // 1. Формируем data-check-string (сортировка по алфавиту)
+  const dataCheckString = Object.keys(userData)
     .sort()
-    .forEach((key) => {
-      const val = data[key];
-      if (val !== undefined && val !== null && val !== '') {
-        allCheckArr.push(`${key}=${val}`);
-      }
-    });
-  const allDataCheckString = allCheckArr.join('\n');
+    .map((key) => `${key}=${userData[key]}`)
+    .join('\n');
 
-  // Key derivation 1: Classic Widget secret_key = SHA256(bot_token)
-  const widgetSecretKey = crypto.createHash('sha256').update(cleanToken).digest();
-  const hashWidgetStandard = crypto.createHmac('sha256', widgetSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
-  const hashWidgetAll = crypto.createHmac('sha256', widgetSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+  // 2. Секретный ключ для Login Widget: SHA256 от токена
+  const secretKey = crypto
+    .createHash('sha256')
+    .update(BOT_TOKEN)
+    .digest();
 
-  // Key derivation 2: WebApp secret_key = HMAC-SHA256("WebAppData", bot_token)
-  const webAppSecretKey = crypto.createHmac('sha256', 'WebAppData').update(cleanToken).digest();
-  const hashWebAppStandard = crypto.createHmac('sha256', webAppSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
-  const hashWebAppAll = crypto.createHmac('sha256', webAppSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+  // 3. Вычисляем хэш
+  const calculatedHash = crypto
+    .createHmac('sha256', secretKey)
+    .update(dataCheckString)
+    .digest('hex');
 
-  const isMatched =
-    receivedHash === hashWidgetStandard ||
-    receivedHash === hashWidgetAll ||
-    receivedHash === hashWebAppStandard ||
-    receivedHash === hashWebAppAll;
+  console.log('--- DEBUG TELEGRAM AUTH ---');
+  console.log('Data String:\n', dataCheckString);
+  console.log('Calculated:', calculatedHash);
+  console.log('Received:', hash);
 
-  if (!isMatched) {
-    console.error('[Telegram Auth Error] Hash mismatch details:', {
-      receivedHash,
-      calculatedWidgetStandard: hashWidgetStandard,
-      calculatedWidgetAll: hashWidgetAll,
-      calculatedWebAppStandard: hashWebAppStandard,
-      standardDataCheckString,
-      botTokenPrefix: cleanToken.substring(0, 10) + '...',
-    });
+  const isValid = calculatedHash.toLowerCase() === String(hash).trim().toLowerCase();
+
+  if (!isValid) {
     return {
       valid: false,
       error: 'Неверная цифровая подпись Telegram HMAC-SHA-256',
@@ -137,13 +89,14 @@ function verifyTelegramWidgetData(
 
   return {
     valid: true,
-    user: {
-      id: Number(data.id),
-      first_name: String(data.first_name || ''),
-      last_name: data.last_name ? String(data.last_name) : undefined,
-      username: data.username ? `@${String(data.username).replace(/^@/, '')}` : undefined,
-      photo_url: data.photo_url ? String(data.photo_url) : undefined,
-      auth_date: authDate,
+    userData: {
+      id: Number(userData.id),
+      first_name: String(userData.first_name || ''),
+      last_name: userData.last_name ? String(userData.last_name) : undefined,
+      username: userData.username ? `@${String(userData.username).replace(/^@/, '')}` : undefined,
+      photo_url: userData.photo_url ? String(userData.photo_url) : undefined,
+      auth_date: Number(userData.auth_date),
+      ...userData,
     },
   };
 }
@@ -344,22 +297,7 @@ async function startServer() {
         });
       }
 
-      const activeToken = (
-        process.env.TELEGRAM_BOT_TOKEN ||
-        process.env.BOT_TOKEN ||
-        botToken ||
-        '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
-      ).trim();
-
-      if (!activeToken) {
-        return res.status(500).json({
-          success: false,
-          ok: false,
-          error: 'Telegram Bot Token не задан в переменных окружения сервера',
-        });
-      }
-
-      const result = verifyTelegramWidgetData(payload, activeToken);
+      const result = verifyTelegramAuth(payload);
       if (!result.valid) {
         console.warn('[Telegram Auth API] Verification failed:', result.error);
         return res.status(401).json({
@@ -370,13 +308,13 @@ async function startServer() {
       }
 
       console.log(
-        `[Telegram Widget] Successfully verified user @${result.user?.username || result.user?.id} via HMAC-SHA-256`
+        `[Telegram Widget] Successfully verified user @${result.userData?.username || result.userData?.id} via HMAC-SHA-256`
       );
 
       return res.status(200).json({
-        success: true,
         ok: true,
-        user: result.user,
+        success: true,
+        user: result.userData,
       });
     } catch (err: any) {
       console.error('[Telegram Auth API] Server exception:', err);
