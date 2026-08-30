@@ -33,6 +33,17 @@ type ModalView = 'default' | 'telegram_waiting';
 const TELEGRAM_BOT_TOKEN = '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM';
 
 /**
+ * Device detection: iOS (iPhone / iPad / iPod) check to bypass Safari number verification popup
+ */
+const isIOSDevice = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  return (
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  );
+};
+
+/**
  * Pure client-side Web Crypto verification for Telegram Login Widget
  */
 async function verifyTelegramAuthClient(data: Record<string, any>): Promise<{ valid: boolean; user: any }> {
@@ -135,6 +146,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     botUsername: string;
   } | null>(null);
 
+  const pollingTimerRef = useRef<any>(null);
+
+  const stopTelegramPolling = () => {
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+  };
+
   // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
 
@@ -151,7 +171,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } else {
       setGoogleLoading(false);
       setTelegramLoading(false);
+      stopTelegramPolling();
     }
+    return () => {
+      stopTelegramPolling();
+    };
   }, [isOpen]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,8 +210,54 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   // ==========================================
-  // 2. TELEGRAM PURE CLIENT-SIDE AUTH
+  // 2. TELEGRAM AUTH (iOS Bot Redirect vs PC/Android Widget)
   // ==========================================
+  const startIOSBotFlow = () => {
+    const botUsername = 'kyrgyzakylman_bot';
+    const sessionToken = `auth_${Math.random().toString(36).substring(2, 11)}_${Date.now()}`;
+    const botUrl = `https://t.me/${botUsername}?start=${sessionToken}`;
+
+    setTelegramSession({
+      token: sessionToken,
+      botUrl,
+      botUsername,
+    });
+
+    setModalView('telegram_waiting');
+
+    // Direct redirect / open in Telegram on iOS to bypass Safari popup restrictions
+    try {
+      window.location.href = botUrl;
+    } catch {
+      window.open(botUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    // 2-second interval polling for iOS
+    stopTelegramPolling();
+    pollingTimerRef.current = setInterval(() => {
+      try {
+        const savedAuth = localStorage.getItem(`akylman_auth_session_${sessionToken}`);
+        if (savedAuth) {
+          const parsed = JSON.parse(savedAuth);
+          if (parsed && (parsed.id || parsed.username)) {
+            stopTelegramPolling();
+            setSuccessMessage(
+              isKg
+                ? `🎉 Telegram аркылуу ийгиликтүү кирдиңиз (${parsed.username || parsed.first_name})!`
+                : `🎉 Успешный вход через Telegram (${parsed.username || parsed.first_name})!`
+            );
+            loginWithTelegram(parsed);
+            setTimeout(() => {
+              onClose();
+              setSuccessMessage('');
+              setModalView('default');
+            }, 600);
+          }
+        }
+      } catch {}
+    }, 2000);
+  };
+
   const startBotWaitingFlow = () => {
     const botUsername = 'kyrgyzakylman_bot';
     const sessionToken = 'akylman_' + Math.random().toString(36).substring(2, 10);
@@ -201,7 +271,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setModalView('telegram_waiting');
 
-    // Safely open Telegram bot in a new tab
     try {
       window.open(botUrl, '_blank', 'noopener,noreferrer');
     } catch {}
@@ -213,6 +282,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTelegramLoading(true);
 
     try {
+      // 1. Check if user is on iOS (iPhone / iPad / iPod)
+      if (isIOSDevice()) {
+        setTelegramLoading(false);
+        startIOSBotFlow();
+        return;
+      }
+
+      // 2. PC / Android / Other devices: exact Telegram Login Widget
       const telegramObj = (window as any).Telegram;
 
       // Check if official Telegram.Login.auth JS method is available
@@ -476,7 +553,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="flex items-center justify-between gap-2 pt-1">
               <button
                 type="button"
-                onClick={() => setModalView('default')}
+                onClick={() => {
+                  stopTelegramPolling();
+                  setModalView('default');
+                }}
                 className="px-3 py-2 text-xs text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
