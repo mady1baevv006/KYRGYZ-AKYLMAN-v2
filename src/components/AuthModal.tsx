@@ -264,7 +264,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     return;
                   }
 
-                  if (verifyData && verifyData.ok && verifyData.user) {
+                  if (verifyData && (verifyData.ok || verifyData.success) && verifyData.user) {
                     console.log('[Telegram Auth] Success! User verified:', verifyData.user);
                     setSuccessMessage(
                       isKg

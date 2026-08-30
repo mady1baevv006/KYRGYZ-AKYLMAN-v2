@@ -278,15 +278,31 @@ async function startServer() {
     });
   });
 
-  // 2. Verify Telegram Login Widget authentication (Official HMAC-SHA-256 verification)
+  // 2. Verify Telegram Login Widget authentication (Official HMAC-SHA-256 verification, supporting POST, GET & OPTIONS)
   const handleTelegramVerify = (req: express.Request, res: express.Response) => {
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
     try {
-      const payload = req.body;
-      console.log('[Telegram Auth API] Incoming verification request:', payload ? Object.keys(payload) : null);
+      // Support payload in req.body (POST) or req.query (GET)
+      const payload =
+        req.method === 'GET'
+          ? (req.query as Record<string, any>)
+          : req.body && Object.keys(req.body).length > 0
+          ? req.body
+          : (req.query as Record<string, any>);
+
+      console.log(`[Telegram Auth API] Incoming ${req.method} verification request:`, payload ? Object.keys(payload) : null);
 
       if (!payload || typeof payload !== 'object' || !payload.hash) {
         return res.status(400).json({
+          success: false,
           ok: false,
           error: 'Отсутствуют данные авторизации Telegram или параметр hash',
         });
@@ -301,6 +317,7 @@ async function startServer() {
 
       if (!activeToken) {
         return res.status(500).json({
+          success: false,
           ok: false,
           error: 'Telegram Bot Token не задан в переменных окружения сервера',
         });
@@ -310,6 +327,7 @@ async function startServer() {
       if (!result.valid) {
         console.warn('[Telegram Auth API] Verification failed:', result.error);
         return res.status(401).json({
+          success: false,
           ok: false,
           error: result.error || 'Ошибка проверки цифровой подписи Telegram',
         });
@@ -320,21 +338,23 @@ async function startServer() {
       );
 
       return res.status(200).json({
+        success: true,
         ok: true,
         user: result.user,
       });
     } catch (err: any) {
       console.error('[Telegram Auth API] Server exception:', err);
       return res.status(500).json({
+        success: false,
         ok: false,
         error: err?.message || 'Внутренняя ошибка сервера при обработке авторизации Telegram',
       });
     }
   };
 
-  app.post('/api/telegram/verify-widget', handleTelegramVerify);
-  app.post('/api/auth/telegram', handleTelegramVerify);
-  app.post('/api/telegram/verify', handleTelegramVerify);
+  app.all('/api/telegram/verify-widget', handleTelegramVerify);
+  app.all('/api/auth/telegram', handleTelegramVerify);
+  app.all('/api/telegram/verify', handleTelegramVerify);
 
   // 3. Generate new Telegram Auth Session (for direct bot /start fallback)
   app.post('/api/telegram/create-session', (req, res) => {
