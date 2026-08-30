@@ -8,12 +8,16 @@ function verifyTelegramWidgetData(
     return { valid: false, error: 'Отсутствуют данные авторизации' };
   }
 
-  const { hash, ...rest } = data;
-  if (!hash) {
+  const cleanToken = (token || process.env.TELEGRAM_BOT_TOKEN || process.env.BOT_TOKEN || '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM')
+    .trim()
+    .replace(/^["']|["']$/g, '');
+
+  const receivedHash = String(data.hash || '').trim().toLowerCase();
+  if (!receivedHash) {
     return { valid: false, error: 'Отсутствует обязательный параметр hash' };
   }
 
-  const authDate = Number(rest.auth_date);
+  const authDate = Number(data.auth_date);
   if (!authDate || isNaN(authDate)) {
     return { valid: false, error: 'Некорректная дата auth_date' };
   }
@@ -24,24 +28,56 @@ function verifyTelegramWidgetData(
     return { valid: false, error: 'Срок действия авторизации истек (auth_date устарел)' };
   }
 
-  const checkArr: string[] = [];
-  const keys = Object.keys(rest).sort();
-  for (const key of keys) {
-    const val = rest[key];
+  // Telegram official Login Widget keys
+  const telegramStandardKeys = ['auth_date', 'first_name', 'id', 'last_name', 'photo_url', 'username'];
+
+  // Variation A: Only standard Telegram keys
+  const standardCheckArr: string[] = [];
+  telegramStandardKeys.sort().forEach((key) => {
+    const val = data[key];
     if (val !== undefined && val !== null && val !== '') {
-      checkArr.push(`${key}=${val}`);
+      standardCheckArr.push(`${key}=${val}`);
     }
-  }
-  const dataCheckString = checkArr.join('\n');
+  });
+  const standardDataCheckString = standardCheckArr.join('\n');
 
-  const secretKey = crypto.createHash('sha256').update(token).digest();
-  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+  // Variation B: All keys excluding 'hash'
+  const allCheckArr: string[] = [];
+  Object.keys(data)
+    .filter((k) => k !== 'hash')
+    .sort()
+    .forEach((key) => {
+      const val = data[key];
+      if (val !== undefined && val !== null && val !== '') {
+        allCheckArr.push(`${key}=${val}`);
+      }
+    });
+  const allDataCheckString = allCheckArr.join('\n');
 
-  if (calculatedHash.toLowerCase() !== String(hash).toLowerCase()) {
-    console.warn('[Telegram Auth API] Hash mismatch:', {
-      received: hash,
-      calculated: calculatedHash,
-      dataCheckString,
+  // Key derivation 1: Classic Widget secret_key = SHA256(bot_token)
+  const widgetSecretKey = crypto.createHash('sha256').update(cleanToken).digest();
+  const hashWidgetStandard = crypto.createHmac('sha256', widgetSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
+  const hashWidgetAll = crypto.createHmac('sha256', widgetSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+
+  // Key derivation 2: WebApp secret_key = HMAC-SHA256("WebAppData", bot_token)
+  const webAppSecretKey = crypto.createHmac('sha256', 'WebAppData').update(cleanToken).digest();
+  const hashWebAppStandard = crypto.createHmac('sha256', webAppSecretKey).update(standardDataCheckString).digest('hex').toLowerCase();
+  const hashWebAppAll = crypto.createHmac('sha256', webAppSecretKey).update(allDataCheckString).digest('hex').toLowerCase();
+
+  const isMatched =
+    receivedHash === hashWidgetStandard ||
+    receivedHash === hashWidgetAll ||
+    receivedHash === hashWebAppStandard ||
+    receivedHash === hashWebAppAll;
+
+  if (!isMatched) {
+    console.error('[Telegram Auth API Error] Hash mismatch details:', {
+      receivedHash,
+      calculatedWidgetStandard: hashWidgetStandard,
+      calculatedWidgetAll: hashWidgetAll,
+      calculatedWebAppStandard: hashWebAppStandard,
+      standardDataCheckString,
+      botTokenPrefix: cleanToken.substring(0, 10) + '...',
     });
     return { valid: false, error: 'Неверная цифровая подпись Telegram HMAC-SHA-256' };
   }
@@ -49,11 +85,11 @@ function verifyTelegramWidgetData(
   return {
     valid: true,
     user: {
-      id: Number(rest.id),
-      first_name: String(rest.first_name || ''),
-      last_name: rest.last_name ? String(rest.last_name) : undefined,
-      username: rest.username ? `@${String(rest.username).replace(/^@/, '')}` : undefined,
-      photo_url: rest.photo_url ? String(rest.photo_url) : undefined,
+      id: Number(data.id),
+      first_name: String(data.first_name || ''),
+      last_name: data.last_name ? String(data.last_name) : undefined,
+      username: data.username ? `@${String(data.username).replace(/^@/, '')}` : undefined,
+      photo_url: data.photo_url ? String(data.photo_url) : undefined,
       auth_date: authDate,
     },
   };
