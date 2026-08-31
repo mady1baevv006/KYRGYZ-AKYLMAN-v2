@@ -3,7 +3,7 @@ import crypto from 'crypto';
 const BOT_TOKEN = (
   process.env.TELEGRAM_BOT_TOKEN ||
   process.env.BOT_TOKEN ||
-  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
+  ''
 ).trim();
 
 function verifyTelegramAuth(data: Record<string, any>): { valid: boolean; error?: string; userData?: any } {

@@ -35,12 +35,14 @@ let currentBotUsername = process.env.TELEGRAM_BOT_USERNAME || 'kyrgyzakylman_bot
 const BOT_TOKEN = (
   process.env.TELEGRAM_BOT_TOKEN ||
   process.env.BOT_TOKEN ||
-  '8778115011:AAGDKc9Sye6QPQR1yzU0pFJqXFXj0r5JQfM'
+  ''
 ).trim();
 const botToken = BOT_TOKEN;
 
-// Extract bot ID from token prefix
-const botId = BOT_TOKEN.split(':')[0] || '8778115011';
+// Extract bot ID from token prefix or env
+const botId = BOT_TOKEN.includes(':')
+  ? BOT_TOKEN.split(':')[0]
+  : (process.env.TELEGRAM_BOT_ID || process.env.VITE_TELEGRAM_BOT_ID || '8778115011');
 
 /**
  * Verifies the Telegram Login Widget auth hash according to official Telegram specification.

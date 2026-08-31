@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Check,
   Crown,
+  School,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -227,7 +228,13 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
                   </div>
                   <div className="hidden sm:flex flex-col">
-                    <span className="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors line-clamp-1 max-w-[120px]">
+                    <span
+                      className={`text-xs transition-colors line-clamp-1 max-w-[130px] ${
+                        isVip
+                          ? 'font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]'
+                          : 'font-bold text-white group-hover:text-emerald-300'
+                      }`}
+                    >
                       {user.name}
                     </span>
                     <span
@@ -248,7 +255,15 @@ export const Header: React.FC<HeaderProps> = ({
                 {userDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-[#06231b] border border-emerald-700/60 shadow-2xl z-50 p-2 text-white animate-in fade-in zoom-in-95 duration-150">
                     <div className="px-3 py-2.5 border-b border-emerald-800/40 mb-1">
-                      <div className="font-bold text-sm text-white truncate">{user.name}</div>
+                      <div
+                        className={`text-sm truncate ${
+                          isVip
+                            ? 'font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]'
+                            : 'font-bold text-white'
+                        }`}
+                      >
+                        {user.name}
+                      </div>
                       <div className="text-xs text-emerald-300/70 truncate">{user.identifier}</div>
                       {isVip && (
                         <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/30 text-amber-300 text-[10px] font-bold">
@@ -264,6 +279,14 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <UserIcon className="w-4 h-4 text-emerald-400" />
                       <span>{t.profile}</span>
+                    </Link>
+                    <Link
+                      to="/courses"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-100 hover:text-white hover:bg-emerald-800/50 transition-colors cursor-pointer"
+                    >
+                      <School className="w-4 h-4 text-emerald-400" />
+                      <span>{lang === 'kg' ? 'Курстар & Класстар' : 'Онлайн-курсы & Классы'}</span>
                     </Link>
                     {isAdmin && (
                       <Link

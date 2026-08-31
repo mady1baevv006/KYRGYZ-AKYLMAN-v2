@@ -355,7 +355,13 @@ export const UsersManager: React.FC = () => {
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-black text-sm sm:text-base text-white truncate">
+                        <h4
+                          className={`font-black text-sm sm:text-base truncate ${
+                            isPaidPrem || isTrialPrem
+                              ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]'
+                              : 'text-white'
+                          }`}
+                        >
                           {u.name}
                         </h4>
                         {isAdminAccount && (

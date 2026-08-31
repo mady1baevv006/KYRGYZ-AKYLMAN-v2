@@ -35,6 +35,7 @@ import { KYRGYZ_UNIVERSITIES } from '../data/constants';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
+import { CoursesSection } from '../components/courses/CoursesSection';
 import { AuthModal } from '../components/AuthModal';
 import { processAndCompressImage } from '../utils/imageUpload';
 
@@ -53,7 +54,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories'>('history');
+  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'courses'>('history');
 
   const [editName, setEditName] = useState(user?.name || '');
   const [editTargetScore, setEditTargetScore] = useState(user?.targetScore || 210);
@@ -361,7 +362,15 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className="text-lg sm:text-3xl font-black tracking-tight truncate max-w-full text-white">{user.name}</h1>
+                <h1
+                  className={`text-lg sm:text-3xl font-black tracking-tight truncate max-w-full ${
+                    isPremium
+                      ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]'
+                      : 'text-white'
+                  }`}
+                >
+                  {user.name}
+                </h1>
                 
                 {/* Badges in the exact same line/row */}
                 <div className="inline-flex items-center gap-2 flex-wrap">
@@ -941,9 +950,27 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
           <GraduationCap className="w-4 h-4" />
           <span>{lang === 'kg' ? 'Теория' : 'Теория'}</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveProfileTab('courses')}
+          className={`px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+            activeProfileTab === 'courses'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 scale-[1.02]'
+              : 'bg-[#06261d] text-emerald-200/80 hover:text-white border border-emerald-800/70 hover:border-emerald-600'
+          }`}
+        >
+          <School className="w-4 h-4 text-amber-300" />
+          <span>{lang === 'kg' ? 'Курстар' : 'Курсы'}</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase">
+            NEW
+          </span>
+        </button>
       </div>
 
-      {activeProfileTab === 'theories' ? (
+      {activeProfileTab === 'courses' ? (
+        <CoursesSection lang={lang} />
+      ) : activeProfileTab === 'theories' ? (
         <TheoriesSection
           user={user}
           lang={lang}

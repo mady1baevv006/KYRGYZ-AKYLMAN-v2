@@ -8,6 +8,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { AdminPage } from './pages/AdminPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { CoursesPage } from './pages/CoursesPage';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { TwinklingStars } from './components/TwinklingStars';
@@ -131,6 +132,7 @@ const AppContent: React.FC<{
           <Route path="/results" element={<ResultsPage lang={lang} />} />
           <Route path="/practice" element={<PracticePage lang={lang} />} />
           <Route path="/profile" element={<ProfilePage lang={lang} />} />
+          <Route path="/courses" element={<CoursesPage lang={lang} />} />
           <Route path="/privacy" element={<PrivacyPage lang={lang} />} />
           <Route path="/terms" element={<TermsPage lang={lang} />} />
           <Route path="/admin" element={<AdminPage />} />

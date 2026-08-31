@@ -280,6 +280,9 @@ interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isVip: boolean;
+  isPremium: boolean;
+  isTrial: boolean;
   subscriptionStatus: UserSubscriptionStatus;
   isAuthModalOpen: boolean;
   openAuthModal: () => void;
@@ -964,12 +967,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
+  const isVip =
+    subscriptionStatus.effectivePlan === 'premium' ||
+    user?.subscriptionPlan === 'premium' ||
+    isAdmin;
+  const isPremium = isVip;
+  const isTrial =
+    !user?.isPaid &&
+    !isAdmin &&
+    (subscriptionStatus.trialStage === 'trial_premium' ||
+      subscriptionStatus.trialStage === 'trial_standard');
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated: !!user,
         isAdmin,
+        isVip,
+        isPremium,
+        isTrial,
         subscriptionStatus,
         isAuthModalOpen,
         openAuthModal,

@@ -4,7 +4,8 @@ import { API_BASE_URL, ANALYTICS_METADATA } from '../data/constants';
 import { StudentsManager } from '../components/admin/StudentsManager';
 import { UsersManager } from '../components/admin/UsersManager';
 import { TestAnswersManager } from '../components/admin/TestAnswersManager';
-import { Award, FileText, ArrowLeft, LogOut, ShieldCheck, Sparkles, Users, FileCheck, Crown } from 'lucide-react';
+import { CoursesAdminManager } from '../components/admin/CoursesAdminManager';
+import { Award, FileText, ArrowLeft, LogOut, ShieldCheck, Sparkles, Users, FileCheck, Crown, School } from 'lucide-react';
 import { useAuth, ADMIN_EMAIL } from '../context/AuthContext';
 
 interface VariantSummary {
@@ -102,7 +103,7 @@ export const AdminPage: React.FC = () => {
 
   const isAuthenticated = authIsAdmin;
 
-  const [activeTab, setActiveTab] = useState<'users' | 'answers' | 'students' | 'tests'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'answers' | 'students' | 'tests' | 'courses'>('users');
 
   const [variantsList, setVariantsList] = useState<VariantSummary[]>([]);
   const [variantId, setVariantId] = useState('');
@@ -573,6 +574,18 @@ export const AdminPage: React.FC = () => {
             <FileText className="w-4 h-4 text-emerald-400" />
             <span>Конструктор тестов</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('courses')}
+            className={`px-3.5 sm:px-5 py-2.5 sm:py-3 border-b-2 font-black text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              activeTab === 'courses'
+                ? 'border-emerald-400 text-emerald-300 bg-emerald-950/40 shadow-xs'
+                : 'border-transparent text-emerald-400/60 hover:text-emerald-200'
+            }`}
+          >
+            <School className="w-4 h-4 text-emerald-400" />
+            <span>Курсы и группы</span>
+          </button>
         </div>
       </header>
 
@@ -673,6 +686,9 @@ export const AdminPage: React.FC = () => {
 
         {/* TAB: STUDENTS MANAGER */}
         {activeTab === 'students' && <StudentsManager />}
+
+        {/* TAB: COURSES AND CLASSES MANAGER */}
+        {activeTab === 'courses' && <CoursesAdminManager />}
 
         {/* TAB: TESTS AND VARIANTS BUILDER */}
         {activeTab === 'tests' && (
