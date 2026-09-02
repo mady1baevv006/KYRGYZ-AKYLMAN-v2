@@ -14,6 +14,8 @@ import {
 import { getFallbackQuestions } from '../data/fallbackQuestions';
 import { getOptimizedTestPageUrl } from '../utils/imageOptimization';
 import { CreativeLoader } from '../components/CreativeLoader';
+import { CeetoDisclaimerModal } from '../components/CeetoDisclaimerModal';
+import { ImageZoomModal } from '../components/ImageZoomModal';
 
 const TEST_TRANSLATIONS = {
   ru: {
@@ -57,6 +59,10 @@ const TEST_TRANSLATIONS = {
     nextPage: 'Следующая страница',
     openFullscreen: 'На весь экран',
     closeFullscreen: 'Закрыть просмотр',
+    exitConfirmTitle: 'Вы действительно хотите выйти?',
+    exitConfirmDesc: 'Ваш прогресс и выбранные ответы сохранены в черновик. Вы сможете вернуться и продолжить тестирование в любое время.',
+    exitConfirmBtn: 'Да, выйти назад',
+    exitCancelBtn: 'Продолжить тест',
   },
   kg: {
     exitToHome: 'Башкы бетке чыгуу',
@@ -99,6 +105,10 @@ const TEST_TRANSLATIONS = {
     nextPage: 'Кийинки бет',
     openFullscreen: 'Толук экран',
     closeFullscreen: 'Жабуу',
+    exitConfirmTitle: 'Тесттен чыгууну каалайсызбы?',
+    exitConfirmDesc: 'Сиздин жоопторуңуз жана прогрессиңиз сакталды. Кийинчерээк кайтып келип, тестирлөөнү уланта аласыз.',
+    exitConfirmBtn: 'Ооба, артка чыгуу',
+    exitCancelBtn: 'Тестти улантуу',
   },
 };
 
@@ -117,7 +127,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const initialTargetSec = targetSectionId || (customSectionsParam ? Number(customSectionsParam.split(',')[0]) : 1);
   const initialFirstQ = initialTargetSec === 3 ? 61 : (initialTargetSec === 2 ? 31 : (initialTargetSec === 4 ? 91 : (initialTargetSec === 5 ? 121 : 1)));
 
-  const builtInVariantIds = [1, 2, 3, 12, 16, 19, 20, 101];
+  const builtInVariantIds = [1, 2, 3, 12, 16, 19, 20, 101, 102];
 
   const [questions, setQuestions] = useState<Question[]>(() => {
     if (builtInVariantIds.includes(Number(variantId)) || !variantId) {
@@ -135,6 +145,8 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const [availableSectionsList, setAvailableSectionsList] = useState<number[]>([initialTargetSec]);
 
   // Modals & alerts
+  const [showCeetoDisclaimer, setShowCeetoDisclaimer] = useState<boolean>(true);
+  const [showExitConfirmModal, setShowExitConfirmModal] = useState<boolean>(false);
   const [missingSectionsAlert, setMissingSectionsAlert] = useState(false);
   const [missingSectionsText, setMissingSectionsText] = useState('');
   const [isWindowBlurred, setIsWindowBlurred] = useState(false);
@@ -158,6 +170,18 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
 
   const sectionDict = (lang === 'kg' || questions[0]?.language === 'kg') ? SECTION_NAMES_KG : SECTION_NAMES;
+
+  // Protect against accidental browser tab close / refresh during active test
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!calculating) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [calculating]);
 
   // 1. Initial Data Fetching & Setup
   useEffect(() => {
@@ -291,16 +315,31 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   // 2. Draft Auto-Saving
   useEffect(() => {
     if (!loading && !calculating && questions.length > 0) {
+      const answeredCount = Object.keys(userAnswers || {}).length;
       const draftData = {
-        userAnswers,
-        previousAnswers,
+        variantId: Number(variantId) || 1,
+        mode: mode || 'full',
+        targetSectionId: targetSectionId ? Number(targetSectionId) : undefined,
+        customSectionsParam: customSectionsParam || undefined,
         currentSection,
         timeLeft,
+        answeredCount,
+        totalQuestionsCount: questions.length,
+        userAnswers,
+        previousAnswers,
+        updatedAt: new Date().toISOString(),
       };
       const draftKey = `ort_draft_variant_${variantId}_${mode}_${
         targetSectionId || customSectionsParam || 'full'
       }`;
-      localStorage.setItem(draftKey, JSON.stringify(draftData));
+      try {
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+        if (answeredCount > 0) {
+          localStorage.setItem('ort_last_active_draft', JSON.stringify({ key: draftKey, ...draftData }));
+        }
+      } catch (e) {
+        console.warn('Could not save draft to localStorage:', e);
+      }
     }
   }, [userAnswers, previousAnswers, currentSection, timeLeft, loading, calculating, questions.length, variantId, mode, targetSectionId, customSectionsParam]);
 
@@ -375,6 +414,17 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
           targetSectionId || customSectionsParam || 'full'
         }`;
         localStorage.removeItem(draftKey);
+        try {
+          const lastActive = localStorage.getItem('ort_last_active_draft');
+          if (lastActive) {
+            const parsed = JSON.parse(lastActive);
+            if (parsed.key === draftKey || parsed.variantId === Number(variantId)) {
+              localStorage.removeItem('ort_last_active_draft');
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
 
         navigate('/results', {
           state: {
@@ -863,91 +913,71 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
         </div>
       )}
 
-      {/* Image Zoom Modal with Page Flip Controls */}
-      {zoomedImage && (
+      {/* CEETO / ЦООМО Copyright Disclaimer Notification */}
+      <CeetoDisclaimerModal
+        isOpen={showCeetoDisclaimer}
+        onClose={() => setShowCeetoDisclaimer(false)}
+        lang={lang}
+      />
+
+      {/* Exit Confirmation Modal */}
+      {showExitConfirmModal && (
         <div
-          className="fixed inset-0 bg-black/95 backdrop-blur-md z-[300] flex flex-col items-center justify-between p-3 sm:p-6 cursor-default"
-          onClick={() => setZoomedImage(null)}
+          className="fixed inset-0 z-[260] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setShowExitConfirmModal(false)}
         >
-          {/* Zoom Modal Header Toolbar */}
           <div
-            className="w-full max-w-4xl flex items-center justify-between gap-3 text-white z-10 bg-slate-900/90 px-4 py-2.5 rounded-2xl border border-slate-700 shadow-xl"
+            className="w-full max-w-md bg-white dark:bg-[#07241c] rounded-3xl border border-slate-200 dark:border-emerald-800/60 shadow-2xl overflow-hidden p-6 animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-emerald-400 font-bold text-xs sm:text-sm">
-                {t.pageFull} {currentPageIdx + 1} {t.pageOf} {totalPages}
-              </span>
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center text-2xl mb-4 mx-auto">
+              ⚠️
             </div>
-
-            {/* Page Flipping Buttons in Zoom Modal */}
-            {totalPages > 1 && (
-              <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1 max-w-[65%] sm:max-w-none scrollbar-none touch-pan-x">
-                <button
-                  type="button"
-                  onClick={handlePrevPage}
-                  disabled={currentPageIdx <= 0}
-                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all border border-slate-700 touch-manipulation active:scale-95"
-                >
-                  ◀
-                </button>
-                <div className="flex items-center gap-1">
-                  {sectionPages.map((_, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSelectPage(idx)}
-                      className={`h-7 min-w-[28px] px-2 rounded-lg text-xs font-black transition-all cursor-pointer touch-manipulation active:scale-95 ${
-                        idx === currentPageIdx
-                          ? 'bg-emerald-600 text-white ring-2 ring-emerald-400 scale-105 shadow-md shadow-emerald-600/40'
-                          : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
-                      }`}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleNextPage}
-                  disabled={currentPageIdx >= totalPages - 1}
-                  className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all border border-slate-700 touch-manipulation active:scale-95"
-                >
-                  ▶
-                </button>
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setZoomedImage(null)}
-              className="text-white hover:text-rose-400 text-lg px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 cursor-pointer transition-colors touch-manipulation active:scale-95"
-              title={t.closeFullscreen}
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Zoom Image Area */}
-          <div
-            className="flex-1 w-full flex items-center justify-center p-2 overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              key={activeDisplayPageRaw}
-              src={getImageUrl(activeDisplayPageRaw) || '/coomo1_page1.jpg'}
-              alt={`Страница ${currentPageIdx + 1}`}
-              onError={(e) => {
-                const target = e.currentTarget;
-                const fallback = getFallbackImageUrl(activeDisplayPageRaw, currentQuestionNum);
-                if (target.src !== fallback) {
-                  target.src = fallback;
-                }
-              }}
-              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-slate-800 select-none"
-            />
+            <h3 className="text-xl font-black text-center text-slate-900 dark:text-white mb-2">
+              {t.exitConfirmTitle}
+            </h3>
+            <p className="text-sm text-center text-slate-600 dark:text-emerald-200/80 font-medium leading-relaxed mb-6">
+              {t.exitConfirmDesc}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setShowExitConfirmModal(false)}
+                className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm transition-all shadow-md cursor-pointer active:scale-95"
+              >
+                {t.exitCancelBtn}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExitConfirmModal(false);
+                  navigate('/');
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-rose-500 hover:text-white text-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-600 font-bold text-sm transition-all cursor-pointer active:scale-95"
+              >
+                {t.exitConfirmBtn}
+              </button>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Interactive Pinch/Wheel Image Zoom Modal with Page Flip Controls */}
+      {zoomedImage && (
+        <ImageZoomModal
+          imageUrl={getImageUrl(activeDisplayPageRaw) || '/coomo1_page1.jpg'}
+          altText={`Страница ${currentPageIdx + 1}`}
+          currentPageIdx={currentPageIdx}
+          totalPages={totalPages}
+          sectionPages={sectionPages}
+          onPrevPage={handlePrevPage}
+          onNextPage={handleNextPage}
+          onSelectPage={handleSelectPage}
+          onClose={() => setZoomedImage(null)}
+          getFallbackImageUrl={(rawUrl) => getFallbackImageUrl(rawUrl, currentQuestionNum)}
+          pageLabel={t.pageFull}
+          ofLabel={t.pageOf}
+        />
       )}
 
       {/* Top Test Header */}
@@ -961,9 +991,10 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
         <div className="p-3 md:p-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="text-slate-400 hover:text-white transition-colors bg-slate-800 p-2 rounded-xl"
+            <button
+              type="button"
+              onClick={() => setShowExitConfirmModal(true)}
+              className="text-slate-400 hover:text-white transition-colors bg-slate-800 p-2 rounded-xl cursor-pointer active:scale-95"
               title={t.exitToHome}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -973,7 +1004,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                   clipRule="evenodd"
                 />
               </svg>
-            </Link>
+            </button>
 
             <div>
               <h1 className="font-black text-xs md:text-sm uppercase tracking-tighter text-slate-200">

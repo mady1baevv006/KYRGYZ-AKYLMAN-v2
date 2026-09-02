@@ -37,6 +37,7 @@ export interface Variant {
   language: 'ru' | 'kg';
   isPractice: boolean;
   isNew: boolean;
+  createdAt?: string;
   tags: string[];
   status?: string;
   availableSections: number[];

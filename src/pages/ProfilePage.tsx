@@ -306,18 +306,26 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
     <div className="max-w-5xl mx-auto px-3 sm:px-4 py-8 sm:py-12 space-y-8 text-white">
       {/* Top Banner / User Hero */}
       <div
-        className={`relative rounded-3xl bg-[#06261d] p-5 sm:p-8 overflow-hidden transition-all ${
+        className={`relative rounded-3xl p-5 sm:p-8 overflow-hidden transition-all duration-300 ${
           isPremium
-            ? 'border-2 border-amber-400/90 shadow-[0_0_35px_rgba(251,191,36,0.22)]'
-            : 'border border-emerald-800/60 shadow-xl shadow-black/40'
+            ? 'bg-gradient-to-br from-[#241a05] via-[#141003] to-[#0a0802] border-2 border-amber-400/90 shadow-[0_0_40px_rgba(251,191,36,0.22)]'
+            : 'bg-[#06261d] border border-emerald-800/60 shadow-xl shadow-black/40'
         }`}
       >
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div
+          className={`absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl pointer-events-none ${
+            isPremium ? 'bg-amber-400/15' : 'bg-emerald-500/15'
+          }`}
+        />
+        <div
+          className={`absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-3xl pointer-events-none ${
+            isPremium ? 'bg-yellow-400/15' : 'bg-teal-500/15'
+          }`}
+        />
 
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
           {/* User info */}
-          <div className="flex items-center gap-3.5 sm:gap-6 min-w-0 flex-1 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 min-w-0 flex-1 w-full">
             <div
               onClick={() => {
                 setEditName(user.name);
@@ -333,17 +341,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover group-hover:scale-105 transition-all bg-emerald-950 ${
+                  className={`w-18 h-18 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl object-cover group-hover:scale-105 transition-all ${
                     isPremium
-                      ? 'border-3 border-amber-400 ring-4 ring-amber-400/40 shadow-[0_0_20px_rgba(251,191,36,0.55)]'
-                      : 'border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/20'
+                      ? 'border-3 border-amber-400 ring-4 ring-amber-400/40 shadow-[0_0_24px_rgba(251,191,36,0.55)] bg-amber-950'
+                      : 'border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/20 bg-emerald-950'
                   }`}
                 />
               ) : (
                 <div
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center font-black text-2xl sm:text-3xl group-hover:scale-105 transition-all ${
+                  className={`w-18 h-18 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center font-black text-2xl sm:text-3xl group-hover:scale-105 transition-all ${
                     isPremium
-                      ? 'bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 border-3 border-amber-400 ring-4 ring-amber-400/40 shadow-[0_0_20px_rgba(251,191,36,0.55)]'
+                      ? 'bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border-3 border-amber-400 ring-4 ring-amber-400/40 shadow-[0_0_24px_rgba(251,191,36,0.55)]'
                       : 'bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/20 border-2 border-emerald-400/60'
                   }`}
                 >
@@ -353,19 +361,20 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
               <div
                 className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-md border ${
                   isPremium
-                    ? 'bg-amber-400 text-slate-950 border-amber-300'
+                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-amber-500/50'
                     : 'bg-emerald-500 text-slate-950 border-[#06261d]'
                 }`}
               >
                 <Camera className="w-3.5 h-3.5" />
               </div>
             </div>
-            <div className="min-w-0 flex-1">
+            
+            <div className="min-w-0 flex-1 w-full">
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 <h1
-                  className={`text-lg sm:text-3xl font-black tracking-tight truncate max-w-full ${
+                  className={`text-xl sm:text-3xl font-black tracking-tight truncate max-w-full ${
                     isPremium
-                      ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]'
+                      ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 drop-shadow-[0_0_12px_rgba(251,191,36,0.35)]'
                       : 'text-white'
                   }`}
                 >
@@ -374,18 +383,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 
                 {/* Badges in the exact same line/row */}
                 <div className="inline-flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0 shadow-xs">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border shrink-0 shadow-xs ${
+                      isPremium
+                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/40'
+                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    }`}
+                  >
                     {t.studentBadge}
                   </span>
 
                   {isPaidUserPremium ? (
                     <div
-                      className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-500/20 to-emerald-500/20 text-amber-300 border border-amber-400/50 flex items-center gap-1 shrink-0 shadow-sm"
+                      className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 border border-amber-300 flex items-center gap-1 shrink-0 shadow-md shadow-amber-500/30"
                       title={lang === 'kg' ? 'Премиум жазылуу 2027-жылдын 1-июнуна чейин активдүү' : 'Премиальная подписка активна до 1 июня 2027 г.'}
                     >
-                      <Crown className="w-3 h-3 text-amber-300" />
+                      <Crown className="w-3 h-3 text-slate-950" />
                       <span>{lang === 'kg' ? 'VIP Премиум (до 2027)' : 'VIP Премиум (до 2027)'}</span>
-                      <span className="text-[10px] text-amber-400 font-bold ml-0.5">★</span>
+                      <span className="text-[10px] text-slate-950 font-black ml-0.5">★</span>
                     </div>
                   ) : isTrialPremium ? (
                     <div
@@ -420,13 +435,33 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                   )}
                 </div>
               </div>
-              <p className="text-xs sm:text-sm text-emerald-200/70 font-medium truncate">
+
+              <p
+                className={`text-xs sm:text-sm font-medium truncate ${
+                  isPremium ? 'text-amber-200/80' : 'text-emerald-200/70'
+                }`}
+              >
                 {user.identifier}
               </p>
+
               {user.targetUniversity && (
-                <div className="text-xs text-emerald-300 font-bold mt-1.5 inline-flex items-center gap-1.5 bg-emerald-950/70 border border-emerald-800/60 px-2.5 py-1 rounded-xl w-fit max-w-full shadow-xs">
-                  <School className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
-                  <span className="text-[11px] sm:text-xs leading-snug text-emerald-200 truncate">
+                <div
+                  className={`text-xs font-bold mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl w-fit max-w-full shadow-xs ${
+                    isPremium
+                      ? 'bg-[#1e1605] border border-amber-500/40 text-amber-200'
+                      : 'bg-emerald-950/70 border border-emerald-800/60 text-emerald-300'
+                  }`}
+                >
+                  <School
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${
+                      isPremium ? 'text-amber-400' : 'text-emerald-400'
+                    }`}
+                  />
+                  <span
+                    className={`text-[11px] sm:text-xs leading-snug truncate ${
+                      isPremium ? 'text-amber-200' : 'text-emerald-200'
+                    }`}
+                  >
                     {user.targetUniversity}
                   </span>
                 </div>
@@ -434,8 +469,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
             </div>
           </div>
 
-          {/* Action buttons (only edit profile & logout) - placed side-by-side on mobile */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end shrink-0">
+          {/* Action buttons (only edit profile & logout) - placed neatly side-by-side on mobile */}
+          <div className="flex items-center gap-2.5 w-full md:w-auto justify-between md:justify-end shrink-0 pt-2 md:pt-0 border-t border-white/10 md:border-0">
             <button
               onClick={() => {
                 setEditName(user.name);
@@ -444,9 +479,17 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 setEditAvatar(user.avatar || '');
                 setIsEditing(true);
               }}
-              className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-emerald-700/50 text-xs sm:text-sm font-bold text-white transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-center"
+              className={`flex-1 md:flex-initial min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-center ${
+                isPremium
+                  ? 'bg-amber-400/10 hover:bg-amber-400/20 border border-amber-500/40 text-amber-100 hover:text-white shadow-sm'
+                  : 'bg-white/5 hover:bg-white/10 border border-emerald-700/50 text-white'
+              }`}
             >
-              <Edit3 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <Edit3
+                className={`w-4 h-4 shrink-0 ${
+                  isPremium ? 'text-amber-400' : 'text-emerald-400'
+                }`}
+              />
               <span>{t.editProfile}</span>
             </button>
             <button
@@ -454,9 +497,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 logout();
                 navigate('/');
               }}
-              className="flex-1 sm:flex-initial px-3.5 sm:px-4 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-xs sm:text-sm font-bold text-rose-300 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-center"
+              className="flex-1 md:flex-initial min-h-[44px] px-4 py-2.5 rounded-xl bg-rose-950/70 hover:bg-rose-900/90 border border-rose-500/70 text-xs sm:text-sm font-bold text-rose-200 shadow-[0_0_14px_rgba(244,63,94,0.3)] hover:shadow-[0_0_20px_rgba(244,63,94,0.5)] ring-1 ring-rose-500/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-center"
             >
-              <LogOut className="w-4 h-4 text-rose-400 shrink-0" />
+              <LogOut className="w-4 h-4 text-rose-300 shrink-0" />
               <span>{t.logout}</span>
             </button>
           </div>
@@ -864,7 +907,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         {/* Metric 1 */}
         <div className="bg-[#06261d] border border-emerald-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300/80">
+            <span className="text-[11px] sm:text-xs font-bold text-emerald-300/80 uppercase tracking-wider">
               {t.testsCompleted}
             </span>
             <BookOpen className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -875,7 +918,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         {/* Metric 2 */}
         <div className="bg-[#06261d] border border-emerald-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300/80">
+            <span className="text-[11px] sm:text-xs font-bold text-emerald-300/80 uppercase tracking-wider">
               {t.bestScore}
             </span>
             <Award className="w-4 h-4 text-amber-400 shrink-0" />
@@ -888,7 +931,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         {/* Metric 3 */}
         <div className="bg-[#06261d] border border-emerald-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300/80">
+            <span className="text-[11px] sm:text-xs font-bold text-emerald-300/80 uppercase tracking-wider">
               {t.avgAccuracy}
             </span>
             <TrendingUp className="w-4 h-4 text-teal-400 shrink-0" />
@@ -901,7 +944,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         {/* Metric 4 */}
         <div className="bg-[#06261d] border border-emerald-800/50 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300/80">
+            <span className="text-[11px] sm:text-xs font-bold text-emerald-300/80 uppercase tracking-wider">
               {t.targetScore}
             </span>
             <Target className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -912,7 +955,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         </div>
       </div>
 
-      {/* Section Level Navigation Tabs: История тестов & Теории */}
+      {/* Section Level Navigation Tabs: История тестов, Теория & Курсы */}
       <div className="flex flex-wrap items-center justify-start gap-2.5 pt-1">
         <button
           type="button"
@@ -960,11 +1003,8 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
               : 'bg-[#06261d] text-emerald-200/80 hover:text-white border border-emerald-800/70 hover:border-emerald-600'
           }`}
         >
-          <School className="w-4 h-4 text-amber-300" />
+          <School className="w-4 h-4" />
           <span>{lang === 'kg' ? 'Курстар' : 'Курсы'}</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase">
-            NEW
-          </span>
         </button>
       </div>
 
@@ -983,7 +1023,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         <div className="bg-[#06261d] border border-emerald-800/50 rounded-3xl p-5 sm:p-7 shadow-xl space-y-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-emerald-800/60">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider mb-1.5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider mb-1.5 bg-emerald-500/15 border border-emerald-400/40 text-emerald-300">
                 <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{lang === 'kg' ? 'Тесттер тарыхы' : 'История тестов'}</span>
               </div>
@@ -1000,12 +1040,14 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
 
           {history.length === 0 ? (
             <div className="text-center py-10 px-4 border border-dashed border-emerald-800/60 rounded-2xl">
-              <BookOpen className="w-10 h-10 mx-auto text-emerald-600 mb-2.5 opacity-60" />
+              <BookOpen className="w-10 h-10 text-emerald-600 mx-auto mb-2.5 opacity-60" />
               <h4 className="text-base font-bold text-white mb-1">{t.noHistory}</h4>
-              <p className="text-xs text-emerald-200/60 max-w-sm mx-auto mb-5">{t.noHistoryDesc}</p>
+              <p className="text-xs text-emerald-200/60 max-w-sm mx-auto mb-5">
+                {t.noHistoryDesc}
+              </p>
               <Link
                 to="/test/1?mode=section&id=1"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition-all"
               >
                 <span>{t.startTestBtn}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -1062,7 +1104,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                         </span>
                         <span>
                           {lang === 'kg' ? 'Туура:' : 'Правильных:'}{' '}
-                          <strong className="text-emerald-400">{record.correctAnswers}</strong>/{record.totalQuestions}
+                          <strong className="text-emerald-400">
+                            {record.correctAnswers}
+                          </strong>
+                          /{record.totalQuestions}
                         </span>
                       </div>
 
@@ -1070,7 +1115,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                         <span className="text-[9px] uppercase font-bold text-emerald-300/70 block">
                           {t.score}
                         </span>
-                        <span className="text-base sm:text-xl font-black text-amber-400">
+                        <span className="text-base sm:text-xl font-black text-amber-400 drop-shadow-xs">
                           {record.totalScore}
                         </span>
                       </div>
@@ -1085,7 +1130,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                   <button
                     type="button"
                     onClick={() => setShowAllHistory((prev) => !prev)}
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white font-bold text-xs transition-all cursor-pointer active:scale-95 shadow-sm"
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-xs bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 hover:text-white transition-all cursor-pointer active:scale-95 shadow-sm"
                   >
                     <span>
                       {showAllHistory

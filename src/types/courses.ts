@@ -1,6 +1,8 @@
 import { AppLanguage } from './index';
 
-export type CourseSubject = 'math' | 'analogies' | 'reading' | 'grammar' | 'intensive';
+export type CourseSubject = 'math' | 'english' | 'russian' | 'analogies' | 'reading' | 'grammar' | 'intensive';
+
+export type CourseModuleType = 'base' | 'advanced' | 'extra' | 'in_development';
 
 export interface CourseTeacher {
   id: string;
@@ -75,6 +77,9 @@ export interface CourseGroup {
   subject: CourseSubject;
   subjectNameRu: string;
   subjectNameKg: string;
+  moduleType?: CourseModuleType;
+  moduleNameRu?: string;
+  moduleNameKg?: string;
   targetBadgeRu: string;
   targetBadgeKg: string;
   targetScore: number; // e.g. 220
@@ -86,6 +91,7 @@ export interface CourseGroup {
   priceSom: number;
   periodLabelRu: string;
   periodLabelKg: string;
+  daysScheduleFormat?: string; // e.g. "Пн-Пт"
   isFreeForPremium: boolean;
   schedule: CourseScheduleItem[];
   nextLessonDate: string;
@@ -95,6 +101,7 @@ export interface CourseGroup {
   lessons: CourseLesson[];
   homeworks: CourseHomework[];
   chatMessages: CourseChatMessage[];
+  isCustom?: boolean;
 }
 
 export interface StudentCourseProfile {

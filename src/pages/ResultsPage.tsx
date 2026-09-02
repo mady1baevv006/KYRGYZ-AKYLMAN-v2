@@ -48,6 +48,7 @@ const I18N = {
     correctAnswers: 'Верно отвечено',
     tabOverall: 'Общий итог',
     tabMath: 'Математика',
+    tabAnalogies: 'Аналогии и дополнения',
     tabReading: 'Чтение и понимание',
     tabGrammar: 'Грамматика',
     mapTitle: 'Карта всех ответов',
@@ -80,6 +81,7 @@ const I18N = {
     correctAnswers: 'Туура жооптор',
     tabOverall: 'Жалпы жыйынтык',
     tabMath: 'Математика',
+    tabAnalogies: 'Окшоштуктар жана сүйлөмдү толуктоо',
     tabReading: 'Окуу жана түшүнүү',
     tabGrammar: 'Грамматика',
     mapTitle: 'Бардык жооптордун картасы',
@@ -140,7 +142,8 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
   const tabsConfig = {
     overall: { id: 'overall', label: t.tabOverall, sections: [1, 2, 3, 4, 5] },
     math: { id: 'math', label: t.tabMath, sections: [1, 2] },
-    reading: { id: 'reading', label: t.tabReading, sections: [3, 4] },
+    analogies: { id: 'analogies', label: t.tabAnalogies, sections: [3] },
+    reading: { id: 'reading', label: t.tabReading, sections: [4] },
     grammar: { id: 'grammar', label: t.tabGrammar, sections: [5] },
   };
 

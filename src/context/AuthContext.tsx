@@ -342,15 +342,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(() => {
-    // If not logged in on first visit, open auth modal
-    try {
-      const saved = localStorage.getItem(CURRENT_USER_KEY) || localStorage.getItem('user');
-      return !saved;
-    } catch {
-      return true;
-    }
-  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTrialWelcomeOpen, setIsTrialWelcomeOpen] = useState(false);
   const [tick, setTick] = useState(0);
 

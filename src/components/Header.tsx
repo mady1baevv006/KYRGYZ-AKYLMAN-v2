@@ -280,14 +280,6 @@ export const Header: React.FC<HeaderProps> = ({
                       <UserIcon className="w-4 h-4 text-emerald-400" />
                       <span>{t.profile}</span>
                     </Link>
-                    <Link
-                      to="/courses"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-100 hover:text-white hover:bg-emerald-800/50 transition-colors cursor-pointer"
-                    >
-                      <School className="w-4 h-4 text-emerald-400" />
-                      <span>{lang === 'kg' ? 'Курстар & Класстар' : 'Онлайн-курсы & Классы'}</span>
-                    </Link>
                     {isAdmin && (
                       <Link
                         to="/admin"

@@ -6,6 +6,7 @@ import {
   getQuestionsVariant19,
   getQuestionsVariant20,
   getQuestionsVariant101,
+  getQuestionsVariant102,
 } from './testsDataExtended';
 
 const applyCustomAnswers = (vId: number, questions: Question[]): Question[] => {
@@ -1370,6 +1371,10 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
 
   if (vId === 101) {
     return getQuestionsVariant101();
+  }
+
+  if (vId === 102) {
+    return getQuestionsVariant102();
   }
 
   // Fallback for general variants if offline

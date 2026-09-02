@@ -12,6 +12,7 @@ import { PricingSection } from '../components/PricingSection';
 import { StudentsResultsSection } from '../components/StudentsResultsSection';
 import { OrtScoreCalculator } from '../components/OrtScoreCalculator';
 import { CreativeLoader } from '../components/CreativeLoader';
+import { ActiveDraftBanner } from '../components/ActiveDraftBanner';
 import heroEarthStarsImg from '../assets/images/hero_earth_stars_1787130940166.jpg';
 
 const THEME_STYLES: Record<string, {
@@ -314,19 +315,20 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             return (
               <div
                 key={variant.id}
-                className={`group relative bg-white dark:bg-[#07241c] rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col ${
+                style={{ borderColor: '#334290' }}
+                className={`group relative bg-white dark:bg-[#07241c] rounded-3xl border-2 transition-all duration-300 overflow-hidden flex flex-col ${
                   isExpanded
-                    ? 'border-emerald-500 dark:border-emerald-400 shadow-2xl shadow-emerald-500/25 ring-2 ring-emerald-500/80 scale-[1.02] z-20'
+                    ? 'shadow-2xl shadow-[#334290]/25 ring-2 ring-[#334290]/80 scale-[1.02] z-20'
                     : isBlurred
-                    ? 'border-emerald-950/40 dark:border-emerald-950/60 shadow-none opacity-40 blur-[3px] grayscale-[25%] scale-[0.98] cursor-pointer hover:opacity-75 hover:blur-none hover:scale-100 z-0'
-                    : 'border-emerald-100/80 dark:border-emerald-900/60 hover:border-emerald-400/80 dark:hover:border-emerald-500/80 shadow-lg shadow-emerald-950/5 dark:shadow-black/30 hover:shadow-2xl hover:shadow-emerald-950/20 hover:-translate-y-1 z-10'
+                    ? 'opacity-40 blur-[3px] grayscale-[25%] scale-[0.98] cursor-pointer hover:opacity-75 hover:blur-none hover:scale-100 z-0'
+                    : 'shadow-lg shadow-[#334290]/10 dark:shadow-black/30 hover:shadow-2xl hover:shadow-[#334290]/20 hover:-translate-y-1 z-10'
                 }`}
               >
                 {/* Subtle Top Glow Line */}
                 <div className={`h-1.5 w-full transition-all duration-300 ${
                   isExpanded
-                    ? 'bg-gradient-to-r from-emerald-500 via-teal-300 to-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]'
-                    : 'bg-transparent group-hover:bg-gradient-to-r group-hover:from-emerald-500/40 group-hover:to-teal-500/40'
+                    ? 'bg-gradient-to-r from-[#334290] via-blue-400 to-[#334290] shadow-[0_0_12px_rgba(51,66,144,0.8)]'
+                    : 'bg-transparent group-hover:bg-gradient-to-r group-hover:from-[#334290]/60 group-hover:to-blue-500/60'
                 }`} />
 
                 {/* Card Main Body */}
@@ -334,20 +336,39 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                   onClick={() => toggleCard(variant.id)}
                   className="p-6 cursor-pointer select-none flex flex-col flex-1"
                 >
-                  {/* Top Meta Bar (Only show New badge if applicable, without #id and language duplicates) */}
-                  {variant.isNew && (
-                    <div className="flex items-center justify-end mb-2">
-                      <span className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-emerald-300/60 dark:border-emerald-700/80 shadow-xs flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        {t.newBadge}
-                      </span>
-                    </div>
-                  )}
+                  {/* Top Meta Bar */}
+                  {(() => {
+                    if (!variant.isNew) return null;
+                    // Check if created within 3 days (72 hours)
+                    if (variant.createdAt) {
+                      const ageMs = Date.now() - new Date(variant.createdAt).getTime();
+                      const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+                      if (ageMs > threeDaysMs) return null;
+                    }
+                    return (
+                      <div className="flex items-center justify-end mb-2">
+                        <span className="bg-[#334290]/15 text-[#334290] dark:text-blue-300 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-[#334290]/30 shadow-xs flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                          {t.newBadge}
+                        </span>
+                      </div>
+                    );
+                  })()}
 
-                  {/* Title */}
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white mb-3 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
-                    {variant.title || `${t.variantPrefix} ${variant.id}`}
-                  </h3>
+                  {/* Title with CEETO Logo inside White Circle */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center p-1 shrink-0 shadow-sm border-2 border-[#334290] dark:border-[#334290]">
+                      <img
+                        src="https://res.cloudinary.com/rw9qhk3a/image/upload/v1788172390/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD_%D0%B1%D0%B5%D0%B7_%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F_13.png"
+                        alt="ЦООМО / CEETO"
+                        className="h-8.5 w-auto max-w-[38px] object-contain drop-shadow-xs"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white leading-snug group-hover:text-[#334290] dark:group-hover:text-blue-300 transition-colors">
+                      {variant.title || `${t.variantPrefix} ${variant.id}`}
+                    </h3>
+                  </div>
 
                   {/* Sections Indicator Dots & Status */}
                   <div className="mt-auto pt-4 border-t border-slate-100 dark:border-emerald-900/40 flex items-center justify-between">
@@ -532,6 +553,9 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             </div>
           )}
         </div>
+
+        {/* Active Draft recovery window for incomplete tests */}
+        <ActiveDraftBanner lang={lang} />
       </section>
 
       {/* ORT Score Calculator (SchoolClub exact formulas & emerald design) */}
