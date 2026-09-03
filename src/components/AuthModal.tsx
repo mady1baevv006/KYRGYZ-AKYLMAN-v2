@@ -23,6 +23,7 @@ interface AuthModalProps {
 }
 
 type AuthMethod = 'email' | 'phone';
+type EmailStep = 'email' | 'code';
 
 const DEFAULT_BOT_ID = (import.meta as any).env?.VITE_TELEGRAM_BOT_ID || '8778115011';
 
@@ -47,7 +48,6 @@ async function processTelegramAuth(data: Record<string, any>): Promise<{ valid: 
   }
 
   try {
-    // Try server-side secure HMAC-SHA-256 verification first
     const res = await fetch('/api/telegram/verify-widget', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -72,10 +72,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   lang = 'ru',
 }) => {
-  // Lock background scrolling when modal is open
   useBodyScrollLock(isOpen);
 
-  const { user, loginWithGoogle, loginWithTelegram, loginWithWhatsApp } = useAuth();
+  const { user, loginWithGoogle, loginWithTelegram, loginWithCode } = useAuth();
 
   const [method, setMethod] = useState<AuthMethod>('email');
 
@@ -83,18 +82,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [emailInput, setEmailInput] = useState('');
   const [phoneRaw, setPhoneRaw] = useState('');
   const [nameInput, setNameInput] = useState('');
+  const [codeInput, setCodeInput] = useState('');
+  const [emailStep, setEmailStep] = useState<EmailStep>('email');
 
   // Statuses
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
   const [telegramLoading, setTelegramLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
 
-  // Detected Operator
   const detectedOperator = detectKyrgyzOperator(phoneRaw);
   const isKg = lang === 'kg';
 
-  // Reset inputs when opening or closing
   useEffect(() => {
     if (isOpen) {
       setErrorMessage('');
@@ -102,10 +102,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } else {
       setGoogleLoading(false);
       setTelegramLoading(false);
+      setEmailLoading(false);
+      setEmailStep('email');
+      setCodeInput('');
     }
   }, [isOpen]);
 
-  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -165,18 +167,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             setTelegramLoading(false);
 
             if (data && typeof data === 'object') {
-              console.log('[Telegram Auth] Received client data:', data);
-
-              // Server/Client Verification
               const { valid, user } = await processTelegramAuth(data);
-
               if (valid) {
                 console.log('[Telegram Auth] Signature verified successfully');
-              } else {
-                console.log('[Telegram Auth] Fallback login executed for user:', user);
               }
-
-              // Guaranteed Login & Persistence
               setSuccessMessage(
                 isKg
                   ? `🎉 Telegram аркылуу ийгиликтүү кирдиңиз (${user.username || user.first_name})!`
@@ -193,7 +187,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           }
         );
       } else {
-        // Fallback: If Telegram widget script isn't loaded yet, prompt user
         setErrorMessage(
           isKg
             ? 'Telegram виджети жүктөлүүдө, сураныч, бир аздан кийин кайталаңыз же Google колдонуңуз'
@@ -208,40 +201,91 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   // ==========================================
-  // 3. WHATSAPP DIRECT AUTH (TEMPORARILY DISABLED)
+  // 3. EMAIL 6-DIGIT CODE (WORKING)
   // ==========================================
-  const handleWhatsAppClick = () => {
-    setSuccessMessage('');
-    setErrorMessage(
-      isKg
-        ? 'Сайт даярдоо процессинде: WhatsApp аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход через WhatsApp временно недоступен. Пожалуйста, используйте Google или Telegram.'
-    );
-  };
-
-  // ==========================================
-  // 4. EMAIL 6-DIGIT CODE (TEMPORARILY DISABLED)
-  // ==========================================
-  const handleEmailFormSubmit = (e: React.FormEvent) => {
+  const handleSendEmailCode = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
     setSuccessMessage('');
-    setErrorMessage(
-      isKg
-        ? 'Сайт даярдоо процессинде: Почтадагы 6 орундуу код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход через 6-значный код почты временно недоступен. Пожалуйста, используйте Google или Telegram.'
-    );
+
+    if (!emailInput.trim() || !emailInput.includes('@')) {
+      setErrorMessage(isKg ? 'Туура электрондук почта жазыңыз' : 'Введите корректный email');
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      const res = await fetch('/api/email/send-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setEmailStep('code');
+        setSuccessMessage(isKg ? 'Код почтаңызга жиберилди' : 'Код отправлен на почту, проверьте письмо');
+      } else {
+        setErrorMessage(data.error || (isKg ? 'Кодду жиберүү мүмкүн болбоду' : 'Не удалось отправить код'));
+      }
+    } catch (err) {
+      setErrorMessage(isKg ? 'Тармак катасы. Кайра аракет кылыңыз' : 'Ошибка сети. Попробуйте снова.');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleVerifyEmailCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (!codeInput.trim()) {
+      setErrorMessage(isKg ? 'Кодду жазыңыз' : 'Введите код из письма');
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      const res = await fetch('/api/email/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailInput.trim(), code: codeInput.trim() }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const result = loginWithCode(emailInput.trim(), nameInput.trim());
+        if (result.success) {
+          setSuccessMessage(isKg ? '🎉 Ийгиликтүү кирдиңиз!' : '🎉 Успешный вход!');
+          setTimeout(() => {
+            onClose();
+            setSuccessMessage('');
+            setEmailStep('email');
+            setCodeInput('');
+          }, 700);
+        } else {
+          setErrorMessage(result.error || 'Ошибка входа');
+        }
+      } else {
+        setErrorMessage(data.error || (isKg ? 'Код туура эмес' : 'Неверный код'));
+      }
+    } catch (err) {
+      setErrorMessage(isKg ? 'Тармак катасы. Кайра аракет кылыңыз' : 'Ошибка сети. Попробуйте снова.');
+    } finally {
+      setEmailLoading(false);
+    }
   };
 
   // ==========================================
-  // 5. SMS METHOD (TEMPORARILY DISABLED)
+  // 4. SMS METHOD (TEMPORARILY DISABLED)
   // ==========================================
   const handlePhoneFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('');
     setErrorMessage(
       isKg
-        ? 'Сайт даярдоо процессинде: SMS-код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же Telegram аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход по SMS-коду временно недоступен. Пожалуйста, используйте Google или Telegram.'
+        ? 'Сайт даярдоо процессинде: SMS-код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же email аркылуу кириңиз.'
+        : 'Сайт в процессе подготовки: вход по SMS-коду временно недоступен. Пожалуйста, используйте Google или email.'
     );
   };
 
@@ -260,10 +304,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/60 rounded-3xl p-5 sm:p-7 shadow-2xl text-white max-h-[95vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glowing background aura */}
         <div className="absolute top-0 right-1/4 w-48 h-32 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close Button (Крестик для выхода из окна авторизации) */}
         <button
           type="button"
           onClick={onClose}
@@ -274,7 +316,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <X className="w-4 h-4 text-slate-300 group-hover:text-white group-hover:rotate-90 transition-transform duration-200" />
         </button>
 
-        {/* Header Title */}
         <div className="text-center mb-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 flex items-center justify-center mx-auto mb-2.5 shadow-lg shadow-emerald-950/80">
             <Sparkles className="w-6 h-6 text-emerald-400" />
@@ -285,7 +326,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </p>
         </div>
 
-        {/* Notifications & Error alerts */}
         {errorMessage && (
           <div className="mb-4 p-3 rounded-2xl bg-rose-950/70 border border-rose-600/70 text-rose-200 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
@@ -300,10 +340,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* Quick Fast Google, Telegram & WhatsApp Sign-in buttons */}
+        {/* Quick Fast Google & Telegram Sign-in buttons */}
         <div className="space-y-2.5 mb-4">
-          <div className="grid grid-cols-3 gap-2">
-            {/* 1. Google (WORKING) */}
+          <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={handleGoogleSignIn}
@@ -314,28 +353,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
               ) : (
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                  />
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" />
+                  <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
                 </svg>
               )}
               <span>Google</span>
             </button>
 
-            {/* 2. Telegram (UNIFIED FOR ALL DEVICES - WORKING) */}
             <button
               type="button"
               onClick={handleTelegramClick}
@@ -351,18 +377,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               )}
               <span>Telegram</span>
             </button>
-
-            {/* 3. WhatsApp (TEMPORARILY UNAVAILABLE - SHOWS NOTICE) */}
-            <button
-              type="button"
-              onClick={handleWhatsAppClick}
-              className="h-[42px] px-2 bg-[#25D366]/80 hover:bg-[#25D366] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-[#25D366]/20 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] border border-[#25D366]/50"
-            >
-              <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
-                <path d="M12.031 0C5.408 0 .034 5.374.034 11.997c0 2.112.552 4.175 1.601 5.993L0 24l6.173-1.618a11.944 11.944 0 0 0 5.858 1.527h.005c6.623 0 11.997-5.374 11.997-12A11.97 11.97 0 0 0 12.031 0zm0 21.942a9.92 9.92 0 0 1-5.06-1.385l-.363-.215-3.762.986 1.004-3.668-.236-.376A9.92 9.92 0 1 1 12.031 21.942zm5.452-7.447c-.299-.15-1.77-.874-2.044-.974-.274-.1-.473-.15-.672.15-.199.299-.77.974-.944 1.173-.174.199-.349.224-.648.075-.299-.15-1.262-.465-2.404-1.484-.888-.792-1.488-1.77-1.662-2.069-.174-.299-.018-.461.131-.61.135-.134.299-.349.449-.523.149-.174.199-.299.299-.498.1-.199.05-.374-.025-.523-.075-.15-.672-1.62-.921-2.219-.243-.583-.49-.504-.672-.513l-.573-.01c-.199 0-.523.075-.797.374-.274.299-1.046 1.022-1.046 2.492s1.071 2.891 1.22 3.09c.149.199 2.107 3.217 5.105 4.512.713.308 1.27.493 1.704.631.716.228 1.368.196 1.884.119.576-.086 1.77-.723 2.019-1.42.249-.698.249-1.296.174-1.42-.075-.125-.274-.2-.573-.349z" />
-              </svg>
-              <span>WhatsApp</span>
-            </button>
           </div>
 
           <div className="relative flex py-1.5 items-center">
@@ -374,7 +388,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
 
-        {/* Auth Method Navigation Tabs (Email & Phone) */}
         <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
           <button
             type="button"
@@ -409,26 +422,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
-        {/* EMAIL & PHONE FORMS */}
         <div>
-          {method === 'email' && (
-            <form onSubmit={handleEmailFormSubmit} className="space-y-4">
-              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs space-y-2">
-                <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-                  <span>
-                    {isKg
-                      ? 'Электрондук почта аркылуу кирүү убактылуу жеткиликсиз'
-                      : 'Вход через эл. почту временно недоступен'}
-                  </span>
-                </div>
-                <p className="text-amber-200/90 leading-relaxed">
-                  {isKg
-                    ? 'Сайт даярдоо процессинде. Почтадагы 6 орундуу код аркылуу кирүү убактылуу өчүрүлгөн. Сураныч, Google же Telegram аркылуу кириңиз.'
-                    : 'Сайт находится на стадии подготовки. Вход по 6-значному коду на почту временно отключен. Пожалуйста, используйте вход через Google или Telegram.'}
-                </p>
-              </div>
-
+          {method === 'email' && emailStep === 'email' && (
+            <form onSubmit={handleSendEmailCode} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1.5">
                   {isKg ? 'Электрондук почтаңыз' : 'Электронная почта'}
@@ -463,11 +459,72 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+                disabled={emailLoading}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
-                <Sparkles className="w-4 h-4 text-slate-950" />
-                <span>{isKg ? 'Почтага код алуу' : 'Получить 6-значный код на почту'}</span>
-                <ArrowRight className="w-4 h-4 text-slate-950" />
+                {emailLoading ? (
+                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                    <span>{isKg ? 'Почтага код алуу' : 'Получить 6-значный код на почту'}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-950" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {method === 'email' && emailStep === 'code' && (
+            <form onSubmit={handleVerifyEmailCode} className="space-y-4">
+              <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-600/50 text-emerald-200 text-xs">
+                {isKg
+                  ? `Код "${emailInput}" почтасына жиберилди`
+                  : `Код отправлен на ${emailInput}`}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-200 mb-1.5">
+                  {isKg ? '6 орундуу код' : '6-значный код из письма'}
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={codeInput}
+                  onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="123456"
+                  className="w-full text-center tracking-[0.5em] text-xl px-4 py-3 bg-[#031510] border border-emerald-800/80 rounded-2xl font-black text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={emailLoading}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {emailLoading ? (
+                  <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                    <span>{isKg ? 'Кирүү' : 'Подтвердить и войти'}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-950" />
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmailStep('email');
+                  setCodeInput('');
+                  setErrorMessage('');
+                  setSuccessMessage('');
+                }}
+                className="w-full text-center text-xs text-emerald-300/70 hover:text-emerald-200 underline cursor-pointer"
+              >
+                {isKg ? 'Почтаны өзгөртүү' : 'Изменить почту / отправить код заново'}
               </button>
             </form>
           )}
@@ -478,15 +535,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
                   <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
                   <span>
-                    {isKg
-                      ? 'SMS-код аркылуу кирүү убактылуу жеткиликсиз'
-                      : 'Вход через SMS-код временно недоступен'}
+                    {isKg ? 'SMS-код аркылуу кирүү убактылуу жеткиликсиз' : 'Вход через SMS-код временно недоступен'}
                   </span>
                 </div>
                 <p className="text-amber-200/90 leading-relaxed">
                   {isKg
-                    ? 'Сайт даярдоо процессинде. SMS-код аркылуу кирүү убактылуу өчүрүлгөн. Сураныч, Google же Telegram аркылуу кириңиз.'
-                    : 'Сайт находится на стадии подготовки. Вход по SMS-коду временно отключен. Пожалуйста, используйте вход через Google или Telegram.'}
+                    ? 'Сайт даярдоо процессинде. SMS-код аркылуу кирүү убактылуу өчүрүлгөн. Сураныч, Google же email аркылуу кириңиз.'
+                    : 'Сайт находится на стадии подготовки. Вход по SMS-коду временно отключен. Пожалуйста, используйте вход через Google или email.'}
                 </p>
               </div>
 
@@ -496,9 +551,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     {isKg ? 'Телефон номериңиз' : 'Номер телефона'}
                   </label>
                   {detectedOperator && (
-                    <span
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${detectedOperator.colorBadge} opacity-70`}
-                    >
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${detectedOperator.colorBadge} opacity-70`}>
                       {detectedOperator.name}
                     </span>
                   )}
