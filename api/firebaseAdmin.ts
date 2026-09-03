@@ -5,12 +5,13 @@ function getAdminApp(): App {
   if (getApps().length > 0) {
     return getApps()[0];
   }
+
+  const encoded = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || '';
+  const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
+  const serviceAccount = JSON.parse(decoded);
+
   return initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    }),
+    credential: cert(serviceAccount),
   });
 }
 
