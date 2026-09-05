@@ -40,6 +40,7 @@ export interface Variant {
   createdAt?: string;
   tags: string[];
   status?: string;
+  isLocked?: boolean;
   availableSections: number[];
   pdfUrl?: string;
 }

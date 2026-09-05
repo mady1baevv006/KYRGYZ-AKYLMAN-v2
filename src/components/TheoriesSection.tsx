@@ -391,23 +391,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header pill & Methodology Badge */}
+            {/* Header pill */}
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
                 <BookOpen className="w-4 h-4 text-emerald-400" />
                 <span>{isKg ? 'Негизги предмет' : 'Основной предмет'}</span>
-              </div>
-
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-emerald-700/50 shadow-md">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0">
-                  <Calculator className="w-4 h-4" />
-                </div>
-                <div className="text-left leading-tight">
-                  <span className="text-xs font-bold text-white block">{isKg ? 'Автордук методика' : 'Авторская методика'}</span>
-                  <span className="text-[10px] text-emerald-300/80 font-medium">
-                    {isKg ? 'ЖРТнын бардык бөлүмдөрү' : 'Все разделы ОРТ'}
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -472,23 +460,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header pill & Methodology badge */}
+            {/* Header pill */}
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider shadow-inner">
                 <BookOpen className="w-4 h-4 text-emerald-400" />
                 <span>{isKg ? 'Негизги предмет' : 'Основной предмет'}</span>
-              </div>
-
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-emerald-700/50 shadow-md">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shrink-0">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <div className="text-left leading-tight">
-                  <span className="text-xs font-bold text-white block">{isKg ? 'Орус тили жана адабияты' : 'Русский язык и литература'}</span>
-                  <span className="text-[10px] text-emerald-300/80 font-medium">
-                    {isKg ? '3 бөлүм • 60 суроо' : '3 тематических блока ОРТ'}
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -559,23 +535,11 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/20 transition-all" />
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Header pill & Methodology Badge */}
+            {/* Header pill */}
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/20 border border-teal-400/40 text-teal-300 text-xs font-black uppercase tracking-wider shadow-inner">
                 <GraduationCap className="w-4 h-4 text-teal-400" />
                 <span>{isKg ? 'Предметтик тест ОРТ' : 'Предметный тест ОРТ'}</span>
-              </div>
-
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#02100c]/85 border border-teal-700/50 shadow-md">
-                <div className="w-8 h-8 rounded-full bg-teal-500/20 border border-teal-400 flex items-center justify-center text-teal-300 shrink-0">
-                  <BookOpen className="w-4 h-4" />
-                </div>
-                <div className="text-left leading-tight">
-                  <span className="text-xs font-bold text-white block">{isKg ? 'Англис тили курсу' : 'Курс английского языка'}</span>
-                  <span className="text-[10px] text-teal-300/80 font-medium">
-                    {isKg ? '3 предметтик блок' : '3 профильных блока ОРТ'}
-                  </span>
-                </div>
               </div>
             </div>
 

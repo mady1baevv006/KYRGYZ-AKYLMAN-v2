@@ -32,11 +32,18 @@ export interface UserProfile {
   id: string;
   name: string;
   identifier: string; // email or phone or telegram
+  email?: string;
+  phone?: string;
+  telegramUsername?: string;
+  telegramId?: number;
+  authProvider?: 'google' | 'telegram' | 'email_code' | 'phone_code' | 'password';
+  authProviders?: string[]; // e.g. ['google', 'email_code'] for synchronized users
   password: string;
   avatar?: string;
   targetScore: number;
   targetUniversity?: string;
   registeredAt: string;
+  lastLoginAt?: string;
   testHistory: UserTestRecord[];
   subscriptionPlan?: 'free' | 'standard' | 'premium';
   subscriptionExpiry?: string;
@@ -170,11 +177,16 @@ const DEFAULT_ADMIN_PROFILE: UserProfile = {
   id: 'admin_mady1baevv',
   name: 'Абдраим Мадылбаев (Администратор)',
   identifier: ADMIN_EMAIL,
+  email: ADMIN_EMAIL,
+  telegramUsername: '@mady1baevv',
+  authProvider: 'google',
+  authProviders: ['google', 'email_code', 'telegram', 'password'],
   password: '123',
   avatar: '/avatars/snow_leopard.svg',
   targetScore: 240,
   targetUniversity: 'Кыргызский национальный университет (КНУ)',
   registeredAt: '2025-01-01T00:00:00.000Z',
+  lastLoginAt: new Date().toISOString(),
   testHistory: [
     {
       id: 'rec_admin_1',
@@ -200,14 +212,18 @@ const DEFAULT_ADMIN_PROFILE: UserProfile = {
 const SEED_USERS: UserProfile[] = [
   DEFAULT_ADMIN_PROFILE,
   {
-    id: 'user_seed_1',
+    id: 'user_seed_google',
     name: 'Айпери Касымова',
     identifier: 'aiperi.kasymova@gmail.com',
-    password: '123',
+    email: 'aiperi.kasymova@gmail.com',
+    authProvider: 'google',
+    authProviders: ['google'],
+    password: '',
     avatar: '/avatars/argali.svg',
     targetScore: 225,
     targetUniversity: 'КГТУ им. И. Раззакова (Политех)',
     registeredAt: new Date(Date.now() - 3600000 * 30).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 3).toISOString(),
     testHistory: [
       {
         id: 'rec_s1',
@@ -230,14 +246,91 @@ const SEED_USERS: UserProfile[] = [
     hasSeenWelcomeGift: true,
   },
   {
-    id: 'user_seed_2',
+    id: 'user_seed_sync',
+    name: 'Эркин Бакиров',
+    identifier: 'erkin.bakirov@gmail.com',
+    email: 'erkin.bakirov@gmail.com',
+    authProvider: 'google',
+    authProviders: ['google', 'email_code'], // Synchronized Google & 6-digit Code!
+    password: '',
+    avatar: '/avatars/snow_leopard.svg',
+    targetScore: 232,
+    targetUniversity: 'АУЦА (Американский университет в ЦА)',
+    registeredAt: new Date(Date.now() - 3600000 * 48).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    testHistory: [
+      {
+        id: 'rec_s_sync',
+        variantId: 2,
+        testName: 'ЦООМО №2',
+        subject: 'Математика',
+        title: 'ЦООМО №2',
+        date: new Date(Date.now() - 3600000 * 8).toISOString(),
+        mode: 'section',
+        totalScore: 224,
+        maxScore: 245,
+        accuracy: 91,
+        correctAnswers: 27,
+        totalQuestions: 30,
+      },
+    ],
+    subscriptionPlan: 'premium',
+    subscriptionExpiry: '2027-06-01',
+    isPaid: true,
+    hasSeenWelcomeGift: true,
+  },
+  {
+    id: 'user_seed_tg',
+    name: 'Азамат Темиров',
+    identifier: '@azamat_ort',
+    telegramUsername: '@azamat_ort',
+    telegramId: 894021482,
+    authProvider: 'telegram',
+    authProviders: ['telegram'],
+    password: '',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+    targetScore: 220,
+    targetUniversity: 'КНУ им. Ж. Баласагына',
+    registeredAt: new Date(Date.now() - 3600000 * 50).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 4).toISOString(),
+    testHistory: [],
+    subscriptionPlan: 'premium',
+    subscriptionExpiry: '2027-06-01',
+    isPaid: true,
+    hasSeenWelcomeGift: true,
+  },
+  {
+    id: 'user_seed_code',
+    name: 'Чынгыз Айтматов',
+    identifier: 'chyngyz.student@yandex.ru',
+    email: 'chyngyz.student@yandex.ru',
+    authProvider: 'email_code',
+    authProviders: ['email_code'],
+    password: '',
+    avatar: '/avatars/argali.svg',
+    targetScore: 218,
+    targetUniversity: 'КГТУ им. И. Раззакова',
+    registeredAt: new Date(Date.now() - 3600000 * 60).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 6).toISOString(),
+    testHistory: [],
+    subscriptionPlan: 'standard',
+    subscriptionExpiry: '2027-06-01',
+    isPaid: true,
+    hasSeenWelcomeGift: true,
+  },
+  {
+    id: 'user_seed_phone',
     name: 'Бектур Сулайманов',
     identifier: '+996700123456',
+    phone: '+996700123456',
+    authProvider: 'phone_code',
+    authProviders: ['phone_code'],
     password: '123',
     avatar: '/avatars/golden_eagle.svg',
     targetScore: 230,
     targetUniversity: 'АУЦА (Американский университет в ЦА)',
     registeredAt: new Date(Date.now() - 3600000 * 70).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 5).toISOString(),
     testHistory: [
       {
         id: 'rec_s2',
@@ -260,14 +353,18 @@ const SEED_USERS: UserProfile[] = [
     hasSeenWelcomeGift: true,
   },
   {
-    id: 'user_seed_3',
+    id: 'user_seed_email_pass',
     name: 'Нурайым Абдыкадырова',
     identifier: 'nurayim.abdyk@mail.ru',
+    email: 'nurayim.abdyk@mail.ru',
+    authProvider: 'password',
+    authProviders: ['password'],
     password: '123',
     avatar: '/avatars/kyrgyz_horse.svg',
     targetScore: 210,
     targetUniversity: 'КГМА им. И. Ахунбаева (Медакадемия)',
     registeredAt: new Date(Date.now() - 3600000 * 90).toISOString(),
+    lastLoginAt: new Date(Date.now() - 3600000 * 10).toISOString(),
     testHistory: [],
     subscriptionPlan: 'free',
     subscriptionExpiry: '2027-06-01',
@@ -320,6 +417,130 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const USERS_STORAGE_KEY = 'ort_registered_users_v2';
 const CURRENT_USER_KEY = 'ort_current_user_v2';
 
+export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
+  if (!Array.isArray(usersList)) return [DEFAULT_ADMIN_PROFILE];
+
+  const result: UserProfile[] = [];
+  const seenIds = new Set<string>();
+  let adminAdded = false;
+
+  for (const u of usersList) {
+    if (!u) continue;
+    const rawIdentifier = (u.identifier || '').trim();
+    const lowerIdentifier = rawIdentifier.toLowerCase();
+    const email = (u.email || (rawIdentifier.includes('@') && !rawIdentifier.startsWith('@') ? rawIdentifier : '')).trim().toLowerCase();
+
+    const isAdmin =
+      u.id === 'admin_mady1baevv' ||
+      lowerIdentifier === ADMIN_EMAIL.toLowerCase() ||
+      email === ADMIN_EMAIL.toLowerCase() ||
+      lowerIdentifier === '@mady1baevv' ||
+      lowerIdentifier === '@kyrgyzakylman';
+
+    if (isAdmin) {
+      if (adminAdded) {
+        continue;
+      }
+      adminAdded = true;
+      seenIds.add('admin_mady1baevv');
+
+      result.unshift({
+        ...DEFAULT_ADMIN_PROFILE,
+        ...u,
+        id: 'admin_mady1baevv',
+        identifier: ADMIN_EMAIL,
+        email: ADMIN_EMAIL,
+        authProviders: Array.from(new Set([...(u.authProviders || []), 'google', 'email_code', 'telegram'])),
+        subscriptionPlan: 'premium',
+        isPaid: true,
+        subscriptionExpiry: '2027-06-01',
+      });
+      continue;
+    }
+
+    // Check if this user shares an email or identifier with an already processed user (e.g. Google auth + 6-digit code)
+    const existingIndex = result.findIndex((r) => {
+      const rEmail = (r.email || (r.identifier?.includes('@') && !r.identifier.startsWith('@') ? r.identifier : '')).toLowerCase();
+      if (email && rEmail && email === rEmail) return true;
+      if (lowerIdentifier && r.identifier?.toLowerCase() === lowerIdentifier) return true;
+      return false;
+    });
+
+    if (existingIndex !== -1) {
+      // Merge into the existing synchronized profile!
+      const existing = result[existingIndex];
+      const mergedProviders = Array.from(
+        new Set([
+          ...(existing.authProviders || (existing.authProvider ? [existing.authProvider] : [])),
+          ...(u.authProviders || (u.authProvider ? [u.authProvider] : [])),
+        ])
+      );
+
+      result[existingIndex] = {
+        ...existing,
+        ...u,
+        id: existing.id,
+        identifier: existing.identifier || u.identifier,
+        email: existing.email || u.email || (email || undefined),
+        name:
+          existing.name && existing.name !== 'Ученик' && !existing.name.startsWith('Ученик (')
+            ? existing.name
+            : u.name || existing.name,
+        avatar: existing.avatar && !existing.avatar.includes('snow_leopard.svg') ? existing.avatar : u.avatar || existing.avatar,
+        authProviders: mergedProviders,
+        authProvider: existing.authProvider || u.authProvider,
+        isPaid: existing.isPaid || u.isPaid,
+        subscriptionPlan:
+          existing.subscriptionPlan === 'premium' || u.subscriptionPlan === 'premium'
+            ? 'premium'
+            : existing.subscriptionPlan === 'standard' || u.subscriptionPlan === 'standard'
+            ? 'standard'
+            : existing.subscriptionPlan || u.subscriptionPlan || 'free',
+        testHistory: [...(existing.testHistory || []), ...(u.testHistory || [])].filter(
+          (test, i, arr) => arr.findIndex((t) => t.id === test.id) === i
+        ),
+      };
+      continue;
+    }
+
+    let uid = u.id ? String(u.id).trim() : '';
+    if (!uid || seenIds.has(uid) || uid === 'admin_mady1baevv') {
+      uid = `user_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    }
+    seenIds.add(uid);
+
+    // Infer auth provider if missing
+    let inferredProvider = u.authProvider;
+    if (!inferredProvider) {
+      if (lowerIdentifier.startsWith('@') || uid.startsWith('tg_')) {
+        inferredProvider = 'telegram';
+      } else if (lowerIdentifier.startsWith('+')) {
+        inferredProvider = 'phone_code';
+      } else if (lowerIdentifier.includes('@')) {
+        inferredProvider = 'email_code';
+      } else {
+        inferredProvider = 'password';
+      }
+    }
+
+    const providers = u.authProviders && u.authProviders.length > 0 ? u.authProviders : [inferredProvider];
+
+    result.push({
+      ...u,
+      id: uid,
+      authProvider: inferredProvider,
+      authProviders: providers,
+      email: u.email || (rawIdentifier.includes('@') && !rawIdentifier.startsWith('@') ? rawIdentifier : undefined),
+    });
+  }
+
+  if (!adminAdded) {
+    result.unshift(DEFAULT_ADMIN_PROFILE);
+  }
+
+  return result;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
@@ -329,6 +550,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parsed && parsed.identifier?.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
           return {
             ...parsed,
+            id: 'admin_mady1baevv',
             subscriptionPlan: 'premium',
             isPaid: true,
             subscriptionExpiry: '2027-06-01',
@@ -357,23 +579,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(timer);
   }, []);
 
-  // Ensure default seed users exist in localStorage
+  // Ensure default seed users exist and are cleanly deduplicated in localStorage
   useEffect(() => {
     try {
       const existing = localStorage.getItem(USERS_STORAGE_KEY);
       if (!existing) {
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
+        const initial = deduplicateUsers(SEED_USERS);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initial));
       } else {
         const parsed = JSON.parse(existing);
-        const hasAdmin = parsed.some(
-          (u: UserProfile) => u.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()
-        );
-        if (!hasAdmin) {
-          parsed.unshift(DEFAULT_ADMIN_PROFILE);
-          localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(parsed));
-        }
+        const clean = deduplicateUsers(parsed);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(clean));
       }
-    } catch {}
+    } catch {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(deduplicateUsers(SEED_USERS)));
+    }
   }, []);
 
   const subscriptionStatus = computeSubscriptionStatus(user);
@@ -382,24 +602,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const users = localStorage.getItem(USERS_STORAGE_KEY);
       if (!users) {
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(SEED_USERS));
-        return SEED_USERS;
+        const initial = deduplicateUsers(SEED_USERS);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initial));
+        return initial;
       }
-      return JSON.parse(users);
+      const parsed = JSON.parse(users);
+      const clean = deduplicateUsers(parsed);
+      if (clean.length !== parsed.length) {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(clean));
+      }
+      return clean;
     } catch {
-      return SEED_USERS;
+      return deduplicateUsers(SEED_USERS);
     }
   };
 
   const saveUsers = (users: UserProfile[]) => {
-    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    const clean = deduplicateUsers(users);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(clean));
   };
 
   const login = (identifier: string, pass: string) => {
     const trimmedId = identifier.trim().toLowerCase();
 
     // Special auto-login for Admin
-    if (trimmedId === ADMIN_EMAIL.toLowerCase()) {
+    if (trimmedId === ADMIN_EMAIL.toLowerCase() || trimmedId === '@mady1baevv' || trimmedId === '@kyrgyzakylman') {
       const adminProfile = {
         ...DEFAULT_ADMIN_PROFILE,
         name: user?.name || DEFAULT_ADMIN_PROFILE.name,
@@ -407,15 +634,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(adminProfile);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(adminProfile));
 
-      const users = getUsers();
-      const adminIdx = users.findIndex(
-        (u) => u.identifier.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase()
+      const users = getUsers().filter(
+        (u) => u.id !== 'admin_mady1baevv' && u.identifier.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()
       );
-      if (adminIdx !== -1) {
-        users[adminIdx] = adminProfile;
-      } else {
-        users.unshift(adminProfile);
-      }
+      users.unshift(adminProfile);
       saveUsers(users);
       return { success: true };
     }
@@ -499,37 +721,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Укажите номер телефона или email' };
     }
 
+    const isEmail = trimmedId.includes('@');
+    const normalizedEmail = isEmail ? trimmedId.toLowerCase() : '';
     const isAdminAccount = trimmedId.toLowerCase() === ADMIN_EMAIL.toLowerCase();
     const users = getUsers();
-    const existing = users.find(
-      (u) => u.identifier.trim().toLowerCase() === trimmedId.toLowerCase()
-    );
 
-    if (existing) {
+    // Match by email if email, or by identifier if phone/other
+    const existingIndex = users.findIndex((u) => {
+      if (isEmail) {
+        const uIdent = (u.identifier || '').trim().toLowerCase();
+        const uEmail = (u.email || '').trim().toLowerCase();
+        return uIdent === normalizedEmail || uEmail === normalizedEmail;
+      }
+      return (u.identifier || '').trim().toLowerCase() === trimmedId.toLowerCase();
+    });
+
+    if (existingIndex !== -1) {
+      const existing = users[existingIndex];
+      const currentProviders = existing.authProviders || (existing.authProvider ? [existing.authProvider] : []);
+      const updatedProviders = Array.from(
+        new Set([...currentProviders, isEmail ? 'email_code' : 'phone_code'])
+      );
+
       const updatedUser: UserProfile = {
         ...existing,
-        ...(name && name.trim() ? { name: name.trim() } : {}),
+        identifier: isEmail ? normalizedEmail : existing.identifier,
+        ...(isEmail ? { email: normalizedEmail } : {}),
+        name:
+          name && name.trim() && (!existing.name || existing.name === 'Ученик' || existing.name.startsWith('Ученик ('))
+            ? name.trim()
+            : existing.name,
+        authProvider: existing.authProvider || (isEmail ? 'email_code' : 'phone_code'),
+        authProviders: updatedProviders,
+        lastLoginAt: new Date().toISOString(),
         ...(isAdminAccount
           ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
           : {}),
       };
-      const updatedUsers = users.map((u) =>
-        u.identifier.trim().toLowerCase() === trimmedId.toLowerCase() ? updatedUser : u
-      );
-      saveUsers(updatedUsers);
+
+      users[existingIndex] = updatedUser;
+      saveUsers(users);
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+      localStorage.setItem('user', JSON.stringify(updatedUser));
       return { success: true };
     } else {
       // Auto-register new student via phone or email code
       const newUser: UserProfile = {
         id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
-        name: name?.trim() || (trimmedId.includes('@') ? trimmedId.split('@')[0] : 'Ученик (' + trimmedId.slice(-4) + ')'),
-        identifier: trimmedId,
+        name:
+          name?.trim() ||
+          (isEmail ? normalizedEmail.split('@')[0] : 'Ученик (' + trimmedId.slice(-4) + ')'),
+        identifier: isEmail ? normalizedEmail : trimmedId,
+        email: isEmail ? normalizedEmail : undefined,
         password: '',
+        avatar: '/avatars/snow_leopard.svg',
+        authProvider: isEmail ? 'email_code' : 'phone_code',
+        authProviders: [isEmail ? 'email_code' : 'phone_code'],
         targetScore: isAdminAccount ? 240 : 215,
         targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
         registeredAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
         testHistory: [],
         subscriptionPlan: isAdminAccount ? 'premium' : 'free',
         subscriptionExpiry: '2027-06-01',
@@ -537,11 +789,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasSeenWelcomeGift: false,
       };
 
-      const filtered = users.filter((u) => u.identifier.trim().toLowerCase() !== trimmedId.toLowerCase());
+      const filtered = users.filter((u) => {
+        if (isEmail) {
+          return (
+            (u.identifier || '').trim().toLowerCase() !== normalizedEmail &&
+            (u.email || '').trim().toLowerCase() !== normalizedEmail
+          );
+        }
+        return (u.identifier || '').trim().toLowerCase() !== trimmedId.toLowerCase();
+      });
       filtered.unshift(newUser);
       saveUsers(filtered);
       setUser(newUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+      localStorage.setItem('user', JSON.stringify(newUser));
       if (!isAdminAccount) {
         setIsTrialWelcomeOpen(true);
       }
@@ -559,40 +820,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { success: false, error: 'Пользователь Google не найден' };
       }
 
-      const email = result.user.email || '';
+      const email = (result.user.email || '').trim().toLowerCase();
       const displayName = result.user.displayName || 'Ученик Google';
       const photoURL = result.user.photoURL || '/avatars/snow_leopard.svg';
-      const isAdminAccount = email.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const isAdminAccount = email === ADMIN_EMAIL.toLowerCase();
 
       const users = getUsers();
-      const existingUser = users.find((u) => u.identifier.trim().toLowerCase() === email.trim().toLowerCase());
+      const existingIndex = users.findIndex(
+        (u) =>
+          (u.identifier && u.identifier.trim().toLowerCase() === email) ||
+          (u.email && u.email.trim().toLowerCase() === email)
+      );
 
-      if (existingUser) {
+      if (existingIndex !== -1) {
+        const existing = users[existingIndex];
+        const currentProviders = existing.authProviders || (existing.authProvider ? [existing.authProvider] : []);
+        const updatedProviders = Array.from(new Set([...currentProviders, 'google']));
+
         const updatedUser: UserProfile = {
-          ...existingUser,
-          name: displayName || existingUser.name,
-          avatar: photoURL || existingUser.avatar,
+          ...existing,
+          email: email,
+          identifier: existing.identifier || email,
+          name:
+            existing.name && existing.name !== 'Ученик' && !existing.name.startsWith('Ученик (')
+              ? existing.name
+              : displayName || existing.name,
+          avatar: photoURL || existing.avatar,
+          authProvider: existing.authProvider || 'google',
+          authProviders: updatedProviders,
+          lastLoginAt: new Date().toISOString(),
           ...(isAdminAccount
             ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
             : {}),
         };
-        const updatedUsers = users.map((u) =>
-          u.identifier.trim().toLowerCase() === email.trim().toLowerCase() ? updatedUser : u
-        );
-        saveUsers(updatedUsers);
+
+        users[existingIndex] = updatedUser;
+        saveUsers(users);
         setUser(updatedUser);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+        localStorage.setItem('user', JSON.stringify(updatedUser));
         return { success: true };
       } else {
         const newUser: UserProfile = {
           id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
           name: displayName,
           identifier: email,
+          email: email,
           password: '',
           avatar: photoURL,
+          authProvider: 'google',
+          authProviders: ['google'],
           targetScore: isAdminAccount ? 240 : 215,
           targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
           registeredAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
           testHistory: [],
           subscriptionPlan: isAdminAccount ? 'premium' : 'free',
           subscriptionExpiry: '2027-06-01',
@@ -600,11 +881,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           hasSeenWelcomeGift: false,
         };
 
-        const filtered = users.filter((u) => u.identifier.trim().toLowerCase() !== email.trim().toLowerCase());
+        const filtered = users.filter(
+          (u) =>
+            (u.identifier || '').trim().toLowerCase() !== email &&
+            (u.email || '').trim().toLowerCase() !== email
+        );
         filtered.unshift(newUser);
         saveUsers(filtered);
         setUser(newUser);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+        localStorage.setItem('user', JSON.stringify(newUser));
         if (!isAdminAccount) {
           setIsTrialWelcomeOpen(true);
         }
@@ -654,27 +940,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (telegramId !== undefined && telegramId === 853874930794);
 
     const users = getUsers();
-    const existing = users.find(
+    const existingIndex = users.findIndex(
       (u) =>
-        u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase() ||
-        (telegramId !== undefined && u.id === `tg_${telegramId}`)
+        (u.identifier && u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase()) ||
+        (telegramId !== undefined && (u.telegramId === telegramId || u.id === `tg_${telegramId}`))
     );
 
-    if (existing) {
+    if (existingIndex !== -1) {
+      const existing = users[existingIndex];
+      const currentProviders = existing.authProviders || (existing.authProvider ? [existing.authProvider] : []);
+      const updatedProviders = Array.from(new Set([...currentProviders, 'telegram']));
+
       const updatedUser: UserProfile = {
         ...existing,
         name: displayName || existing.name,
+        telegramUsername: cleanUsername,
+        telegramId: telegramId || existing.telegramId,
         avatar: avatarUrl !== '/avatars/snow_leopard.svg' ? avatarUrl : existing.avatar,
+        authProvider: existing.authProvider || 'telegram',
+        authProviders: updatedProviders,
+        lastLoginAt: new Date().toISOString(),
         ...(isAdminAccount
           ? { subscriptionPlan: 'premium', isPaid: true, subscriptionExpiry: '2027-06-01' }
           : {}),
       };
-      const updatedUsers = users.map((u) =>
-        u.id === existing.id || u.identifier.trim().toLowerCase() === cleanUsername.toLowerCase()
-          ? updatedUser
-          : u
-      );
-      saveUsers(updatedUsers);
+      users[existingIndex] = updatedUser;
+      saveUsers(users);
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -684,11 +975,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: isAdminAccount ? 'admin_mady1baevv' : telegramId ? `tg_${telegramId}` : 'user_' + Date.now(),
         name: displayName,
         identifier: cleanUsername,
+        telegramUsername: cleanUsername,
+        telegramId: telegramId,
+        authProvider: 'telegram',
+        authProviders: ['telegram'],
         password: '',
         avatar: avatarUrl,
         targetScore: isAdminAccount ? 240 : 215,
         targetUniversity: 'КНУ им. Ж. Баласагына — Кыргызский национальный университет',
         registeredAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
         testHistory: [],
         subscriptionPlan: isAdminAccount ? 'premium' : 'free',
         subscriptionExpiry: '2027-06-01',
@@ -697,7 +993,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       const filtered = users.filter(
-        (u) => u.identifier.trim().toLowerCase() !== cleanUsername.toLowerCase()
+        (u) =>
+          (u.identifier || '').trim().toLowerCase() !== cleanUsername.toLowerCase() &&
+          !(telegramId !== undefined && (u.telegramId === telegramId || u.id === `tg_${telegramId}`))
       );
       filtered.unshift(newUser);
       saveUsers(filtered);

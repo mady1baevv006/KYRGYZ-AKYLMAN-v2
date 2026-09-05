@@ -135,16 +135,23 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
       'Умение находить n-й член геометрической прогрессии',
     ];
 
+    const section1Pages = [
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg'), // 1-6
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg'), // 7-15
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604856/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg'), // 16-24
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604857/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg'), // 25-30
+    ];
+
+    const getSection1Page = (qNum: number): string => {
+      if (qNum <= 6) return section1Pages[0];
+      if (qNum <= 15) return section1Pages[1];
+      if (qNum <= 24) return section1Pages[2];
+      return section1Pages[3];
+    };
+
     const questions: Question[] = [];
     for (let i = 1; i <= 30; i++) {
-      let pageImg = '/coomo1_page1.jpg';
-      if (i >= 7 && i <= 15) {
-        pageImg = '/coomo1_page2.jpg';
-      } else if (i >= 16 && i <= 24) {
-        pageImg = '/coomo1_page3.jpg';
-      } else if (i >= 25 && i <= 30) {
-        pageImg = '/coomo1_page4.jpg';
-      }
+      const pageImg = getSection1Page(i);
 
       questions.push({
         id: 1000 + i,
@@ -197,12 +204,12 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     ];
 
     const section2Pages = [
-      '/coomo1_part2_page1.jpg', // Страница 1 = 31 - 33
-      '/coomo1_part2_page2.jpg', // Страница 2 = 34 - 39
-      '/coomo1_part2_page3.jpg', // Страница 3 = 40 - 43
-      '/coomo1_part2_page4.jpg', // Страница 4 = 44 - 48
-      '/coomo1_part2_page5.jpg', // Страница 5 = 49 - 56
-      '/coomo1_part2_page6.jpg', // Страница 6 = 57 - 60
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605098/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.jpg'), // Страница 1 = 31 - 33
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605099/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.jpg'), // Страница 2 = 34 - 39
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605100/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.jpg'), // Страница 3 = 40 - 43
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605110/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.jpg'), // Страница 4 = 44 - 48
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605112/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.jpg'), // Страница 5 = 49 - 56
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605113/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.jpg'), // Страница 6 = 57 - 60
     ];
 
     const math2Topics = [
@@ -302,10 +309,10 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
 
     // ЦООМО №1 (Аналогии и дополнение предложений: 30 вопросов, № 61 - 90, время 30 мин, 4 варианта ответов А, Б, В, Г)
     const section3Pages = [
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787062305/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_1.jpg'), // Страница 1 = 1 - 10 (вопросы 61 - 70)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064555/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_2.jpg'), // Страница 2 = 11 - 20 (вопросы 71 - 80)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064565/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_3.jpg'), // Страница 3 = 21 - 26 (вопросы 81 - 86)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064576/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_4.jpg'), // Страница 4 = 27 - 30 (вопросы 87 - 90)
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605292/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg'), // Страница 1 = 1 - 10 (вопросы 61 - 70)
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605293/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg'), // Страница 2 = 11 - 20 (вопросы 71 - 80)
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605267/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg'), // Страница 3 = 21 - 26 (вопросы 81 - 86)
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605291/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg'), // Страница 4 = 27 - 30 (вопросы 87 - 90)
     ];
 
     const section3Answers: ('А' | 'Б' | 'В' | 'Г')[] = [
@@ -438,15 +445,15 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     // SECTION 4: Чтение и понимание текста (Вопросы 91 - 120, время 60 мин, 9 страниц)
     // ==========================================
     const section4Pages = [
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132551/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_1.jpg'), // Страница 1 (Текст 1, часть 1 / вопросы 91-93)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132423/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_2.jpg'), // Страница 2 (Текст 1, часть 2 / вопросы 94-97)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132418/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_3.jpg'), // Страница 3 (Текст 1, часть 3 / вопросы 98-100)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132412/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_4.jpg'), // Страница 4 (Текст 2, часть 1 / вопросы 101-103)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132397/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_5.jpg'), // Страница 5 (Текст 2, часть 2 / вопросы 104-107)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132391/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_6.jpg'), // Страница 6 (Текст 2, часть 3 / вопросы 108-110)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132383/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_7.jpg'), // Страница 7 (Текст 3, часть 1 / вопросы 111-113)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132373/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_8.jpg'), // Страница 8 (Текст 3, часть 2 / вопросы 114-117)
-      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132289/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_9.jpg'), // Страница 9 (Текст 3, часть 3 / вопросы 118-120)
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605415/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 1: 1-3
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605416/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 2: 1-3
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605417/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 3: 4-10
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605446/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 4: 11-16
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 5: 11-16
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 6: 17-20
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605412/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 7: 21-27
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605414/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 8: 21-27
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605451/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg'), // Фото 9: 28-30
     ];
 
     const section4Answers: ('А' | 'Б' | 'В' | 'Г')[] = [
@@ -585,11 +592,11 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     // SECTION 5: Практическая грамматика русского языка (Вопросы 121 - 150)
     // ==========================================
     const section5Pages = [
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128367/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_1.jpg',
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128430/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_2.jpg',
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128438/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_3.jpg',
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128482/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_4.jpg',
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128493/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_5.jpg',
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605676/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg'), // Фото 1 = 1-3
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605677/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg'), // Фото 2 = 4-11
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605679/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg'), // Фото 3 = 12-18
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605659/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg'), // Фото 4 = 19-26
+      getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605657/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg'), // Фото 5 = 27-30
     ];
 
     const getSection5Page = (qNum: number): string => {
@@ -708,10 +715,10 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     // Часть 1: Математика I (30 вопросов: 1 - 30, время 30 мин, 4 варианта А, Б, В, Г)
     // -------------------------------------------------------------------------
     const section1PagesV2 = [
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137869/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg', // Страница 1 = 1-7 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137870/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg', // Страница 2 = 8-15 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137871/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg', // Страница 3 = 16-23 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137872/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg', // Страница 4 = 24-30 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603233/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg', // Страница 1 = 1-7 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603233/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg', // Страница 2 = 8-15 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603234/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg', // Страница 3 = 16-23 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603234/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.4.jpg', // Страница 4 = 24-30 (включительно)
     ];
 
     const getSection1PageV2 = (qNum: number): string => {
@@ -817,12 +824,12 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
     // Вторая часть: Математика II (30 вопросов: 31 - 60, время 60 мин, 5 вариантов А, Б, В, Г, Д)
     // -------------------------------------------------------------------------
     const section2PagesV2 = [
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137871/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.jpg', // Страница 1 = 31-35 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137873/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.jpg', // Страница 2 = 36-40 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.jpg', // Страница 3 = 41-46 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137872/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.jpg', // Страница 4 = 47-51 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.jpg', // Страница 5 = 52-58 (включительно)
-      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.jpg', // Страница 6 = 59-60 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603378/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg', // Страница 1 = 31-35 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603379/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg', // Страница 2 = 36-40 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603376/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg', // Страница 3 = 41-46 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603368/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg', // Страница 4 = 47-51 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603377/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg', // Страница 5 = 52-58 (включительно)
+      'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603377/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.jpg', // Страница 6 = 59-60 (включительно)
     ];
 
     const getSection2PageV2 = (qNum: number): string => {

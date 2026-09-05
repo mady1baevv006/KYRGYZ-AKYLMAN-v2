@@ -22,6 +22,9 @@ import {
   UserPlus,
   FileText,
   Radio,
+  Crown,
+  Upload,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { CourseGroup, CourseLesson, CourseHomework, CourseScheduleItem } from '../../types/courses';
 import {
@@ -32,13 +35,17 @@ import {
   saveStoredStudents,
   EnrolledStudentRecord,
 } from '../../data/coursesStorage';
-import { PRIMARY_COURSE } from '../../data/coursesData';
+import { COURSE_TEMPLATE_PREVIEW } from '../../data/coursesData';
 
 export const CoursesAdminManager: React.FC = () => {
   const [courses, setCourses] = useState<CourseGroup[]>([]);
   const [students, setStudents] = useState<EnrolledStudentRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Dedicated Preview Template State
+  const [previewTemplate, setPreviewTemplate] = useState<CourseGroup>(() => COURSE_TEMPLATE_PREVIEW);
+  const [templateToast, setTemplateToast] = useState<string | null>(null);
+
   // Modals
   const [editingCourse, setEditingCourse] = useState<CourseGroup | null>(null);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
@@ -88,9 +95,25 @@ export const CoursesAdminManager: React.FC = () => {
   };
 
   const handleResetToDefault = () => {
-    if (!window.confirm('Сбросить список курсов к исходному курсу Мадылбаева А. Т. (40 занятий, 4000 сом)?')) return;
+    if (!window.confirm('Сбросить список курсов к исходному состоянию?')) return;
     const defaultData = resetStoredCourses();
     setCourses(defaultData);
+  };
+
+  const handlePublishFromTemplate = () => {
+    const newCourse: CourseGroup = {
+      ...previewTemplate,
+      id: `course-${Date.now()}`,
+      enrolledCount: 0,
+      lessons: previewTemplate.lessons && previewTemplate.lessons.length > 0 ? previewTemplate.lessons : [],
+      homeworks: previewTemplate.homeworks && previewTemplate.homeworks.length > 0 ? previewTemplate.homeworks : [],
+      chatMessages: [],
+    };
+    const updated = [newCourse, ...courses];
+    saveStoredCourses(updated);
+    setCourses(updated);
+    setTemplateToast(`Курс «${newCourse.titleRu}» успешно создан и опубликован в каталоге!`);
+    setTimeout(() => setTemplateToast(null), 4000);
   };
 
   // Lesson actions
@@ -216,10 +239,10 @@ export const CoursesAdminManager: React.FC = () => {
               type="button"
               onClick={handleResetToDefault}
               className="px-3.5 py-2.5 rounded-xl border border-emerald-700/60 bg-emerald-950/60 hover:bg-emerald-900/60 text-xs font-bold text-emerald-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Сбросить к базовому курсу Мадылбаева А. Т."
+              title="Сбросить список курсов"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Сбросить к курсу Мадылбаева А. Т.</span>
+              <span>Сбросить курсы</span>
             </button>
 
             <button
@@ -227,7 +250,7 @@ export const CoursesAdminManager: React.FC = () => {
               onClick={() => {
                 setIsCreatingCourse(true);
                 setEditingCourse({
-                  ...PRIMARY_COURSE,
+                  ...COURSE_TEMPLATE_PREVIEW,
                   id: `course-${Date.now()}`,
                   titleRu: 'Новый курс ОРТ',
                   titleKg: 'Жаңы ЖРТ курсу',
@@ -239,7 +262,7 @@ export const CoursesAdminManager: React.FC = () => {
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/20 active:scale-95 hover:brightness-105"
             >
               <Plus className="w-4 h-4" />
-              <span>Создать новый курс</span>
+              <span>Создать курс вручную</span>
             </button>
           </div>
         </div>
@@ -247,7 +270,7 @@ export const CoursesAdminManager: React.FC = () => {
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-emerald-800/60">
           <div className="bg-[#031510] border border-emerald-800/40 rounded-2xl p-3.5">
-            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Всего курсов</div>
+            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Всего курсов в каталоге</div>
             <div className="text-2xl font-black text-white mt-1">{courses.length}</div>
           </div>
           <div className="bg-[#031510] border border-emerald-800/40 rounded-2xl p-3.5">
@@ -261,6 +284,454 @@ export const CoursesAdminManager: React.FC = () => {
           <div className="bg-[#031510] border border-emerald-800/40 rounded-2xl p-3.5">
             <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Домашних заданий</div>
             <div className="text-2xl font-black text-white mt-1">{totalHomeworksCount}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- DEDICATED ADMIN BLOCK: COURSE PREVIEW TEMPLATE --- */}
+      <div className="bg-gradient-to-br from-[#06291f] via-[#041d16] to-[#02140f] border-2 border-emerald-500/60 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Специальный блок для курсов • Шаблон предпросмотра</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-white">
+              Шаблон прямоугольного предварительного просмотра курса
+            </h3>
+            <p className="text-xs sm:text-sm text-emerald-200/80 max-w-2xl leading-relaxed">
+              Настройте параметры шаблона (Предмет, Модуль, Преподаватель, График, Цена) и сразу проверьте, как карточка будет смотреться у учеников. Опубликуйте курс в каталог в один клик.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setPreviewTemplate(COURSE_TEMPLATE_PREVIEW)}
+              className="px-3.5 py-2.5 rounded-xl border border-emerald-700/60 bg-[#031510] hover:bg-emerald-900/50 text-emerald-300 hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Сбросить шаблон к эталонному виду"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Сбросить к эталону</span>
+            </button>
+            <button
+              type="button"
+              onClick={handlePublishFromTemplate}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-amber-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Опубликовать в каталог</span>
+            </button>
+          </div>
+        </div>
+
+        {templateToast && (
+          <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-400 text-emerald-200 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{templateToast}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Template Parameters Form (7 cols) */}
+          <div className="lg:col-span-6 bg-[#031510]/90 border border-emerald-800/70 rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-emerald-900/80">
+              <span className="text-xs font-black uppercase text-emerald-400 tracking-wider">
+                Параметры шаблона курса
+              </span>
+              <span className="text-[11px] text-emerald-300/70">Редактируйте на лету</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Предмет */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Предмет курса
+                </label>
+                <select
+                  value={previewTemplate.subject}
+                  onChange={(e) => {
+                    const subj = e.target.value as any;
+                    const subjectNames: Record<string, { ru: string; kg: string }> = {
+                      math: { ru: 'Математика', kg: 'Математика' },
+                      kyrgyz: { ru: 'Кыргыз тили', kg: 'Кыргыз тили' },
+                      english: { ru: 'Английский язык', kg: 'Англис тили' },
+                      russian: { ru: 'Русский язык', kg: 'Орус тили' },
+                      history: { ru: 'История Кыргызстана', kg: 'Кыргызстан тарыхы' },
+                      chemistry: { ru: 'Химия', kg: 'Химия' },
+                      biology: { ru: 'Биология', kg: 'Биология' },
+                    };
+                    const match = subjectNames[subj] || { ru: 'Математика', kg: 'Математика' };
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      subject: subj,
+                      subjectNameRu: match.ru,
+                      subjectNameKg: match.kg,
+                    }));
+                  }}
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                >
+                  <option value="math">Математика</option>
+                  <option value="kyrgyz">Кыргыз тили</option>
+                  <option value="english">Английский язык</option>
+                  <option value="russian">Русский язык</option>
+                  <option value="history">История</option>
+                  <option value="chemistry">Химия</option>
+                  <option value="biology">Биология</option>
+                </select>
+              </div>
+
+              {/* Модуль */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Модуль курса
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.moduleNameRu}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      moduleNameRu: e.target.value,
+                      moduleNameKg: e.target.value,
+                    }))
+                  }
+                  placeholder="Интенсивный модуль / Базовый / 220+"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Название курса */}
+              <div className="sm:col-span-2">
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Название курса (Заголовок карточки)
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.titleRu}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      titleRu: e.target.value,
+                      titleKg: e.target.value,
+                    }))
+                  }
+                  placeholder="Математика: Интенсивная подготовка к ОРТ"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Преподаватель */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Преподаватель (ФИО)
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.teacher.name}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      teacher: { ...prev.teacher, name: e.target.value, nameKg: e.target.value },
+                    }))
+                  }
+                  placeholder="Мадылбаев Абдраим Турусбекович"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Регалии преподавателя */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Должность / Регалии
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.teacher.title}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      teacher: { ...prev.teacher, title: e.target.value, titleKg: e.target.value },
+                    }))
+                  }
+                  placeholder="Главный преподаватель и эксперт ОРТ"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Фото преподавателя */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Фото преподавателя (URL или Загрузить файл)
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl overflow-hidden border border-emerald-700/60 bg-[#020e0b] shrink-0 flex items-center justify-center">
+                    {previewTemplate.teacher.avatar ? (
+                      <img
+                        src={previewTemplate.teacher.avatar}
+                        alt="Преподаватель"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-4 h-4 text-emerald-400/50" />
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={previewTemplate.teacher.avatar}
+                    onChange={(e) =>
+                      setPreviewTemplate((prev) => ({
+                        ...prev,
+                        teacher: { ...prev.teacher, avatar: e.target.value },
+                      }))
+                    }
+                    placeholder="URL фото (Cloudinary / прямая ссылка)"
+                    className="flex-1 min-w-0 bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                  />
+                  <label className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl bg-emerald-800/60 hover:bg-emerald-700/70 border border-emerald-600/60 text-emerald-200 text-xs font-bold cursor-pointer transition-colors shrink-0">
+                    <Upload className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Файл</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            if (event.target?.result) {
+                              setPreviewTemplate((prev) => ({
+                                ...prev,
+                                teacher: { ...prev.teacher, avatar: event.target.result as string },
+                              }));
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* График занятий */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Дни занятий (График)
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.daysScheduleFormat}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      daysScheduleFormat: e.target.value,
+                    }))
+                  }
+                  placeholder="Пн-Ср-Пт или Пн-Пт"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Время урока */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Время занятий
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.nextLessonTime}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      nextLessonTime: e.target.value,
+                    }))
+                  }
+                  placeholder="18:00"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Стоимость курса */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Стоимость (сом)
+                </label>
+                <input
+                  type="number"
+                  value={previewTemplate.priceSom}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      priceSom: Number(e.target.value) || 0,
+                    }))
+                  }
+                  placeholder="4000"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Лимит мест */}
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Лимит мест в мини-группе
+                </label>
+                <input
+                  type="number"
+                  value={previewTemplate.totalSpots}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      totalSpots: Number(e.target.value) || 10,
+                    }))
+                  }
+                  placeholder="10"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+
+              {/* Целевой балл */}
+              <div className="sm:col-span-2">
+                <label className="block text-[11px] font-bold text-emerald-300/80 mb-1">
+                  Целевой бейдж (Баллы ОРТ)
+                </label>
+                <input
+                  type="text"
+                  value={previewTemplate.targetBadgeRu}
+                  onChange={(e) =>
+                    setPreviewTemplate((prev) => ({
+                      ...prev,
+                      targetBadgeRu: e.target.value,
+                      targetBadgeKg: e.target.value,
+                    }))
+                  }
+                  placeholder="Цель: 220+ баллов на ОРТ"
+                  className="w-full bg-[#020e0b] border border-emerald-800/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-400"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Rectangular Live Preview Card (6 cols) */}
+          <div className="lg:col-span-6 space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-xs font-black uppercase text-amber-300 tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Прямоугольный предпросмотр (как на сайте)</span>
+              </span>
+              <span className="text-[10px] text-emerald-300/60 font-mono">100% LIVE PREVIEW</span>
+            </div>
+
+            {/* The exact rectangular card template */}
+            <div className="relative flex flex-col justify-between bg-gradient-to-b from-[#05261d] to-[#031711] border-2 border-emerald-500/80 rounded-3xl p-6 shadow-2xl space-y-4">
+              {/* Badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-[11px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 uppercase tracking-wide">
+                  {previewTemplate.moduleNameRu || 'Интенсивный модуль'}
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-400/15 text-amber-300 border border-amber-400/30">
+                  {previewTemplate.targetBadgeRu || 'Цель: 220+ баллов'}
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-[#020e0b] text-emerald-400 border border-emerald-800/60 ml-auto uppercase">
+                  {previewTemplate.subjectNameRu || 'Математика'}
+                </span>
+              </div>
+
+              {/* Title & Description */}
+              <div>
+                <h4 className="text-lg sm:text-xl font-black text-white">
+                  {previewTemplate.titleRu || 'Математика: Интенсивная подготовка к ОРТ'}
+                </h4>
+                <p className="text-xs text-emerald-200/70 mt-2 line-clamp-2 leading-relaxed">
+                  {previewTemplate.descriptionRu}
+                </p>
+              </div>
+
+              {/* Teacher Info */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#031510]/90 border border-emerald-800/60">
+                <img
+                  src={previewTemplate.teacher.avatar}
+                  alt={previewTemplate.teacher.name}
+                  className="w-12 h-12 rounded-xl object-cover border border-emerald-400/40 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h5 className="text-xs sm:text-sm font-black text-white truncate">
+                      {previewTemplate.teacher.name || 'Мадылбаев Абдраим Турусбекович'}
+                    </h5>
+                    <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  </div>
+                  <p className="text-[11px] text-emerald-300/80 truncate">
+                    {previewTemplate.teacher.title || 'Главный преподаватель и эксперт ОРТ'}
+                  </p>
+                  <p className="text-[10px] text-emerald-400 font-semibold">
+                    ОРТ: {previewTemplate.teacher.ortScore} балл • {previewTemplate.teacher.experienceYears} лет стажа
+                  </p>
+                </div>
+              </div>
+
+              {/* Highlights (Schedule, Time) */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#031510]/70 border border-emerald-900/60 text-emerald-200/90">
+                  <Calendar className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="truncate font-semibold">{previewTemplate.daysScheduleFormat || 'Пн-Ср-Пт'}</span>
+                </div>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#031510]/70 border border-emerald-900/60 text-emerald-200/90">
+                  <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate font-semibold">{previewTemplate.nextLessonTime || '18:00'} (1 час)</span>
+                </div>
+              </div>
+
+              {/* Spots Progress Bar (strictly 6-10 students) */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-emerald-300/80 font-bold flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Мини-группа:</span>
+                  </span>
+                  <span className="font-black text-white">
+                    0 из {previewTemplate.totalSpots || 10} мест
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-[#020e0b] border border-emerald-900 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                    style={{ width: '0%' }}
+                  />
+                </div>
+                <p className="text-[10px] text-emerald-400/80 text-right">
+                  Осталось {previewTemplate.totalSpots || 10} мест (набор открыт)
+                </p>
+              </div>
+
+              {/* Bottom Price & Button */}
+              <div className="pt-4 border-t border-emerald-800/60 flex items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-xl sm:text-2xl font-black text-white">
+                      {previewTemplate.priceSom.toLocaleString('ru-RU')} сом
+                    </span>
+                    <span className="text-[10px] text-emerald-300/70">за весь курс</span>
+                  </div>
+                  {previewTemplate.isFreeForPremium && (
+                    <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1 mt-0.5">
+                      <Crown className="w-3 h-3 text-amber-400" />
+                      <span>Для Premium — бесплатно</span>
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handlePublishFromTemplate}
+                  className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-amber-500/25 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Создать курс</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -513,6 +984,126 @@ export const CoursesAdminManager: React.FC = () => {
                   }
                   className="w-full bg-[#031510] border border-emerald-700/60 rounded-xl px-3.5 py-2.5 text-white outline-none focus:border-emerald-400"
                 />
+              </div>
+
+              {/* Фото преподавателя */}
+              <div className="p-4 rounded-2xl bg-[#020e0b] border border-emerald-700/70 space-y-3">
+                <label className="block text-xs font-bold text-emerald-300 uppercase tracking-wide">
+                  Фото преподавателя
+                </label>
+                <div className="flex flex-col sm:flex-row items-center gap-3.5">
+                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-emerald-500/60 bg-[#041a14] shrink-0 shadow-lg flex items-center justify-center">
+                    {editingCourse.teacher.avatar ? (
+                      <img
+                        src={editingCourse.teacher.avatar}
+                        alt={editingCourse.teacher.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80';
+                        }}
+                      />
+                    ) : (
+                      <ImageIcon className="w-7 h-7 text-emerald-400/50" />
+                    )}
+                  </div>
+                  <div className="flex-1 w-full space-y-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editingCourse.teacher.avatar || ''}
+                        onChange={(e) =>
+                          setEditingCourse({
+                            ...editingCourse,
+                            teacher: { ...editingCourse.teacher, avatar: e.target.value },
+                          })
+                        }
+                        placeholder="Вставьте URL фото преподавателя (Cloudinary / ссылка)"
+                        className="flex-1 bg-[#031510] border border-emerald-700/60 rounded-xl px-3.5 py-2 text-xs text-white outline-none focus:border-emerald-400"
+                      />
+                      <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700/50 hover:bg-emerald-600/60 border border-emerald-500/60 text-emerald-200 text-xs font-bold cursor-pointer transition-colors whitespace-nowrap shadow-sm">
+                        <Upload className="w-3.5 h-3.5 text-emerald-300" />
+                        <span>Загрузить фото</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                if (event.target?.result) {
+                                  setEditingCourse({
+                                    ...editingCourse,
+                                    teacher: {
+                                      ...editingCourse.teacher,
+                                      avatar: event.target.result as string,
+                                    },
+                                  });
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-emerald-400/70">
+                      <span>Примеры:</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingCourse({
+                            ...editingCourse,
+                            teacher: {
+                              ...editingCourse.teacher,
+                              avatar: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80',
+                            },
+                          })
+                        }
+                        className="hover:underline text-emerald-300 cursor-pointer"
+                      >
+                        Женский профиль
+                      </button>
+                      <span>•</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setEditingCourse({
+                            ...editingCourse,
+                            teacher: {
+                              ...editingCourse.teacher,
+                              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80',
+                            },
+                          })
+                        }
+                        className="hover:underline text-emerald-300 cursor-pointer"
+                      >
+                        Мужской профиль
+                      </button>
+                      {editingCourse.teacher.avatar && (
+                        <>
+                          <span>•</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingCourse({
+                                ...editingCourse,
+                                teacher: {
+                                  ...editingCourse.teacher,
+                                  avatar: '',
+                                },
+                              })
+                            }
+                            className="hover:underline text-rose-400 cursor-pointer"
+                          >
+                            Очистить
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -835,7 +1426,7 @@ export const CoursesAdminManager: React.FC = () => {
                 .filter((s) => s.courseId === activeCourseForStudents.id)
                 .map((student, idx) => (
                   <div
-                    key={student.id}
+                    key={`course_student_${student.id}_${idx}`}
                     className="p-4 rounded-2xl bg-[#031510] border border-emerald-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-center gap-3">

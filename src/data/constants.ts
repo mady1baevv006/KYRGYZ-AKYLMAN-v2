@@ -1,6 +1,6 @@
 import { RecommendedChannel, SectionMap } from '../types';
 
-export const API_BASE_URL = 'https://ort-backend.onrender.com';
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || '';
 
 export const SECTION_NAMES: SectionMap = {
   1: 'Математика (Часть I)',

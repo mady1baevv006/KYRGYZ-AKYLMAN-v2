@@ -9,12 +9,10 @@ import {
   PenTool,
   CheckCircle2,
   Sparkles,
-  Search,
   BookOpen,
   Crown,
   ChevronRight,
   ArrowRight,
-  Plus,
   Trash2,
   Layers,
   Info,
@@ -22,10 +20,10 @@ import {
 import { AppLanguage } from '../../types';
 import { CourseGroup, CourseSubject } from '../../types/courses';
 import { COURSES_DATA, MOCK_STUDENT_COURSE_PROFILE } from '../../data/coursesData';
+import { getStoredCourses, saveStoredCourses } from '../../data/coursesStorage';
 import { CourseClassroom } from './CourseClassroom';
 import { CourseEnrollModal } from './CourseEnrollModal';
 import { CourseDetailModal } from './CourseDetailModal';
-import { CreateCourseModal } from './CreateCourseModal';
 import { useAuth } from '../../context/AuthContext';
 
 interface CoursesSectionProps {
@@ -38,28 +36,15 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
   const { user, isVip, isPremium, isAdmin } = useAuth();
   const isKg = lang === 'kg';
 
-  // Load courses from localStorage or default
+  // Load courses from storage
   const [courses, setCourses] = useState<CourseGroup[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error('Error loading courses from localStorage:', e);
-    }
-    return COURSES_DATA;
+    return getStoredCourses();
   });
 
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeClassroomCourse, setActiveClassroomCourse] = useState<CourseGroup | null>(null);
   const [enrollingCourse, setEnrollingCourse] = useState<CourseGroup | null>(null);
   const [detailedCourse, setDetailedCourse] = useState<CourseGroup | null>(null);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   // Enrolled course IDs
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>(() => {
@@ -67,17 +52,18 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
       const saved = localStorage.getItem('kyrgyz_akylman_enrolled_courses');
       if (saved) return JSON.parse(saved);
     } catch {}
-    return ['course-math-base-madylbaev'];
+    return [];
   });
 
-  // Save courses when modified
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
-    } catch (e) {
-      console.error('Error saving courses:', e);
-    }
-  }, [courses]);
+    const handleCoursesUpdate = () => {
+      setCourses(getStoredCourses());
+    };
+    window.addEventListener('kyrgyz_akylman_courses_updated', handleCoursesUpdate);
+    return () => {
+      window.removeEventListener('kyrgyz_akylman_courses_updated', handleCoursesUpdate);
+    };
+  }, []);
 
   // Save enrollments
   useEffect(() => {
@@ -88,10 +74,6 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
     }
   }, [enrolledCourseIds]);
 
-  const handleCreateCourse = (newCourse: CourseGroup) => {
-    setCourses((prev) => [newCourse, ...prev]);
-  };
-
   const handleDeleteCourse = (courseId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const confirmed = window.confirm(
@@ -100,7 +82,9 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
         : 'Вы уверены, что хотите удалить этот курс?'
     );
     if (confirmed) {
-      setCourses((prev) => prev.filter((c) => c.id !== courseId));
+      const updated = courses.filter((c) => c.id !== courseId);
+      setCourses(updated);
+      saveStoredCourses(updated);
     }
   };
 
@@ -115,13 +99,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
 
   const filteredCourses = courses.filter((course) => {
     const matchesSubject = selectedSubject === 'all' || course.subject === selectedSubject;
-    const matchesSearch =
-      course.titleRu.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.titleKg.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.descriptionRu.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (course.moduleNameRu && course.moduleNameRu.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesSubject && matchesSearch;
+    return matchesSubject;
   });
 
   const subjectFilters = [
@@ -145,10 +123,22 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
-      {/* Top Hero / Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#06291f] via-[#041a14] to-[#020e0b] border border-emerald-700/60 rounded-3xl p-6 sm:p-9 shadow-2xl">
+      {/* Top Hero / Banner with Kyrgyzstan Map Background */}
+      <div className="relative overflow-hidden border border-emerald-700/60 rounded-3xl p-6 sm:p-9 shadow-2xl bg-[#031912]">
+        {/* Kyrgyzstan Map Background: scaled down and contained so all national borders are fully visible and recognizable */}
+        <div className="absolute inset-y-0 right-0 w-full sm:w-[65%] lg:w-[55%] flex items-center justify-end p-3 sm:p-6 pointer-events-none select-none">
+          <img
+            src="/images/kyrgyzstan_map.jpg"
+            alt="Кыргызстан картасы"
+            className="w-full h-full max-h-[240px] sm:max-h-[290px] object-contain opacity-45 mix-blend-screen brightness-110 contrast-125 filter drop-shadow-xl"
+          />
+        </div>
+
+        {/* Soft emerald gradient overlay to maintain crisp typography readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#031912] via-[#031912]/85 to-transparent pointer-events-none" />
+
         <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-black uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-black uppercase tracking-wider backdrop-blur-sm">
             <Sparkles className="w-4 h-4 text-amber-300" />
             <span>{isKg ? 'Онлайн курстар & Мастер класстар' : 'Онлайн курсы & Мастер классы'}</span>
           </div>
@@ -159,7 +149,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
               : 'Подготовка к ОРТ онлайн в группах & индивидуально'}
           </h2>
 
-          <p className="text-sm sm:text-base text-emerald-200/80 leading-relaxed">
+          <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed font-medium">
             {isKg
               ? 'Сүйүктүү мугалимдериңиз менен түз эфирде сабак өтүңүз, интерактивдүү тактада маселелерди чыгарыңыз жана чакан топтордо мыкты жыйынтыкка жетишиңиз.'
               : 'Занимайтесь в живом эфире с любимыми преподавателями, решайте задачи на интерактивной доске в небольших группах для максимального результата и высоких баллов.'}
@@ -167,73 +157,38 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
 
           {/* Quick Feature Badges (strictly 6-10 students) */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-[#031510]/80 px-3 py-1.5 rounded-xl border border-emerald-800/60">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-200 bg-[#031510]/90 px-3 py-1.5 rounded-xl border border-emerald-700/60 shadow-sm backdrop-blur-sm">
               <Video className="w-3.5 h-3.5 text-rose-400" />
               <span>{isKg ? 'Түз видео сабактар' : 'Живые видеоуроки'}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-[#031510]/80 px-3 py-1.5 rounded-xl border border-emerald-800/60">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-200 bg-[#031510]/90 px-3 py-1.5 rounded-xl border border-emerald-700/60 shadow-sm backdrop-blur-sm">
               <PenTool className="w-3.5 h-3.5 text-amber-400" />
               <span>{isKg ? 'Интерактивдүү такта' : 'Интерактивная доска'}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 bg-[#031510]/80 px-3 py-1.5 rounded-xl border border-emerald-800/60">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-200 bg-[#031510]/90 px-3 py-1.5 rounded-xl border border-emerald-700/60 shadow-sm backdrop-blur-sm">
               <Users className="w-3.5 h-3.5 text-teal-400" />
               <span>{isKg ? 'Мини-топтор 6–10 окуучу' : 'Мини-группы 6–10 человек'}</span>
             </div>
           </div>
         </div>
-
-        {/* Decorative Watermark */}
-        <div className="absolute right-4 -bottom-10 opacity-5 pointer-events-none text-white text-[160px] font-black select-none hidden lg:block">
-          ОРТ
-        </div>
       </div>
 
-      {/* Filters, Search Bar and Admin Add Button */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        {/* Subject Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-          {subjectFilters.map((sub) => (
-            <button
-              key={sub.id}
-              type="button"
-              onClick={() => setSelectedSubject(sub.id)}
-              className={`px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
-                selectedSubject === sub.id
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
-                  : 'bg-[#041a14] border border-emerald-800/60 text-emerald-200/80 hover:bg-emerald-900/40 hover:text-white'
-              }`}
-            >
-              {isKg ? sub.labelKg : sub.labelRu}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2.5 w-full md:w-auto">
-          {/* Search Field */}
-          <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 text-emerald-400/80 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isKg ? 'Курстардан издөө...' : 'Поиск по курсам...'}
-              className="w-full bg-[#041a14] border border-emerald-800/70 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition-colors"
-            />
-          </div>
-
-          {/* Admin Course Creation Button */}
-          {isAdmin && (
-            <button
-              type="button"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shrink-0 shadow-lg shadow-amber-500/25 hover:brightness-105 active:scale-95 transition-all cursor-pointer"
-              title="Создать новый курс как администратор"
-            >
-              <Plus className="w-4 h-4 text-slate-950" />
-              <span className="hidden sm:inline">{isKg ? 'Курс кошуу' : 'Создать курс'}</span>
-            </button>
-          )}
-        </div>
+      {/* Subject Filter Pills (Search Bar and Create Course button removed) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+        {subjectFilters.map((sub) => (
+          <button
+            key={sub.id}
+            type="button"
+            onClick={() => setSelectedSubject(sub.id)}
+            className={`px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
+              selectedSubject === sub.id
+                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25'
+                : 'bg-[#041a14] border border-emerald-800/60 text-emerald-200/80 hover:bg-emerald-900/40 hover:text-white'
+            }`}
+          >
+            {isKg ? sub.labelKg : sub.labelRu}
+          </button>
+        ))}
       </div>
 
       {/* Course Groups Grid */}
@@ -435,17 +390,6 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({ lang }) => {
           onClose={() => setDetailedCourse(null)}
           onEnroll={() => setEnrollingCourse(detailedCourse)}
           onEnterClassroom={() => setActiveClassroomCourse(detailedCourse)}
-        />
-      )}
-
-      {/* Admin Create Course Modal */}
-      {isCreateModalOpen && (
-        <CreateCourseModal
-          isOpen={isCreateModalOpen}
-          lang={lang}
-          currentUser={user}
-          onClose={() => setIsCreateModalOpen(false)}
-          onCreateCourse={handleCreateCourse}
         />
       )}
     </div>

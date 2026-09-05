@@ -224,6 +224,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (res.ok && data.success) {
         setEmailStep('code');
         setSuccessMessage(isKg ? 'Код почтаңызга жиберилди' : 'Код отправлен на почту, проверьте письмо');
+        if (data.devCode) {
+          setCodeInput(data.devCode);
+        }
       } else {
         setErrorMessage(data.error || (isKg ? 'Кодду жиберүү мүмкүн болбоду' : 'Не удалось отправить код'));
       }

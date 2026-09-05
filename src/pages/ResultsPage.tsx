@@ -319,89 +319,136 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                       onError={(e) => {
                         const target = e.currentTarget;
                         const qNum = selectedQuestion.question_number;
-                        // Section 5 (Практическая грамматика)
-                        if (selectedQuestion.section_id === 5 || (qNum >= 121 && qNum <= 150)) {
-                          if (qNum <= 123) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128367/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_1.jpg');
-                          } else if (qNum <= 131) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128430/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_2.jpg');
-                          } else if (qNum <= 138) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128438/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_3.jpg');
-                          } else if (qNum <= 146) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128482/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_4.jpg');
-                          } else {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128493/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_5.jpg');
-                          }
-                          return;
-                        }
-                        // Section 4 (Чтение и понимание)
-                        if (selectedQuestion.section_id === 4 || (qNum >= 91 && qNum <= 120)) {
-                          const rel = qNum - 90;
-                          if (rel <= 3) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132551/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_1.jpg');
-                          else if (rel <= 7) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132423/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_2.jpg');
-                          else if (rel <= 10) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132418/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_3.jpg');
-                          else if (rel <= 13) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132412/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_4.jpg');
-                          else if (rel <= 17) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132397/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_5.jpg');
-                          else if (rel <= 20) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132391/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_6.jpg');
-                          else if (rel <= 23) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132383/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_7.jpg');
-                          else if (rel <= 27) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132373/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_8.jpg');
-                          else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132289/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_9.jpg');
-                          return;
-                        }
-                        // Section 3 (АДП)
-                        if (selectedQuestion.section_id === 3 || (qNum >= 61 && qNum <= 90)) {
-                          if (qNum <= 70) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787062305/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_1.jpg');
-                          } else if (qNum <= 80) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064555/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_2.jpg');
-                          } else if (qNum <= 86) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064565/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_3.jpg');
-                          } else {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064576/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_4.jpg');
-                          }
-                          return;
-                        }
+                        const isV102 = selectedQuestion.variant_number === 102 || String(variantId) === '102';
                         const isV2 = selectedQuestion.variant_number === 2 || String(variantId) === '2';
+
+                        // Section 5 (Практическая грамматика / Кыргыз тилинин практикалык грамматикасы)
+                        if (selectedQuestion.section_id === 5 || (qNum >= 121 && qNum <= 150)) {
+                          if (isV102) {
+                            if (qNum <= 124) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604508/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            else if (qNum <= 132) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604509/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            else if (qNum <= 140) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604511/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            else if (qNum <= 147) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604511/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604512/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                          } else {
+                            if (qNum <= 123) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605676/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            } else if (qNum <= 131) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605677/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            } else if (qNum <= 138) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605679/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            } else if (qNum <= 146) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605659/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            } else {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605657/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
+                            }
+                          }
+                          return;
+                        }
+                        // Section 4 (Чтение и понимание / Окуп жана түшүнүү)
+                        if (selectedQuestion.section_id === 4 || (qNum >= 91 && qNum <= 120)) {
+                          if (isV102) {
+                            if (qNum <= 93) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604243/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 95) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604244/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 97) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604245/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 100) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604246/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 104) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604247/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 107) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604247/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_6_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 110) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604249/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_7_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 112) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604249/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_8_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else if (qNum <= 114) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604255/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_9_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604284/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_10_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
+                          } else {
+                            const rel = qNum - 90;
+                            if (rel <= 3) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605415/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 7) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605416/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 10) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605417/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 13) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605446/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 17) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 20) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 23) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605412/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else if (rel <= 27) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605414/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605451/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg');
+                          }
+                          return;
+                        }
+                        // Section 3 (АДП / Окшоштуктар жана сүйлөмдү толуктоо)
+                        if (selectedQuestion.section_id === 3 || (qNum >= 61 && qNum <= 90)) {
+                          if (isV102) {
+                            if (qNum <= 68) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604082/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
+                            else if (qNum <= 80) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604083/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
+                            else if (qNum <= 85) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604113/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604114/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
+                          } else {
+                            if (qNum <= 70) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605292/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg');
+                            } else if (qNum <= 80) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605293/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg');
+                            } else if (qNum <= 86) {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605267/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg');
+                            } else {
+                              target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605291/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg');
+                            }
+                          }
+                          return;
+                        }
 
                         // Section 2 (Math 2)
                         if (selectedQuestion.section_id === 2 || (qNum >= 31 && qNum <= 60)) {
-                          if (isV2) {
-                            if (qNum <= 35) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137871/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.jpg');
-                            else if (qNum <= 40) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137873/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.jpg');
-                            else if (qNum <= 46) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.jpg');
-                            else if (qNum <= 51) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137872/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.jpg');
-                            else if (qNum <= 58) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.jpg');
-                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137875/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.jpg');
+                          if (isV102) {
+                            if (qNum <= 35) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603828/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg');
+                            else if (qNum <= 40) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603828/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg');
+                            else if (qNum <= 46) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603829/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg');
+                            else if (qNum <= 51) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603830/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg');
+                            else if (qNum <= 58) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603834/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603834/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.jpg');
+                          } else if (isV2) {
+                            if (qNum <= 35) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603378/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg');
+                            else if (qNum <= 40) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603379/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg');
+                            else if (qNum <= 46) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603376/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg');
+                            else if (qNum <= 51) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603368/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg');
+                            else if (qNum <= 58) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603377/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603377/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.jpg');
                           } else {
-                            if (qNum <= 35) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786954730/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.jpg');
-                            else if (qNum <= 40) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786995981/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.jpg');
-                            else if (qNum <= 45) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996040/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_3.jpg');
-                            else if (qNum <= 50) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996107/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_4.jpg');
-                            else if (qNum <= 55) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996129/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_5.jpg');
-                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996311/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_6.jpg');
+                            if (qNum <= 33) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605098/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.jpg');
+                            else if (qNum <= 39) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605099/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.jpg');
+                            else if (qNum <= 43) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605100/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.jpg');
+                            else if (qNum <= 48) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605110/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.jpg');
+                            else if (qNum <= 56) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605112/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.jpg');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605113/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.jpg');
                           }
                           return;
                         }
                         // Section 1 (Math 1)
-                        if (isV2) {
-                          if (qNum <= 7) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137869/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg');
+                        if (isV102) {
+                          if (qNum <= 6) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603599/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg');
                           } else if (qNum <= 15) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137870/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg');
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603597/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg');
                           } else if (qNum <= 23) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137871/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg');
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603598/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg');
                           } else {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787137872/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg');
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603599/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.4.jpg');
+                          }
+                        } else if (isV2) {
+                          if (qNum <= 7) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603233/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg');
+                          } else if (qNum <= 15) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603233/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg');
+                          } else if (qNum <= 23) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603234/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg');
+                          } else {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603234/2_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.4.jpg');
                           }
                         } else {
-                          if (imgPart.includes('page2') || (qNum >= 9 && qNum <= 16)) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789690/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_2.jpg');
-                          } else if (imgPart.includes('page3') || (qNum >= 17 && qNum <= 23)) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789766/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_3.jpg');
-                          } else if (imgPart.includes('page4') || (qNum >= 24 && qNum <= 30)) {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789771/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_4.jpg');
+                          if (imgPart.includes('page2') || (qNum >= 7 && qNum <= 15)) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg');
+                          } else if (imgPart.includes('page3') || (qNum >= 16 && qNum <= 24)) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604856/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg');
+                          } else if (imgPart.includes('page4') || (qNum >= 25 && qNum <= 30)) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604857/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg');
                           } else {
-                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789680/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_1.jpg');
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg');
                           }
                         }
                       }}

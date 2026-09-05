@@ -126,23 +126,23 @@ const initialHomeworks: CourseHomework[] = [
   },
 ];
 
-export const PRIMARY_COURSE: CourseGroup = {
-  id: 'course-math-base-madylbaev',
-  titleRu: 'Математика: Базовая часть ОРТ с Мадылбаевым А. Т.',
-  titleKg: 'Математика: ЖРТ негизги бөлүгү Мадылбаев А. Т. менен',
+export const COURSE_TEMPLATE_PREVIEW: CourseGroup = {
+  id: 'template-course-preview',
+  titleRu: 'Математика: Интенсивная подготовка к ОРТ',
+  titleKg: 'Математика: ЖРТга интенсивдүү даярдык',
   subject: 'math',
   subjectNameRu: 'Математика',
   subjectNameKg: 'Математика',
-  moduleType: 'base',
-  moduleNameRu: 'Базовый модуль',
-  moduleNameKg: 'Негизги модуль',
+  moduleType: 'advanced',
+  moduleNameRu: 'Интенсивный модуль',
+  moduleNameKg: 'Интенсивдүү модуль',
   targetBadgeRu: 'Цель: 220+ баллов на ОРТ',
   targetBadgeKg: 'Максат: ЖРТда 220+ балл',
   targetScore: 220,
   descriptionRu:
-    'Полный интенсивный курс по базовой математике ОРТ под личным руководством Мадылбаева Абдраима Турусбековича. 40 практических онлайн-занятий по 1 часу с понедельника по пятницу (5 дней в неделю). Глубокий разбор всех ловушек 1-й и 2-й частей математики: уравнения, дроби, степени, проценты, сплавы, движение, работа, планиметрия, стереометрия и мастер-классы по сравнению величин (Колонка А / Колонка Б).',
+    'Углубленная практическая подготовка к ОРТ: разбор всех типов задач, уравнений, планиметрии, стереометрии и колонок А/Б. Занятия в живом эфире с интерактивной доской в мини-группе.',
   descriptionKg:
-    'Мадылбаев Абдраим Турусбековичтин жеке жетекчилиги астында ЖРТнын негизги математикасы боюнча толук интенсивдүү курс. Дүйшөмбүдөн жумага чейин күнүнө 1 сааттан 40 онлайн сабак (жумасына 5 күн). 1-жана 2-бөлүктөрдүн бардык маселелерин жана тез чыгаруу ыкмаларын терең талдоо.',
+    'ЖРТга тереңдетилген практикалык даярдык: бардык түрдөгү маселелерди, теңдемелерди жана А/Б колонкаларын талдоо.',
   teacher: {
     id: 'teacher-madylbaev',
     name: 'Мадылбаев Абдраим Турусбекович',
@@ -156,23 +156,22 @@ export const PRIMARY_COURSE: CourseGroup = {
     experienceYears: 10,
   },
   totalSpots: 10,
-  enrolledCount: 7,
+  enrolledCount: 0,
   priceSom: 4000,
-  daysScheduleFormat: 'Пн-Пт',
-  periodLabelRu: 'за весь курс (40 уроков по 1 часу, 5 дней в неделю)',
-  periodLabelKg: 'толук курс үчүн (40 сабак 1 сааттан, жумасына 5 күн)',
+  daysScheduleFormat: 'Пн-Ср-Пт',
+  periodLabelRu: 'за весь курс (40 уроков по 1 часу)',
+  periodLabelKg: 'толук курс үчүн (40 сабак 1 сааттан)',
   isFreeForPremium: true,
   nextLessonDate: '2026-09-21',
   nextLessonTime: '18:00',
   isLiveNow: false,
   tags: [
     'Математика',
-    'Базовый модуль',
+    'Интенсивный модуль',
     'Мадылбаев А. Т.',
     '40 занятий',
-    'Пн-Пт',
+    'Пн-Ср-Пт',
     '6–10 человек',
-    '20 сентября',
   ],
   schedule: [
     {
@@ -184,25 +183,9 @@ export const PRIMARY_COURSE: CourseGroup = {
       timezone: 'Бишкек (GMT+6)',
     },
     {
-      dayOfWeek: 2,
-      dayNameRu: 'Вторник',
-      dayNameKg: 'Шейшемби',
-      startTime: '18:00',
-      endTime: '19:00',
-      timezone: 'Бишкек (GMT+6)',
-    },
-    {
       dayOfWeek: 3,
       dayNameRu: 'Среда',
       dayNameKg: 'Шаршемби',
-      startTime: '18:00',
-      endTime: '19:00',
-      timezone: 'Бишкек (GMT+6)',
-    },
-    {
-      dayOfWeek: 4,
-      dayNameRu: 'Четверг',
-      dayNameKg: 'Бейшемби',
       startTime: '18:00',
       endTime: '19:00',
       timezone: 'Бишкек (GMT+6)',
@@ -218,28 +201,10 @@ export const PRIMARY_COURSE: CourseGroup = {
   ],
   lessons: initialLessons,
   homeworks: initialHomeworks,
-  chatMessages: [
-    {
-      id: 'msg-admin-pin',
-      senderId: 'teacher-madylbaev',
-      senderName: 'Мадылбаев Абдраим Турусбекович',
-      senderRole: 'teacher',
-      text: 'Салам, урматтуу окуучулар! Добро пожаловать на полный курс Базовой математики ОРТ. Мы начинаем 20 сентября: 40 занятий с понедельника по пятницу по 1 часу. Подготовьте тетрадь в клетку, ручку и боевой настрой на 220+ баллов!',
-      timestamp: '2026-08-30 10:00',
-      isPinned: true,
-    },
-    {
-      id: 'msg-student-1',
-      senderId: 'std-2',
-      senderName: 'Айбек Садыков',
-      senderRole: 'student',
-      text: 'Здравствуйте, Абдраим Турусбекович! Очень ждем начала занятий!',
-      timestamp: '2026-08-30 10:15',
-    },
-  ],
+  chatMessages: [],
 };
 
-export const COURSES_DATA: CourseGroup[] = [PRIMARY_COURSE];
+export const COURSES_DATA: CourseGroup[] = [];
 
 export const MOCK_STUDENT_COURSE_PROFILE: StudentCourseProfile = {
   studentId: 'current-user-student',

@@ -520,49 +520,54 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
   const SECTION_PAGE_FALLBACKS: Record<string, string> = {
     // Section 1: Математика I
-    'страница_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789680/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_1.jpg',
-    'страница_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789690/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_2.jpg',
-    'страница_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789766/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_3.jpg',
-    'страница_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789771/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_4.jpg',
-    'page1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789680/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_1.jpg',
-    'page2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789690/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_2.jpg',
-    'page3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789766/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_3.jpg',
-    'page4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786789771/%D0%A1%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0_4.jpg',
+    'страница_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg',
+    'страница_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg',
+    'страница_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604856/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg',
+    'страница_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604857/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg',
+    'page1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.jpg',
+    'page2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604855/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.jpg',
+    'page3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604856/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.jpg',
+    'page4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604857/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.jpg',
 
     // Section 2: Математика II
-    'математика_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786954730/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.jpg',
-    'математика_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786995981/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.jpg',
-    'математика_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996040/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_3.jpg',
-    'математика_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996107/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_4.jpg',
-    'математика_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996129/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_5.jpg',
-    'математика_6': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1786996311/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_-_%D0%A7%D0%B0%D1%81%D1%82%D1%8C_2_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_6.jpg',
+    'математика_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605098/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.jpg',
+    'математика_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605099/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.jpg',
+    'математика_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605100/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.jpg',
+    'математика_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605110/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.jpg',
+    'математика_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605112/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.jpg',
+    'математика_6': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605113/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.jpg',
 
     // Section 3: АДП
-    'адп_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787062305/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_1.jpg',
-    'адп_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064555/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_2.jpg',
-    'адп_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064565/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_3.jpg',
-    'адп_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787064576/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%94%D0%9F_4.jpg',
+    'адп_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605292/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg',
+    'адп_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605293/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg',
+    'адп_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605267/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg',
+    'адп_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605291/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.jpg',
 
     // Section 4: ЧП
-    'чп_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132551/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_1.jpg',
-    'чп_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132423/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_2.jpg',
-    'чп_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132418/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_3.jpg',
-    'чп_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132412/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_4.jpg',
-    'чп_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132397/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_5.jpg',
-    'чп_6': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132391/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_6.jpg',
-    'чп_7': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132383/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_7.jpg',
-    'чп_8': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132373/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_8.jpg',
-    'чп_9': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787132289/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D0%9F_9.jpg',
+    'чп_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605415/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605416/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605417/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605446/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_6': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605448/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_7': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605412/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_8': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605414/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
+    'чп_9': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605451/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.jpg',
 
     // Section 5: ПГ
-    'пг_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128367/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_1.jpg',
-    'пг_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128430/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_2.jpg',
-    'пг_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128438/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_3.jpg',
-    'пг_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128482/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_4.jpg',
-    'пг_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1787128493/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D0%93_5.jpg',
+    'пг_1': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605676/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg',
+    'пг_2': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605677/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg',
+    'пг_3': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605679/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg',
+    'пг_4': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605659/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg',
+    'пг_5': 'https://res.cloudinary.com/rw9qhk3a/image/upload/v1788605657/1_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg',
   };
 
   const getFallbackImageUrl = (origUrl: string, qNum?: number): string => {
+    // 1. If already a valid absolute URL, return optimized version directly
+    if (origUrl && (origUrl.startsWith('http://') || origUrl.startsWith('https://'))) {
+      return getOptimizedTestPageUrl(origUrl);
+    }
+
     const decodedUrl = (() => {
       try {
         return decodeURIComponent(origUrl || '').toLowerCase();
@@ -571,16 +576,11 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
       }
     })();
 
-    // 1. Direct page token match (Priority: prevents reverting selected page to page 1)
+    // 2. Direct page token match (Priority: prevents reverting selected page to page 1)
     for (const [token, directUrl] of Object.entries(SECTION_PAGE_FALLBACKS)) {
       if (decodedUrl.includes(token)) {
         return getOptimizedTestPageUrl(directUrl);
       }
-    }
-
-    // 2. If already a valid absolute URL, return optimized version
-    if (origUrl && (origUrl.startsWith('http://') || origUrl.startsWith('https://'))) {
-      return getOptimizedTestPageUrl(origUrl);
     }
 
     // 3. Fallback based on question number
@@ -619,18 +619,18 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
     // Section 2: Математика Часть II (Вопросы 31 - 60)
     if (q >= 31 && q <= 60) {
-      if (q <= 35) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_1']);
-      if (q <= 40) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_2']);
-      if (q <= 45) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_3']);
-      if (q <= 50) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_4']);
-      if (q <= 55) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_5']);
+      if (q <= 33) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_1']);
+      if (q <= 39) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_2']);
+      if (q <= 43) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_3']);
+      if (q <= 48) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_4']);
+      if (q <= 56) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_5']);
       return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['математика_6']);
     }
 
     // Section 1: Математика Часть I (Вопросы 1 - 30)
-    if (q <= 8) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_1']);
-    if (q <= 16) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_2']);
-    if (q <= 23) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_3']);
+    if (q <= 6) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_1']);
+    if (q <= 15) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_2']);
+    if (q <= 24) return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_3']);
     return getOptimizedTestPageUrl(SECTION_PAGE_FALLBACKS['страница_4']);
   };
 
@@ -787,6 +787,70 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
       setSelectedPageUrl(sectionPages[idx]);
     }
   };
+
+  // Lock on tests while administrator updates photos and links (variant 1 ЦООМО №1, variant 2 ЦООМО №2 and variant 102 ББОУБ №2 are updated & open)
+  const openVariants = [1, 2, 102];
+  if (variantId && !openVariants.includes(Number(variantId))) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#041a14] p-4 font-sans text-slate-100 select-none">
+        <div className="max-w-md w-full bg-[#07261d] border border-amber-500/40 rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden">
+          <div className="w-20 h-20 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">
+            🔒
+          </div>
+
+          <span className="inline-block px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[11px] font-black uppercase tracking-wider border border-amber-500/30 mb-3">
+            {lang === 'kg' ? 'Убактылуу жабык' : 'Временно закрыт'}
+          </span>
+
+          <h2 className="text-2xl font-black text-white mb-3 tracking-tight">
+            {lang === 'kg' ? 'Тест сүрөттөрү жаңыланууда' : 'Идет замена картинок теста'}
+          </h2>
+
+          <p className="text-slate-300 text-sm leading-relaxed mb-8">
+            {lang === 'kg'
+              ? 'Учурда бул тесттин сүрөттөрү жаңыланууда. Жаңы сапатта ачылган ЦООМО №1, ЦООМО №2 же ББОУБ №2 тесттерин тапшыра аласыз!'
+              : 'В настоящее время для этого теста обновляются фотографии заданий. Сейчас открыты и доступны обновленные тесты ЦООМО №1, ЦООМО №2 и ББОУБ №2!'}
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/test/1?mode=full"
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all active:scale-95 cursor-pointer"
+            >
+              <span>🎯</span>
+              <span>{lang === 'kg' ? 'ЦООМО №1 тестин ачуу' : 'Открыть ЦООМО №1'}</span>
+              <span>→</span>
+            </Link>
+
+            <Link
+              to="/test/2?mode=custom&sections=1,2"
+              className="w-full py-3.5 px-6 rounded-2xl bg-emerald-900/80 hover:bg-emerald-800 text-white font-bold text-sm flex items-center justify-center gap-2 border border-emerald-700/60 transition-all active:scale-95 cursor-pointer"
+            >
+              <span>🎯</span>
+              <span>{lang === 'kg' ? 'ЦООМО №2 тестин ачуу' : 'Открыть ЦООМО №2'}</span>
+              <span>→</span>
+            </Link>
+
+            <Link
+              to="/test/102?mode=custom&sections=1,2,3,4,5"
+              className="w-full py-3.5 px-6 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm flex items-center justify-center gap-2 border border-white/10 transition-all active:scale-95 cursor-pointer"
+            >
+              <span>🇰🇬</span>
+              <span>{lang === 'kg' ? 'ББОУБ №2 тестин ачуу' : 'Открыть ББОУБ №2'}</span>
+              <span>→</span>
+            </Link>
+
+            <Link
+              to="/"
+              className="w-full py-3 px-6 rounded-2xl bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <span>{lang === 'kg' ? 'Башкы бетке кайтуу' : 'Вернуться на главную'}</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || calculating) {
     return (

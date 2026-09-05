@@ -1,8 +1,8 @@
 import { CourseGroup, CourseLesson, CourseHomework, CourseChatMessage } from '../types/courses';
-import { COURSES_DATA, PRIMARY_COURSE } from './coursesData';
+import { COURSES_DATA, COURSE_TEMPLATE_PREVIEW } from './coursesData';
 
-const COURSES_STORAGE_KEY = 'kyrgyz_akylman_courses_v2';
-const ENROLLED_STUDENTS_KEY = 'kyrgyz_akylman_enrolled_students_v2';
+const COURSES_STORAGE_KEY = 'kyrgyz_akylman_courses_v3';
+const ENROLLED_STUDENTS_KEY = 'kyrgyz_akylman_enrolled_students_v3';
 
 export interface EnrolledStudentRecord {
   id: string;
@@ -19,47 +19,7 @@ export interface EnrolledStudentRecord {
   note?: string;
 }
 
-const DEFAULT_STUDENTS: EnrolledStudentRecord[] = [
-  {
-    id: 'std-1',
-    courseId: PRIMARY_COURSE.id,
-    name: 'Айбек Садыков',
-    email: 'aibek.ort@gmail.com',
-    phone: '+996 700 123 456',
-    targetScore: 220,
-    enrolledAt: '2026-08-28',
-    status: 'active',
-    paymentStatus: 'paid',
-    attendanceCount: 0,
-    homeworkScore: 95,
-  },
-  {
-    id: 'std-2',
-    courseId: PRIMARY_COURSE.id,
-    name: 'Арууке Касымова',
-    email: 'aruuke.k@mail.ru',
-    phone: '+996 555 987 654',
-    targetScore: 225,
-    enrolledAt: '2026-08-29',
-    status: 'active',
-    paymentStatus: 'paid',
-    attendanceCount: 0,
-    homeworkScore: 100,
-  },
-  {
-    id: 'std-3',
-    courseId: PRIMARY_COURSE.id,
-    name: 'Бексултан Токтогулов',
-    email: 'beksultan.t@gmail.com',
-    phone: '+996 772 334 455',
-    targetScore: 215,
-    enrolledAt: '2026-08-30',
-    status: 'active',
-    paymentStatus: 'free_vip',
-    attendanceCount: 0,
-    homeworkScore: 90,
-  },
-];
+const DEFAULT_STUDENTS: EnrolledStudentRecord[] = [];
 
 export const getStoredCourses = (): CourseGroup[] => {
   try {
@@ -69,9 +29,18 @@ export const getStoredCourses = (): CourseGroup[] => {
       return COURSES_DATA;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      // Validate that at least the teacher name is updated
-      return parsed;
+    if (Array.isArray(parsed)) {
+      // Filter out any basic math module course
+      const filtered = parsed.filter(
+        (c) =>
+          c.id !== 'course-math-base-madylbaev' &&
+          !(c.subject === 'math' && c.moduleType === 'base') &&
+          !c.titleRu?.includes('Базовая часть')
+      );
+      if (filtered.length !== parsed.length) {
+        localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(filtered));
+      }
+      return filtered;
     }
     return COURSES_DATA;
   } catch (e) {
@@ -82,7 +51,13 @@ export const getStoredCourses = (): CourseGroup[] => {
 
 export const saveStoredCourses = (courses: CourseGroup[]): void => {
   try {
-    localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(courses));
+    const cleanCourses = courses.filter(
+      (c) =>
+        c.id !== 'course-math-base-madylbaev' &&
+        !(c.subject === 'math' && c.moduleType === 'base') &&
+        !c.titleRu?.includes('Базовая часть')
+    );
+    localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(cleanCourses));
     window.dispatchEvent(new Event('kyrgyz_akylman_courses_updated'));
   } catch (e) {
     console.error('Failed to save courses to localStorage:', e);

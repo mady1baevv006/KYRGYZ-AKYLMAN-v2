@@ -7,6 +7,9 @@ function getAdminApp(): App {
   }
 
   const encoded = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 || '';
+  if (!encoded) {
+    throw new Error('FIREBASE_SERVICE_ACCOUNT_BASE64 environment variable is not set');
+  }
   const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
   const serviceAccount = JSON.parse(decoded);
 
