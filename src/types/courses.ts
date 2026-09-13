@@ -17,6 +17,19 @@ export interface CourseTeacher {
   experienceYears: number;
 }
 
+export interface CourseCurriculumModule {
+  id: string;
+  orderNumber: string; // e.g. "01", "02"
+  titleRu: string;
+  titleKg: string;
+  tasksCoveredRu: string; // e.g. "Задания 6, 7"
+  tasksCoveredKg: string;
+  academicHours: number; // e.g. 13
+  descriptionRu?: string;
+  descriptionKg?: string;
+  topics?: string[];
+}
+
 export interface CourseScheduleItem {
   dayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
   dayNameRu: string;
@@ -102,6 +115,15 @@ export interface CourseGroup {
   homeworks: CourseHomework[];
   chatMessages: CourseChatMessage[];
   isCustom?: boolean;
+  curriculumModules?: CourseCurriculumModule[];
+  totalAcademicHours?: number;
+  totalModulesCount?: number;
+  modulePriceSom?: number;
+  moduleDurationMonths?: number;
+  daysPerMonth?: number;
+  scheduleDaysText?: string;
+  lessonTimeRange?: string;
+  courseStartDate?: string;
 }
 
 export interface StudentCourseProfile {

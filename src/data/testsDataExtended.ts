@@ -581,10 +581,10 @@ export const getQuestionsVariant19 = (): Question[] => {
   // Фото 3 = 18-26 (включ.)
   // Фото 4 = 27-30 (включ.)
   const section1PagesV19 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399921/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399921/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399921/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399921/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.4.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681259/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681259/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681259/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681259/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.4.jpg'),
   ];
 
   const getSection1PageV19 = (qNum: number): string => {
@@ -624,22 +624,25 @@ export const getQuestionsVariant19 = (): Question[] => {
   // Фото 1 = 31-36 (включ.)
   // Фото 2 = 37-42 (включ.)
   // Фото 3 = 43-47 (включ.)
-  // Фото 4 = 48-54 (включ.)
-  // Фото 5 = 55-60 (включ.)
+  // Фото 4 = 48-52 (включ.)
+  // Фото 5 = 53-56 (включ.)
+  // Фото 6 = 57-60 (включ.)
   const section2PagesV19 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400038/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400040/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400042/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400042/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400041/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_19_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788681362/19_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.jpg'),
   ];
 
   const getSection2PageV19 = (qNum: number): string => {
     if (qNum <= 36) return section2PagesV19[0];
     if (qNum <= 42) return section2PagesV19[1];
     if (qNum <= 47) return section2PagesV19[2];
-    if (qNum <= 54) return section2PagesV19[3];
-    return section2PagesV19[4];
+    if (qNum <= 52) return section2PagesV19[3];
+    if (qNum <= 56) return section2PagesV19[4];
+    return section2PagesV19[5];
   };
 
   const defaultAnswersV19Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [

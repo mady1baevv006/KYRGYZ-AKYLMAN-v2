@@ -61,12 +61,12 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
   );
 
   const subjectLabels: Record<SubjectType, { ru: string; kg: string }> = {
-    english: { ru: 'Английский язык (50)', kg: 'Англис тили (50)' },
-    chemistry: { ru: 'Химия (40)', kg: 'Химия (40)' },
-    biology: { ru: 'Биология (40)', kg: 'Биология (40)' },
-    physics: { ru: 'Физика (40)', kg: 'Физика (40)' },
-    history: { ru: 'История (40)', kg: 'Тарых (40)' },
-    math_ext: { ru: 'Математика проф. (40)', kg: 'Математика тереңд. (40)' },
+    english: { ru: 'Английский язык', kg: 'Англис тили' },
+    chemistry: { ru: 'Химия', kg: 'Химия' },
+    biology: { ru: 'Биология', kg: 'Биология' },
+    physics: { ru: 'Физика', kg: 'Физика' },
+    history: { ru: 'История', kg: 'Тарых' },
+    math_ext: { ru: 'Математика проф.', kg: 'Математика тереңд.' },
   };
 
   return (
@@ -244,12 +244,12 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
                       className="w-4 h-4 rounded-md accent-emerald-400 cursor-pointer"
                     />
                     <span className="text-xs sm:text-sm font-bold text-white">
-                      {isKg ? `+ 1-предметтик тест (${subject1Max} суроо)` : `+ 1-й предметный тест (${subject1Max} вопр.)`}
+                      {isKg ? '+ 1-предметтик тест' : '+ 1-й предметный тест'}
                     </span>
                   </label>
                   {subject1Enabled && (
                     <span className="text-xs font-black text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-lg border border-emerald-700/60">
-                      {subject1Result.scaled} {isKg ? 'балл' : 'баллов'}
+                      {subject1Result.scaled} / 150 {isKg ? 'балл' : 'баллов'}
                     </span>
                   )}
                 </div>
@@ -306,12 +306,12 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
                       className="w-4 h-4 rounded-md accent-teal-400 cursor-pointer"
                     />
                     <span className="text-xs sm:text-sm font-bold text-white">
-                      {isKg ? `+ 2-предметтик тест (${subject2Max} суроо)` : `+ 2-й предметный тест (${subject2Max} вопр.)`}
+                      {isKg ? '+ 2-предметтик тест' : '+ 2-й предметный тест'}
                     </span>
                   </label>
                   {subject2Enabled && (
                     <span className="text-xs font-black text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded-lg border border-teal-700/60">
-                      {subject2Result.scaled} {isKg ? 'балл' : 'баллов'}
+                      {subject2Result.scaled} / 150 {isKg ? 'балл' : 'баллов'}
                     </span>
                   )}
                 </div>

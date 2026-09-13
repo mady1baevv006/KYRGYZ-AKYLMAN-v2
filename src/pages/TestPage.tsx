@@ -788,8 +788,8 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
     }
   };
 
-  // Lock on tests while administrator updates photos and links (variant 1 ЦООМО №1, variant 2 ЦООМО №2 and variant 102 ББОУБ №2 are updated & open)
-  const openVariants = [1, 2, 102];
+  // Lock on tests while administrator updates photos and links (variant 1 ЦООМО №1, variant 2 ЦООМО №2, variant 19 ЦООМО №19 and variant 102 ББОУБ №2 are updated & open)
+  const openVariants = [1, 2, 19, 102];
   if (variantId && !openVariants.includes(Number(variantId))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#041a14] p-4 font-sans text-slate-100 select-none">
@@ -808,8 +808,8 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
           <p className="text-slate-300 text-sm leading-relaxed mb-8">
             {lang === 'kg'
-              ? 'Учурда бул тесттин сүрөттөрү жаңыланууда. Жаңы сапатта ачылган ЦООМО №1, ЦООМО №2 же ББОУБ №2 тесттерин тапшыра аласыз!'
-              : 'В настоящее время для этого теста обновляются фотографии заданий. Сейчас открыты и доступны обновленные тесты ЦООМО №1, ЦООМО №2 и ББОУБ №2!'}
+              ? 'Учурда бул тесттин сүрөттөрү жаңыланууда. Жаңы сапатта ачылган ЦООМО №1, ЦООМО №2, ЦООМО №19 же ББОУБ №2 тесттерин тапшыра аласыз!'
+              : 'В настоящее время для этого теста обновляются фотографии заданий. Сейчас открыты и доступны обновленные тесты ЦООМО №1, ЦООМО №2, ЦООМО №19 и ББОУБ №2!'}
           </p>
 
           <div className="flex flex-col gap-3">

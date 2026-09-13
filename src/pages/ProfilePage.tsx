@@ -28,6 +28,10 @@ import {
   Upload,
   Trash2,
   Image as ImageIcon,
+  Mail,
+  Smartphone,
+  Key,
+  AtSign,
 } from 'lucide-react';
 import { useAuth, UserTestRecord } from '../context/AuthContext';
 import { AppLanguage, SubscriptionPlan } from '../types';
@@ -37,6 +41,7 @@ import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
 import { CoursesSection } from '../components/courses/CoursesSection';
 import { AuthModal } from '../components/AuthModal';
+import { SetLoginModal } from '../components/SetLoginModal';
 import { processAndCompressImage } from '../utils/imageUpload';
 
 interface ProfilePageProps {
@@ -50,11 +55,42 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCompressingPhoto, setIsCompressingPhoto] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSetLoginModalOpen, setIsSetLoginModalOpen] = useState(false);
   const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'courses'>('history');
+  const [showAuthMethodText, setShowAuthMethodText] = useState(false);
+
+  const getAuthMethodText = (provider?: string) => {
+    if (lang === 'kg') {
+      switch (provider) {
+        case 'google':
+          return 'Google аркылуу кирүү';
+        case 'telegram':
+          return 'Telegram аркылуу кирүү';
+        case 'email_code':
+          return 'Email аркылуу кирүү';
+        case 'phone_code':
+          return 'Телефон номери аркылуу кирүү';
+        default:
+          return 'Сыр сөз аркылуу кирүү';
+      }
+    }
+    switch (provider) {
+      case 'google':
+        return 'Вход через Google';
+      case 'telegram':
+        return 'Вход через Telegram';
+      case 'email_code':
+        return 'Вход по Email';
+      case 'phone_code':
+        return 'Вход по номеру телефона';
+      default:
+        return 'Вход по паролю';
+    }
+  };
 
   const [editName, setEditName] = useState(user?.name || '');
   const [editTargetScore, setEditTargetScore] = useState(user?.targetScore || 210);
@@ -71,6 +107,33 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
     isAdmin;
   const isPaidUserStandard = Boolean(user?.isPaid) && user?.subscriptionPlan === 'standard';
   const isTrialPremium = !user?.isPaid && !isAdmin && subscriptionStatus.trialStage === 'trial_premium';
+
+  const renderAuthProviderIcon = (provider?: string, premium: boolean = false) => {
+    const colorClass = premium ? 'text-amber-300 fill-amber-300' : 'text-emerald-400 fill-emerald-400';
+    switch (provider) {
+      case 'google':
+        return (
+          <svg className={`w-3.5 h-3.5 ${colorClass}`} viewBox="0 0 24 24">
+            <path fill="currentColor" d="M21.35 11.1h-9.17v2.98h5.27c-.23 1.25-.94 2.31-2 3.02v2.51h3.24c1.89-1.74 2.98-4.31 2.98-7.39 0-.38-.03-.75-.08-1.12z"/>
+            <path fill="currentColor" d="M12.18 21c2.7 0 4.96-.9 6.62-2.43l-3.24-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.25v2.59C4.9 18.77 8.27 21 12.18 21z"/>
+            <path fill="currentColor" d="M6.59 12.9c-.2-.6-.31-1.24-.31-1.9s.11-1.3.31-1.9V6.51H3.25C2.58 7.84 2.2 9.37 2.2 11s.38 3.16 1.05 4.49l3.34-2.59z"/>
+            <path fill="currentColor" d="M12.18 5.95c1.47 0 2.78.51 3.82 1.5l2.86-2.86C17.13 3.01 14.87 2 12.18 2 8.27 2 4.9 4.23 3.25 7.51l3.34 2.59c.79-2.36 2.99-4.15 5.59-4.15z"/>
+          </svg>
+        );
+      case 'telegram':
+        return (
+          <svg className={`w-3.5 h-3.5 ${colorClass}`} viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.77-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+          </svg>
+        );
+      case 'email_code':
+        return <Mail className={`w-3.5 h-3.5 ${premium ? 'text-amber-300' : 'text-emerald-400'}`} />;
+      case 'phone_code':
+        return <Smartphone className={`w-3.5 h-3.5 ${premium ? 'text-amber-300' : 'text-emerald-400'}`} />;
+      default:
+        return <Key className={`w-3.5 h-3.5 ${premium ? 'text-amber-300' : 'text-emerald-400'}`} />;
+    }
+  };
 
   const handleAvatarFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -436,13 +499,45 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 </div>
               </div>
 
-              <p
-                className={`text-xs sm:text-sm font-medium truncate ${
-                  isPremium ? 'text-amber-200/80' : 'text-emerald-200/70'
-                }`}
-              >
-                {user.identifier}
-              </p>
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span
+                  className={`text-xs sm:text-sm font-bold tracking-wide font-mono truncate ${
+                    isPremium ? 'text-amber-200' : 'text-emerald-100'
+                  }`}
+                >
+                  {user.login ? `@${user.login}` : user.identifier}
+                </span>
+
+                {/* Compact icon directly to the right of login showing auth method, clickable to reveal subtle auth method text */}
+                <button
+                  type="button"
+                  onClick={() => setShowAuthMethodText((prev) => !prev)}
+                  className={`inline-flex items-center justify-center p-1 rounded-md shadow-xs shrink-0 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                    isPremium
+                      ? 'bg-[#1e1605] border border-amber-500/50 text-amber-300'
+                      : 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-400'
+                  }`}
+                  title={getAuthMethodText(user.authProvider)}
+                >
+                  {renderAuthProviderIcon(user.authProvider, isPremium)}
+                </button>
+
+                {showAuthMethodText && (
+                  <span className="text-[11px] font-medium text-slate-300 opacity-50 select-none animate-in fade-in duration-200">
+                    {getAuthMethodText(user.authProvider)}
+                  </span>
+                )}
+
+                {!user.login && (
+                  <button
+                    type="button"
+                    onClick={() => setIsSetLoginModalOpen(true)}
+                    className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/50 hover:bg-amber-400/30 transition-all cursor-pointer shadow-xs active:scale-95"
+                  >
+                    {lang === 'kg' ? '+ Логин тандоо' : '+ Задать логин'}
+                  </button>
+                )}
+              </div>
 
               {user.targetUniversity && (
                 <div
@@ -628,6 +723,45 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                       <Trash2 className="w-4 h-4 text-rose-400" />
                     </button>
                   )}
+                </div>
+              </div>
+
+              {/* Immutable Login Field */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-200">
+                    {lang === 'kg' ? 'Логин (өзгөртүү мүмкүн эмес)' : 'Логин (нельзя изменить)'}
+                  </label>
+                  <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                    🔒 {lang === 'kg' ? 'Бир гана жолу' : 'Только при регистрации'}
+                  </span>
+                </div>
+                <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-mono ${
+                  isPremium
+                    ? 'bg-[#0f0b03] border border-amber-500/40 text-amber-200'
+                    : 'bg-[#031510] border border-emerald-800/60 text-emerald-300'
+                }`}>
+                  <span>{user?.login ? `@${user.login}` : (lang === 'kg' ? 'Логин тандала элек' : 'Логин ещё не выбран')}</span>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <span className="text-[10px] uppercase font-sans">{lang === 'kg' ? 'Кирүү:' : 'Вход:'}</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowAuthMethodText((prev) => !prev)}
+                      className={`inline-flex items-center justify-center p-1 rounded-md shadow-xs shrink-0 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
+                        isPremium
+                          ? 'bg-[#1e1605] border border-amber-500/50 text-amber-300'
+                          : 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-400'
+                      }`}
+                      title={getAuthMethodText(user?.authProvider)}
+                    >
+                      {renderAuthProviderIcon(user?.authProvider, isPremium)}
+                    </button>
+                    {showAuthMethodText && (
+                      <span className="text-[10px] font-medium text-slate-300 opacity-50 select-none animate-in fade-in duration-200">
+                        {getAuthMethodText(user?.authProvider)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1151,6 +1285,13 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
           )}
         </div>
       )}
+
+      {/* Choose Login Modal */}
+      <SetLoginModal
+        isOpen={isSetLoginModalOpen}
+        onClose={() => setIsSetLoginModalOpen(false)}
+        lang={lang}
+      />
     </div>
   );
 };

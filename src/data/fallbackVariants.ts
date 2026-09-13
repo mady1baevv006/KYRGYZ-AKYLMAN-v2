@@ -76,8 +76,8 @@ export const FALLBACK_VARIANTS: Variant[] = [
     isNew: false,
     createdAt: "2026-08-22T10:00:00Z",
     tags: ["Математика I", "Математика II"],
-    status: "locked",
-    isLocked: true,
+    status: "available",
+    isLocked: false,
     availableSections: [1, 2],
   },
   {

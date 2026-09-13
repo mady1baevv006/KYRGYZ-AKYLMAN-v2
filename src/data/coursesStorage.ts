@@ -1,8 +1,8 @@
 import { CourseGroup, CourseLesson, CourseHomework, CourseChatMessage } from '../types/courses';
 import { COURSES_DATA, COURSE_TEMPLATE_PREVIEW } from './coursesData';
 
-const COURSES_STORAGE_KEY = 'kyrgyz_akylman_courses_v3';
-const ENROLLED_STUDENTS_KEY = 'kyrgyz_akylman_enrolled_students_v3';
+const COURSES_STORAGE_KEY = 'kyrgyz_akylman_courses_v5';
+const ENROLLED_STUDENTS_KEY = 'kyrgyz_akylman_enrolled_students_v5';
 
 export interface EnrolledStudentRecord {
   id: string;
@@ -30,17 +30,12 @@ export const getStoredCourses = (): CourseGroup[] => {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      // Filter out any basic math module course
-      const filtered = parsed.filter(
-        (c) =>
-          c.id !== 'course-math-base-madylbaev' &&
-          !(c.subject === 'math' && c.moduleType === 'base') &&
-          !c.titleRu?.includes('Базовая часть')
-      );
-      if (filtered.length !== parsed.length) {
-        localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(filtered));
+      // Ensure the flagship math course exists in the list if the list is empty
+      if (parsed.length === 0) {
+        localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(COURSES_DATA));
+        return COURSES_DATA;
       }
-      return filtered;
+      return parsed;
     }
     return COURSES_DATA;
   } catch (e) {
@@ -51,13 +46,7 @@ export const getStoredCourses = (): CourseGroup[] => {
 
 export const saveStoredCourses = (courses: CourseGroup[]): void => {
   try {
-    const cleanCourses = courses.filter(
-      (c) =>
-        c.id !== 'course-math-base-madylbaev' &&
-        !(c.subject === 'math' && c.moduleType === 'base') &&
-        !c.titleRu?.includes('Базовая часть')
-    );
-    localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(cleanCourses));
+    localStorage.setItem(COURSES_STORAGE_KEY, JSON.stringify(courses));
     window.dispatchEvent(new Event('kyrgyz_akylman_courses_updated'));
   } catch (e) {
     console.error('Failed to save courses to localStorage:', e);

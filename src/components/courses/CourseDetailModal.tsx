@@ -145,7 +145,7 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-emerald-200/90">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>{isKg ? 'Түз эфирде 40 сабак' : '40 живых онлайн-уроков'}</span>
+              <span>{isKg ? 'Түз эфирде сабактар' : 'Живые онлайн-уроки с преподавателем'}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -161,6 +161,38 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
             </div>
           </div>
         </div>
+
+        {/* If course has curriculum modules (e.g. 7 modules), render them cleanly */}
+        {course.curriculumModules && course.curriculumModules.length > 0 && (
+          <div className="space-y-3 pt-2">
+            <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              <span>{isKg ? 'Модулдар жана академиялык сааттар:' : 'Модули курса и учебные часы:'}</span>
+            </h3>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              {course.curriculumModules.map((mod) => (
+                <div
+                  key={mod.id}
+                  className="p-3 rounded-xl bg-[#031510] border border-emerald-800/70 flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 font-black flex items-center justify-center text-[11px] border border-emerald-400/40">
+                      {mod.orderNumber}
+                    </span>
+                    <div>
+                      <h4 className="font-bold text-white text-xs">{isKg ? mod.titleKg : mod.titleRu}</h4>
+                      <p className="text-[11px] text-emerald-300/80">{isKg ? mod.tasksCoveredKg : mod.tasksCoveredRu}</p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950 px-2 py-1 rounded border border-emerald-800">
+                    {mod.academicHours} {isKg ? 'ак. с' : 'ак. ч'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Modal Actions */}
         <div className="pt-2 border-t border-emerald-800/60 flex items-center justify-between gap-3">

@@ -31,6 +31,7 @@ export interface TelegramUser {
 export interface UserProfile {
   id: string;
   name: string;
+  login?: string; // unique student login: alphanumeric only (a-z, 0-9), max 15 chars, set once and immutable
   identifier: string; // email or phone or telegram
   email?: string;
   phone?: string;
@@ -176,6 +177,7 @@ export const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
 const DEFAULT_ADMIN_PROFILE: UserProfile = {
   id: 'admin_mady1baevv',
   name: 'Абдраим Мадылбаев (Администратор)',
+  login: 'mady1baevv',
   identifier: ADMIN_EMAIL,
   email: ADMIN_EMAIL,
   telegramUsername: '@mady1baevv',
@@ -397,6 +399,7 @@ interface AuthContextType {
   logout: () => void;
   resetPassword: (identifier: string, newPass: string) => { success: boolean; error?: string };
   updateProfile: (data: Partial<UserProfile>) => void;
+  setUserLogin: (newLogin: string) => { success: boolean; error?: string };
   saveTestResult: (result: Omit<UserTestRecord, 'id' | 'date'>) => void;
   // Admin Methods
   adminGetAllUsers: () => UserProfile[];
@@ -644,7 +647,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const users = getUsers();
     const found = users.find(
-      (u) => u.identifier.trim().toLowerCase() === trimmedId && u.password === pass
+      (u) =>
+        (u.identifier.trim().toLowerCase() === trimmedId ||
+          (u.login && u.login.trim().toLowerCase() === trimmedId) ||
+          (u.email && u.email.trim().toLowerCase() === trimmedId)) &&
+        u.password === pass
     );
 
     if (!found) {
@@ -1120,6 +1127,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const setUserLogin = (newLogin: string) => {
+    const trimmed = newLogin.trim();
+    if (!trimmed) {
+      return { success: false, error: 'Логин не может быть пустым' };
+    }
+    if (trimmed.length > 15) {
+      return { success: false, error: 'Логин не должен превышать 15 символов' };
+    }
+    if (trimmed.length < 3) {
+      return { success: false, error: 'Логин должен содержать минимум 3 символа' };
+    }
+    // Strict alphanumeric: Latin letters and digits only! No spaces, dots, quotes, etc.
+    if (!/^[a-zA-Z0-9]+$/.test(trimmed)) {
+      return {
+        success: false,
+        error: 'Разрешены только латинские буквы и цифры (без точек, пробелов, кавычек и знаков)',
+      };
+    }
+
+    if (!user) {
+      return { success: false, error: 'Пользователь не авторизован' };
+    }
+
+    const isAdminAccount = user.identifier?.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    if (user.login && !isAdminAccount) {
+      return { success: false, error: 'Логин задается один раз при регистрации. Менять его невозможно.' };
+    }
+
+    const users = getUsers();
+    const isTaken = users.some(
+      (u) => u.id !== user.id && u.login && u.login.trim().toLowerCase() === trimmed.toLowerCase()
+    );
+    if (isTaken) {
+      return { success: false, error: 'Этот логин уже занят другим пользователем. Выберите другой.' };
+    }
+
+    const updatedUser: UserProfile = { ...user, login: trimmed };
+    setUser(updatedUser);
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+
+    const idx = users.findIndex((u) => u.id === user.id);
+    if (idx !== -1) {
+      users[idx] = updatedUser;
+      saveUsers(users);
+    }
+
+    return { success: true };
+  };
+
   const openTrialWelcomeModal = () => {
     setIsTrialWelcomeOpen(true);
   };
@@ -1294,6 +1350,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         resetPassword,
         updateProfile,
+        setUserLogin,
         saveTestResult,
         adminGetAllUsers,
         adminSetUserSubscription,

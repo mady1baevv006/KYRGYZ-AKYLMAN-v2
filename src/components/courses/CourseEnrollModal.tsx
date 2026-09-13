@@ -15,6 +15,7 @@ import {
 import { AppLanguage } from '../../types';
 import { CourseGroup } from '../../types/courses';
 import { useAuth } from '../../context/AuthContext';
+import { SetLoginModal } from '../SetLoginModal';
 
 interface CourseEnrollModalProps {
   course: CourseGroup;
@@ -29,13 +30,14 @@ export const CourseEnrollModal: React.FC<CourseEnrollModalProps> = ({
   onClose,
   onEnrollSuccess,
 }) => {
-  const { user, isVip, isPremium } = useAuth();
+  const { user, isVip, isPremium, openAuthModal } = useAuth();
   const isKg = lang === 'kg';
 
   const [paymentMethod, setPaymentMethod] = useState<'mbank' | 'optima' | 'odengi' | 'vip'>('mbank');
-  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '+996 ');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone || user?.identifier || '+996 ');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isSetLoginOpen, setIsSetLoginOpen] = useState(false);
 
   const spotsLeft = course.totalSpots - course.enrolledCount;
 
@@ -123,8 +125,77 @@ export const CourseEnrollModal: React.FC<CourseEnrollModalProps> = ({
               </div>
             </div>
 
+            {/* User Login & Auth Condition Check */}
+            {!user ? (
+              <div className="p-6 rounded-3xl bg-[#031510] border border-emerald-700/70 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-400/40 flex items-center justify-center text-emerald-300 mx-auto">
+                  <Users className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-lg font-black text-white">
+                    {isKg ? 'Курска жазылуу үчүн сайтка катталуу керек' : 'Для записи на курс требуется регистрация'}
+                  </h4>
+                  <p className="text-xs sm:text-sm text-emerald-200/80 max-w-md mx-auto">
+                    {isKg
+                      ? 'Окуучулар курска өздөрүнүн уникалдуу логиндери аркылуу жазылып, жеке кабинеттен сабактарга катышышат.'
+                      : 'Запись на курс и проверка домашних заданий проводятся по вашему уникальному логину на сайте.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    openAuthModal();
+                  }}
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 active:scale-95 cursor-pointer"
+                >
+                  {isKg ? 'Катталуу / Кирүү' : 'Зарегистрироваться / Войти'}
+                </button>
+              </div>
+            ) : !user.login ? (
+              <div className="p-5 rounded-2xl bg-[#031510] border border-amber-500/60 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-black text-white">
+                      {isKg ? 'Логинди тандаңыз' : 'Выберите ваш логин'}
+                    </h4>
+                    <p className="text-xs text-amber-200/80">
+                      {isKg
+                        ? 'Курска жазылуу үчүн логин керек. Ал бир гана жолу тандалат.'
+                        : 'Логин задаётся один раз при регистрации. Менять его невозможно.'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSetLoginOpen(true)}
+                  className="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
+                >
+                  {isKg ? 'Логинди тандоо' : 'Задать логин прямо сейчас'}
+                </button>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-[#031610] border border-emerald-700/60 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    {isKg ? 'Жазылуучу окуучу' : 'Записываемый ученик'}
+                  </span>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-sm font-black text-white">{user.name}</span>
+                    <span className="text-xs font-mono font-bold text-emerald-300">@{user.login}</span>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                  ✓ Авторизован
+                </span>
+              </div>
+            )}
+
             {/* VIP Status Banner */}
-            {isVip || isPremium ? (
+            {user && (isVip || isPremium) ? (
               <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/60 to-yellow-950/40 border border-amber-400/50 flex items-start gap-3">
                 <Crown className="w-6 h-6 text-amber-300 shrink-0 mt-0.5" />
                 <div>
@@ -227,6 +298,12 @@ export const CourseEnrollModal: React.FC<CourseEnrollModalProps> = ({
           </>
         )}
       </div>
+
+      <SetLoginModal
+        isOpen={isSetLoginOpen}
+        onClose={() => setIsSetLoginOpen(false)}
+        lang={lang}
+      />
     </div>
   );
 };

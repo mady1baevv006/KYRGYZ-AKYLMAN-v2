@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Download, FileText, Clock, Lock, Key } from 'lucide-react';
 import { Variant, AppLanguage } from '../types';
 import {
@@ -13,6 +13,7 @@ import { StudentsResultsSection } from '../components/StudentsResultsSection';
 import { OrtScoreCalculator } from '../components/OrtScoreCalculator';
 import { CreativeLoader } from '../components/CreativeLoader';
 import { ActiveDraftBanner } from '../components/ActiveDraftBanner';
+import { AiPlatformShowcaseSection } from '../components/AiPlatformShowcaseSection';
 import heroEarthStarsImg from '../assets/images/hero_earth_stars_1787130940166.jpg';
 
 const THEME_STYLES: Record<string, {
@@ -165,6 +166,7 @@ const HOME_TRANSLATIONS = {
 };
 
 export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
+  const navigate = useNavigate();
   const [variants, setVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
@@ -635,6 +637,15 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
       {/* Pricing / Subscriptions Section */}
       <PricingSection lang={lang} />
+
+      {/* AI Platform Showcase Block with Dinosaur & Interactive Phone Mockup */}
+      <AiPlatformShowcaseSection
+        lang={lang}
+        onNavigateToCourses={() => {
+          navigate('/courses');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </div>
   );
 };
