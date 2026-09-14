@@ -107,7 +107,6 @@ const HOME_TRANSLATIONS = {
     langRu: 'Русский',
     langKg: 'Кыргызча',
     variantPrefix: 'Вариант',
-    newBadge: 'Новый',
     lockedBadge: 'Закрыт',
     lockedUpdating: 'Идет замена картинок и ссылок',
     lockedButton: 'Временно закрыт 🔒',
@@ -143,7 +142,6 @@ const HOME_TRANSLATIONS = {
     langRu: 'Орусча',
     langKg: 'Кыргызча',
     variantPrefix: 'Вариант',
-    newBadge: 'Жаңы',
     lockedBadge: 'Жабык',
     lockedUpdating: 'Сүрөттөр жана шилтемелер жаңыланууда',
     lockedButton: 'Убактылуу жабык 🔒',
@@ -353,30 +351,14 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                   className="p-6 cursor-pointer select-none flex flex-col flex-1"
                 >
                   {/* Top Meta Bar */}
-                  {variant.isLocked ? (
+                  {variant.isLocked && (
                     <div className="flex items-center justify-end mb-2">
                       <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs flex items-center gap-1.5">
                         <Lock className="w-3 h-3 text-amber-500 dark:text-amber-400" />
                         <span>{t.lockedBadge} • {t.lockedUpdating}</span>
                       </span>
                     </div>
-                  ) : (() => {
-                    if (!variant.isNew) return null;
-                    // Check if created within 3 days (72 hours)
-                    if (variant.createdAt) {
-                      const ageMs = Date.now() - new Date(variant.createdAt).getTime();
-                      const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-                      if (ageMs > threeDaysMs) return null;
-                    }
-                    return (
-                      <div className="flex items-center justify-end mb-2">
-                        <span className="bg-[#334290]/15 text-[#334290] dark:text-blue-300 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-[#334290]/30 shadow-xs flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                          {t.newBadge}
-                        </span>
-                      </div>
-                    );
-                  })()}
+                  )}
 
                   {/* Title with CEETO Logo inside White Circle */}
                   <div className="flex items-center gap-3 mb-3">

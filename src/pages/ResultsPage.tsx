@@ -320,12 +320,19 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                         const target = e.currentTarget;
                         const qNum = selectedQuestion.question_number;
                         const isV102 = selectedQuestion.variant_number === 102 || String(variantId) === '102';
+                        const isV105 = selectedQuestion.variant_number === 105 || String(variantId) === '105';
                         const isV2 = selectedQuestion.variant_number === 2 || String(variantId) === '2';
                         const isV19 = selectedQuestion.variant_number === 19 || String(variantId) === '19';
 
                         // Section 5 (Практическая грамматика / Кыргыз тилинин практикалык грамматикасы)
                         if (selectedQuestion.section_id === 5 || (qNum >= 121 && qNum <= 150)) {
-                          if (isV102) {
+                          if (isV105) {
+                            if (qNum <= 122) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387258/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png');
+                            else if (qNum <= 129) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387259/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png');
+                            else if (qNum <= 136) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387243/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png');
+                            else if (qNum <= 144) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387256/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387256/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png');
+                          } else if (isV102) {
                             if (qNum <= 124) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604508/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
                             else if (qNum <= 132) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604509/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
                             else if (qNum <= 140) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604511/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.jpg');
@@ -348,7 +355,17 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                         }
                         // Section 4 (Чтение и понимание / Окуп жана түшүнүү)
                         if (selectedQuestion.section_id === 4 || (qNum >= 91 && qNum <= 120)) {
-                          if (isV102) {
+                          if (isV105) {
+                            if (qNum <= 91) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 92) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386635/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 100) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386636/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 103) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386637/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 105) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386633/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 110) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386633/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 112) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else if (qNum <= 114) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386646/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png');
+                          } else if (isV102) {
                             if (qNum <= 93) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604243/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
                             else if (qNum <= 95) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604244/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
                             else if (qNum <= 97) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604245/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9E%D0%BA%D1%83%D0%BF_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%82%D1%83%D1%88%D1%83%D0%BD%D1%83%D1%83.jpg');
@@ -375,7 +392,12 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                         }
                         // Section 3 (АДП / Окшоштуктар жана сүйлөмдү толуктоо)
                         if (selectedQuestion.section_id === 3 || (qNum >= 61 && qNum <= 90)) {
-                          if (isV102) {
+                          if (isV105) {
+                            if (qNum <= 70) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386299/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png');
+                            else if (qNum <= 80) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386318/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png');
+                            else if (qNum <= 85) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386319/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386300/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png');
+                          } else if (isV102) {
                             if (qNum <= 68) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604082/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
                             else if (qNum <= 80) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604083/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
                             else if (qNum <= 85) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788604113/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9E%D0%BA%D1%88%D0%BE%D1%88%D1%82%D1%83%D0%BA%D1%82%D0%B0%D1%80_%D0%B6%D0%B0%D0%BD%D0%B0_%D1%81%D1%83%D0%B9%D0%BB%D0%BE%D0%BC%D0%B4%D0%BE%D1%80%D0%B4%D1%83_%D1%82%D0%BE%D0%BB%D1%83%D0%BA%D1%82%D0%BE%D0%BE.jpg');
@@ -396,7 +418,14 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
 
                         // Section 2 (Math 2)
                         if (selectedQuestion.section_id === 2 || (qNum >= 31 && qNum <= 60)) {
-                          if (isV102) {
+                          if (isV105) {
+                            if (qNum <= 34) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386106/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.png');
+                            else if (qNum <= 39) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386108/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.png');
+                            else if (qNum <= 45) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386109/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.png');
+                            else if (qNum <= 52) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386107/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.png');
+                            else if (qNum <= 56) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386111/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.png');
+                            else target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386111/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.png');
+                          } else if (isV102) {
                             if (qNum <= 35) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603828/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg');
                             else if (qNum <= 40) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603828/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg');
                             else if (qNum <= 46) target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603829/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg');
@@ -428,7 +457,17 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                           return;
                         }
                         // Section 1 (Math 1)
-                        if (isV102) {
+                        if (isV105) {
+                          if (qNum <= 6) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385941/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.png');
+                          } else if (qNum <= 15) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385942/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.png');
+                          } else if (qNum <= 23) {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385943/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.png');
+                          } else {
+                            target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385942/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.png');
+                          }
+                        } else if (isV102) {
                           if (qNum <= 6) {
                             target.src = getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1788603599/2_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg');
                           } else if (qNum <= 15) {

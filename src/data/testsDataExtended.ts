@@ -1125,3 +1125,245 @@ export const getQuestionsVariant102 = (): Question[] => {
 
   return questions;
 };
+
+// ==========================================
+// 6. ББОУБ №5 (Кыргызча ЦООМО №5 - Variant 105)
+// ==========================================
+export const getQuestionsVariant105 = (): Question[] => {
+  const vId = 105;
+  const questions: Question[] = [];
+
+  // ==========================================
+  // SECTION 1: Математика I (30 суроо, 1-30, 4 вариант: А, Б, В, Г)
+  // ==========================================
+  const section1PagesV105 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385941/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.1.png'), // Фото 1: 1 - 6
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385942/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.2.png'), // Фото 2: 7 - 15
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385943/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.3.png'), // Фото 3: 16 - 23
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789385942/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_1.4.png'), // Фото 4: 24 - 30
+  ];
+
+  const getSection1PageV105 = (qNum: number): string => {
+    if (qNum <= 6) return section1PagesV105[0];
+    if (qNum <= 15) return section1PagesV105[1];
+    if (qNum <= 23) return section1PagesV105[2];
+    return section1PagesV105[3];
+  };
+
+  const defaultAnswersV105Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 1; i <= 30; i++) {
+    const pageImg = getSection1PageV105(i);
+    const ansIdx = i - 1;
+
+    questions.push({
+      id: 105000 + i,
+      variant_number: vId,
+      section_id: 1,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV105Part1[ansIdx] || 'А',
+      title: 'ББОУБ №5',
+      theme_color: 'emerald',
+      language: 'kg',
+      sub_section: MATH1_TOPICS_KG[ansIdx] || 'Математика I',
+      skill: MATH1_SKILLS_KG[ansIdx] || 'ЖРТ маселелерин чыгаруу билгичтиги',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 2: Математика II (30 суроо, 31-60, 5 вариант: А, Б, В, Г, Д)
+  // ==========================================
+  const section2PagesV105 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386106/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.1.png'), // Фото 1: 31 - 34
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386108/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.2.png'), // Фото 2: 35 - 39
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386109/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.3.png'), // Фото 3: 40 - 45
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386107/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.4.png'), // Фото 4: 46 - 52
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386111/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.5.png'), // Фото 5: 53 - 56
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386111/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0_2.6.png'), // Фото 6: 57 - 60
+  ];
+
+  const getSection2PageV105 = (qNum: number): string => {
+    if (qNum <= 34) return section2PagesV105[0];
+    if (qNum <= 39) return section2PagesV105[1];
+    if (qNum <= 45) return section2PagesV105[2];
+    if (qNum <= 52) return section2PagesV105[3];
+    if (qNum <= 56) return section2PagesV105[4];
+    return section2PagesV105[5];
+  };
+
+  const defaultAnswersV105Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+  ];
+
+  for (let i = 31; i <= 60; i++) {
+    const pageImg = getSection2PageV105(i);
+    const ansIdx = i - 31;
+
+    questions.push({
+      id: 105000 + i,
+      variant_number: vId,
+      section_id: 2,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV105Part2[ansIdx] || 'А',
+      title: 'ББОУБ №5',
+      theme_color: 'emerald',
+      language: 'kg',
+      sub_section: MATH2_TOPICS_KG[ansIdx] || 'Математика II',
+      skill: MATH2_SKILLS_KG[ansIdx] || 'ЖРТ маселелерин чыгаруу билгичтиги',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 3: Окшоштуктар жана сүйлөмдү толуктоо (30 суроо, 61-90, 4 вариант: А, Б, В, Г)
+  // ==========================================
+  const section3PagesV105 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386299/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png'), // Фото 1: 1-10 (61-70)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386318/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png'), // Фото 2: 11-20 (71-80)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386319/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png'), // Фото 3: 21-25 (81-85)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386300/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%B5%D0%B4%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B9.png'), // Фото 4: 26-30 (86-90)
+  ];
+
+  const getSection3PageV105 = (qNum: number): string => {
+    if (qNum <= 70) return section3PagesV105[0]; // 1-10
+    if (qNum <= 80) return section3PagesV105[1]; // 11-20
+    if (qNum <= 85) return section3PagesV105[2]; // 21-25
+    return section3PagesV105[3]; // 26-30
+  };
+
+  const defaultAnswersV105Part3: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 61; i <= 90; i++) {
+    const pageImg = getSection3PageV105(i);
+    const ansIdx = i - 61;
+
+    questions.push({
+      id: 105000 + i,
+      variant_number: vId,
+      section_id: 3,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV105Part3[ansIdx] || 'А',
+      title: 'ББОУБ №5',
+      theme_color: 'emerald',
+      language: 'kg',
+      sub_section: OST_TOPICS_KG[ansIdx] || 'Окшоштуктар жана сүйлөмдү толуктоо',
+      skill: OST_SKILLS_KG[ansIdx] || 'Сөздүк-логикалык маселелерди чечүү билгичтиги',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 4: Окуп жана түшүнүү (30 суроо, 91-120, 9 бет, 4 вариант: А, Б, В, Г)
+  // ==========================================
+  const section4PagesV105 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 1: 1-2 (текст 1)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386635/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 2: 1-2 (суроолор 1-2)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386636/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 3: 3-10
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386637/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 4: 11-15 (текст 2)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386633/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 5: 11-15 (суроолор 11-15)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386633/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 6: 16-20
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 7: 21-24 (текст 3)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386634/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 8: 21-24 (суроолор 21-24)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789386646/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'), // Фото 9: 25-30
+  ];
+
+  const getSection4PageV105 = (qNum: number): string => {
+    if (qNum <= 91) return section4PagesV105[0]; // Фото 1: 1-2 (текст 1)
+    if (qNum <= 92) return section4PagesV105[1]; // Фото 2: 1-2 (суроолор 1-2)
+    if (qNum <= 100) return section4PagesV105[2]; // Фото 3: 3-10
+    if (qNum <= 103) return section4PagesV105[3]; // Фото 4: 11-15 (текст 2)
+    if (qNum <= 105) return section4PagesV105[4]; // Фото 5: 11-15 (суроолор 11-15)
+    if (qNum <= 110) return section4PagesV105[5]; // Фото 6: 16-20
+    if (qNum <= 112) return section4PagesV105[6]; // Фото 7: 21-24 (текст 3)
+    if (qNum <= 114) return section4PagesV105[7]; // Фото 8: 21-24 (суроолор 21-24)
+    return section4PagesV105[8]; // Фото 9: 25-30
+  };
+
+  const defaultAnswersV105Part4: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 91; i <= 120; i++) {
+    const pageImg = getSection4PageV105(i);
+    const ansIdx = i - 91;
+
+    questions.push({
+      id: 105000 + i,
+      variant_number: vId,
+      section_id: 4,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV105Part4[ansIdx] || 'А',
+      title: 'ББОУБ №5',
+      theme_color: 'emerald',
+      language: 'kg',
+      sub_section: READING_TOPICS_KG[ansIdx] || 'Окуп жана түшүнүү',
+      skill: READING_SKILLS_KG[ansIdx] || 'Текстти талдоо жана түшүнүү билгичтиги',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 5: Кыргыз тилинин практикалык грамматикасы (30 суроо, 121-150, 5 бет, 4 вариант: А, Б, В, Г)
+  // ==========================================
+  const section5PagesV105 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387258/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'), // Фото 1: 1 - 2 (121-122)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387259/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'), // Фото 2: 3 - 9 (123-129)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387243/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'), // Фото 3: 10 - 16 (130-136)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387256/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'), // Фото 4: 17 - 24 (137-144)
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789387256/5_%D0%91%D0%91%D0%9E%D0%A3%D0%91_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8B%D0%BA_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'), // Фото 5: 25 - 30 (145-150)
+  ];
+
+  const getSection5PageV105 = (qNum: number): string => {
+    if (qNum <= 122) return section5PagesV105[0]; // 1-2
+    if (qNum <= 129) return section5PagesV105[1]; // 3-9
+    if (qNum <= 136) return section5PagesV105[2]; // 10-16
+    if (qNum <= 144) return section5PagesV105[3]; // 17-24
+    return section5PagesV105[4]; // 25-30
+  };
+
+  const defaultAnswersV105Part5: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 121; i <= 150; i++) {
+    const pageImg = getSection5PageV105(i);
+    const ansIdx = i - 121;
+
+    questions.push({
+      id: 105000 + i,
+      variant_number: vId,
+      section_id: 5,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV105Part5[ansIdx] || 'А',
+      title: 'ББОУБ №5',
+      theme_color: 'emerald',
+      language: 'kg',
+      sub_section: GRAMMAR_TOPICS_KG[ansIdx] || 'Кыргыз тилинин практикалык грамматикасы',
+      skill: GRAMMAR_SKILLS_KG[ansIdx] || 'Грамматикалык нормаларды колдонуу билгичтиги',
+      is_practice: false,
+    });
+  }
+
+  return questions;
+};
+
