@@ -127,7 +127,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const initialTargetSec = targetSectionId || (customSectionsParam ? Number(customSectionsParam.split(',')[0]) : 1);
   const initialFirstQ = initialTargetSec === 3 ? 61 : (initialTargetSec === 2 ? 31 : (initialTargetSec === 4 ? 91 : (initialTargetSec === 5 ? 121 : 1)));
 
-  const builtInVariantIds = [1, 2, 3, 5, 12, 16, 19, 20, 101, 102, 105];
+  const builtInVariantIds = [1, 2, 3, 5, 19, 102, 105];
 
   const [questions, setQuestions] = useState<Question[]>(() => {
     if (builtInVariantIds.includes(Number(variantId)) || !variantId) {
