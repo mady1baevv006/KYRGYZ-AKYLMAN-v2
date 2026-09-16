@@ -373,6 +373,14 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
                     {isKg ? '/ 245 балл' : '/ 245 баллов'}
                   </span>
                 </div>
+
+                {/* Level Badge (SchoolClub exact levels A, B, C) */}
+                <div className="flex justify-center pt-1">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    {isKg ? mainResult.levelLabel.ky : mainResult.levelLabel.ru}
+                  </span>
+                </div>
               </div>
 
               {/* Progress and Stats */}
@@ -383,6 +391,37 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
                   <span className="font-black text-white">
                     {mainResult.rawTotal} из 150 ({mainResult.percentage}%)
                   </span>
+                </div>
+
+                {/* 3 Section Breakdown (SchoolClub Exact Points) */}
+                <div className="space-y-1.5 py-1 border-b border-emerald-800/50 text-[11px]">
+                  <div className="flex items-center justify-between text-emerald-200/80 font-medium">
+                    <span>{isKg ? 'Математика (I+II):' : 'Математика (I+II):'}</span>
+                    <span className="font-black text-white">
+                      {mainResult.sections.math.score}{' '}
+                      <span className="text-emerald-400/50 text-[10px]">
+                        / 67 {isKg ? 'балл' : 'баллов'} ({mainResult.sections.math.pct}%)
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-emerald-200/80 font-medium">
+                    <span>{isKg ? 'Окшоштуктар жана окуу:' : 'Аналогии и чтение:'}</span>
+                    <span className="font-black text-white">
+                      {mainResult.sections.analogy.score}{' '}
+                      <span className="text-emerald-400/50 text-[10px]">
+                        / 121 {isKg ? 'балл' : 'баллов'} ({mainResult.sections.analogy.pct}%)
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-emerald-200/80 font-medium">
+                    <span>{isKg ? 'Практикалык грамматика:' : 'Практич. грамматика:'}</span>
+                    <span className="font-black text-white">
+                      {mainResult.sections.grammar.score}{' '}
+                      <span className="text-emerald-400/50 text-[10px]">
+                        / 57 {isKg ? 'балл' : 'баллов'} ({mainResult.sections.grammar.pct}%)
+                      </span>
+                    </span>
+                  </div>
                 </div>
 
                 {/* Key Threshold Milestones */}
