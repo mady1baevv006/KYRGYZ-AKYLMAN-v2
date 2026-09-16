@@ -682,13 +682,13 @@ export const getQuestionsVariant20 = (): Question[] => {
   const questions: Question[] = [];
 
   // Часть 1:
-  // Фото 1 = 1-7 (включ.)
-  // Фото 2 = 8-19 (включ.)
-  // Фото 3 = 20-30 (включ.)
+  // Фото 1 = 1-7: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474260/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.png
+  // Фото 2 = 8-19: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474271/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.png
+  // Фото 3 = 20-30: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474283/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png
   const section1PagesV20 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400320/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400319/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400319/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474260/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474271/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474283/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png'),
   ];
 
   const getSection1PageV20 = (qNum: number): string => {
@@ -724,25 +724,28 @@ export const getQuestionsVariant20 = (): Question[] => {
   }
 
   // Часть 2:
-  // Фото 1 = 31-38 (включ.)
-  // Фото 2 = 39-44 (включ.)
-  // Фото 3 = 45-50 (включ.)
-  // Фото 4 = 51-55 (включ.)
-  // Фото 5 = 56-60 (включ.)
+  // Фото 1 = 31: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474283/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png
+  // Фото 2 = 32-38: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474295/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.png
+  // Фото 3 = 39-44: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474307/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.png
+  // Фото 4 = 45-50: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474429/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.png
+  // Фото 5 = 51-55: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474431/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.png
+  // Фото 6 = 56-60: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474431/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.png
   const section2PagesV20 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400435/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400435/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400435/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400437/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787400437/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_20_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474283/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474295/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474307/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474429/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474431/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789474431/20_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.png'),
   ];
 
   const getSection2PageV20 = (qNum: number): string => {
-    if (qNum <= 38) return section2PagesV20[0];
-    if (qNum <= 44) return section2PagesV20[1];
-    if (qNum <= 50) return section2PagesV20[2];
-    if (qNum <= 55) return section2PagesV20[3];
-    return section2PagesV20[4];
+    if (qNum <= 31) return section2PagesV20[0];
+    if (qNum <= 38) return section2PagesV20[1];
+    if (qNum <= 44) return section2PagesV20[2];
+    if (qNum <= 50) return section2PagesV20[3];
+    if (qNum <= 55) return section2PagesV20[4];
+    return section2PagesV20[5];
   };
 
   const defaultAnswersV20Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [

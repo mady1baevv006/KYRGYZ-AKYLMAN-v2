@@ -13,7 +13,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2, 3, 4, 5],
-    pdfUrl: "https://drive.google.com/uc?export=download&id=1_Saiv6GNGcyc4w7kjfwZ0LDx8rHmcnTt",
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1LQww09FKrf6MtBf3ZXeJ-Vm79uD8fRFc",
   },
   {
     id: 2,
@@ -27,6 +27,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1CFpK0YMiRWP1OXvAQs42vdQFBqB4Zj3C",
   },
   {
     id: 3,
@@ -40,6 +41,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2, 3, 4, 5],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1VfOu2-xtW4qwy2S1feJ4uNiKP7JfZnCM",
   },
   {
     id: 5,
@@ -53,6 +55,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2, 3, 4, 5],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1zKR6Ii_B2anrLxw0SiGqO_GzCcQMc8NQ",
   },
   {
     id: 19,
@@ -66,6 +69,21 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1dZjehpRXAmewd4eKgg_RLD8tWczOBdG5",
+  },
+  {
+    id: 20,
+    title: "ЦООМО №20",
+    themeColor: "emerald",
+    language: "ru",
+    isPractice: false,
+    isNew: true,
+    createdAt: "2026-09-15T12:00:00Z",
+    tags: ["Математика I", "Математика II"],
+    status: "available",
+    isLocked: false,
+    availableSections: [1, 2],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1NHbgMiHlSg0B2V5R56RavZbhKRfbbjUo",
   },
   {
     id: 102,
@@ -79,7 +97,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2, 3, 4, 5],
-    pdfUrl: "https://drive.google.com/uc?export=download&id=1bTSQ4x05PWCWX8djT3B6AV-ZUkbv1n96",
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1ZXasReMJZ6K7Cg_9DmJaZNpLd7ZWNStc",
   },
   {
     id: 105,
@@ -93,6 +111,7 @@ export const FALLBACK_VARIANTS: Variant[] = [
     status: "available",
     isLocked: false,
     availableSections: [1, 2, 3, 4, 5],
+    pdfUrl: "https://drive.google.com/uc?export=download&id=1WH4OLAboSnV-OY0mwAhWdh0wCwm9tP8r",
   },
 ];
 
