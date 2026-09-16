@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Download, FileText, Clock, Lock, Key } from 'lucide-react';
+import { Download, FileText, Clock, Key } from 'lucide-react';
 import { Variant, AppLanguage } from '../types';
 import {
   API_BASE_URL,
@@ -14,7 +14,7 @@ import { OrtScoreCalculator } from '../components/OrtScoreCalculator';
 import { CreativeLoader } from '../components/CreativeLoader';
 import { ActiveDraftBanner } from '../components/ActiveDraftBanner';
 import { AiPlatformShowcaseSection } from '../components/AiPlatformShowcaseSection';
-import heroEarthStarsImg from '../assets/images/hero_earth_stars_1787130940166.jpg';
+import heroEarthStarsImg from '../assets/images/hero_earth_stars_opt.webp';
 
 const THEME_STYLES: Record<string, {
   bg: string;
@@ -107,13 +107,6 @@ const HOME_TRANSLATIONS = {
     langRu: 'Русский',
     langKg: 'Кыргызча',
     variantPrefix: 'Вариант',
-    lockedBadge: 'Закрыт',
-    lockedUpdating: 'Идет замена картинок и ссылок',
-    lockedButton: 'Временно закрыт 🔒',
-    lockedCardMsg: 'Тест временно закрыт на обновление',
-    lockedCardDesc: 'Все фотографии заданий и файлы для скачивания обновляются администратором. В данный момент просмотр заданий и скачивание закрыты.',
-    downloadLocked: 'Скачивание временно закрыто',
-    downloadUpdating: 'Идет замена файлов и ссылок',
     allSectionsAvailable: 'Доступны все разделы',
     sectionsLoaded: 'Загружено разделов: {count} из 5',
     selectFormat: 'Выбрать формат',
@@ -125,6 +118,8 @@ const HOME_TRANSLATIONS = {
     inProgress: 'В процессе',
     noTestsFound: 'Тесты не найдены.',
     tryChangeSearch: 'В данном разделе пока нет доступных тестов.',
+    showMore: 'Показать еще',
+    showLess: 'Скрыть',
   },
   kg: {
     loading: 'Платформа жүктөлүүдө...',
@@ -142,13 +137,6 @@ const HOME_TRANSLATIONS = {
     langRu: 'Орусча',
     langKg: 'Кыргызча',
     variantPrefix: 'Вариант',
-    lockedBadge: 'Жабык',
-    lockedUpdating: 'Сүрөттөр жана шилтемелер жаңыланууда',
-    lockedButton: 'Убактылуу жабык 🔒',
-    lockedCardMsg: 'Тест жаңылоого убактылуу жабылган',
-    lockedCardDesc: 'Бардык суроолордун сүрөттөрү жана көчүрүп алуу файлдары администратор тарабынан жаңыланууда. Учурда көрүү жана көчүрүү жабык.',
-    downloadLocked: 'Көчүрүп алуу убактылуу жабык',
-    downloadUpdating: 'Файлдар жана шилтемелер жаңыланууда',
     allSectionsAvailable: 'Бардык бөлүмдөр жеткиликтүү',
     sectionsLoaded: 'Жүктөлгөн бөлүмдөр: {count} ичинен 5',
     selectFormat: 'Форматты тандоо',
@@ -160,6 +148,8 @@ const HOME_TRANSLATIONS = {
     inProgress: 'В процессе',
     noTestsFound: 'Тесттер табылган жок.',
     tryChangeSearch: 'Бул бөлүмдө азырынча тесттер жок.',
+    showMore: 'Дагы көрсөтүү',
+    showLess: 'Жашыруу',
   },
 };
 
@@ -169,12 +159,44 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   const [loading, setLoading] = useState(true);
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   const [languageFilter, setLanguageFilter] = useState<'ru' | 'kg'>(() => (lang === 'kg' ? 'kg' : 'ru'));
+  const [showAll, setShowAll] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768;
+    }
+    return false;
+  });
 
   const t = HOME_TRANSLATIONS[lang] || HOME_TRANSLATIONS.ru;
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setExpandedCardId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     setLanguageFilter(lang === 'kg' ? 'kg' : 'ru');
+    setShowAll(false);
+    setExpandedCardId(null);
   }, [lang]);
+
+  useEffect(() => {
+    setShowAll(false);
+    setExpandedCardId(null);
+  }, [languageFilter]);
 
   useEffect(() => {
     const fetchVariants = async () => {
@@ -198,6 +220,10 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
     const vLang = v.language || 'ru';
     return vLang === languageFilter && !v.isPractice;
   });
+
+  const initialLimit = isMobile ? 4 : 6;
+  const hasMore = filteredVariants.length > initialLimit;
+  const displayedVariants = showAll ? filteredVariants : filteredVariants.slice(0, initialLimit);
 
   if (loading) {
     return (
@@ -289,7 +315,10 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             {/* Language tabs */}
             <div className="grid grid-cols-2 gap-1 p-1 bg-[#031510] rounded-xl w-full sm:w-72 border border-emerald-900/50">
               <button
-                onClick={() => setLanguageFilter('ru')}
+                onClick={() => {
+                  setLanguageFilter('ru');
+                  setExpandedCardId(null);
+                }}
                 className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 text-center truncate ${
                   languageFilter === 'ru'
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -300,7 +329,10 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                 <span className="truncate">{t.langRu}</span>
               </button>
               <button
-                onClick={() => setLanguageFilter('kg')}
+                onClick={() => {
+                  setLanguageFilter('kg');
+                  setExpandedCardId(null);
+                }}
                 className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 text-center truncate ${
                   languageFilter === 'kg'
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -314,9 +346,18 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
           </div>
         </div>
 
+        {/* Global Backdrop overlay when a test card format window is expanded */}
+        {expandedCardId !== null && (
+          <div
+            className="fixed inset-0 z-20 bg-black/45 backdrop-blur-[2px] transition-opacity cursor-pointer animate-in fade-in duration-200"
+            onClick={() => setExpandedCardId(null)}
+            aria-label="Закрыть окно выбора теста"
+          />
+        )}
+
         {/* Variants Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
-          {filteredVariants.map((variant) => {
+          {displayedVariants.map((variant) => {
             const isExpanded = expandedCardId === variant.id;
             const isBlurred = expandedCardId !== null && !isExpanded;
             const isKg = variant.language === 'kg';
@@ -330,11 +371,17 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
               <div
                 key={variant.id}
                 style={{ borderColor: '#334290' }}
+                onClick={(e) => {
+                  if (isBlurred) {
+                    e.stopPropagation();
+                    setExpandedCardId(null);
+                  }
+                }}
                 className={`group relative bg-white dark:bg-[#07241c] rounded-3xl border-2 transition-all duration-300 overflow-hidden flex flex-col ${
                   isExpanded
-                    ? 'shadow-2xl shadow-[#334290]/25 ring-2 ring-[#334290]/80 scale-[1.02] z-20'
+                    ? 'shadow-2xl shadow-[#334290]/30 ring-2 ring-[#334290]/90 scale-[1.02] z-30'
                     : isBlurred
-                    ? 'opacity-40 blur-[3px] grayscale-[25%] scale-[0.98] cursor-pointer hover:opacity-75 hover:blur-none hover:scale-100 z-0'
+                    ? 'opacity-40 blur-[3px] grayscale-[25%] scale-[0.98] cursor-pointer hover:opacity-60 z-10'
                     : 'shadow-lg shadow-[#334290]/10 dark:shadow-black/30 hover:shadow-2xl hover:shadow-[#334290]/20 hover:-translate-y-1 z-10'
                 }`}
               >
@@ -347,19 +394,16 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
                 {/* Card Main Body */}
                 <div
-                  onClick={() => toggleCard(variant.id)}
+                  onClick={(e) => {
+                    if (isBlurred) {
+                      e.stopPropagation();
+                      setExpandedCardId(null);
+                    } else {
+                      toggleCard(variant.id);
+                    }
+                  }}
                   className="p-6 cursor-pointer select-none flex flex-col flex-1"
                 >
-                  {/* Top Meta Bar */}
-                  {variant.isLocked && (
-                    <div className="flex items-center justify-end mb-2">
-                      <span className="bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg border border-amber-500/30 shadow-xs flex items-center gap-1.5">
-                        <Lock className="w-3 h-3 text-amber-500 dark:text-amber-400" />
-                        <span>{t.lockedBadge} • {t.lockedUpdating}</span>
-                      </span>
-                    </div>
-                  )}
-
                   {/* Title with CEETO Logo inside White Circle */}
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center p-1 shrink-0 shadow-sm border-2 border-[#334290] dark:border-[#334290]">
@@ -404,30 +448,26 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
                 {/* Card expand action bar */}
                 <button
-                  onClick={() => toggleCard(variant.id)}
+                  onClick={(e) => {
+                    if (isBlurred) {
+                      e.stopPropagation();
+                      setExpandedCardId(null);
+                    } else {
+                      toggleCard(variant.id);
+                    }
+                  }}
                   className={`w-full py-3.5 px-6 font-black text-xs uppercase tracking-wider flex items-center justify-between border-t transition-colors cursor-pointer ${
-                    variant.isLocked
-                      ? 'bg-amber-50/70 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100/70 dark:hover:bg-amber-900/40'
-                      : isExpanded
+                    isExpanded
                       ? 'bg-emerald-50 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80'
                       : 'bg-slate-50/90 dark:bg-[#051c16] text-slate-700 dark:text-emerald-200/90 border-slate-100 dark:border-emerald-900/50 hover:bg-emerald-50/80 dark:hover:bg-[#0a2e24]'
                   }`}
                 >
                   <span className="flex items-center gap-2">
-                    {variant.isLocked ? (
-                      <>
-                        <Lock className="w-3.5 h-3.5 text-amber-500" />
-                        <span>{t.lockedButton}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className={`w-2 h-2 rounded-full ${isExpanded ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-600'}`} />
-                        {isExpanded ? t.hideSections : t.selectFormat}
-                      </>
-                    )}
+                    <span className={`w-2 h-2 rounded-full ${isExpanded ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-600'}`} />
+                    {isExpanded ? t.hideSections : t.selectFormat}
                   </span>
                   <svg
-                    className={`w-4 h-4 ${variant.isLocked ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'} transform transition-transform duration-200 ${
+                    className={`w-4 h-4 text-emerald-600 dark:text-emerald-400 transform transition-transform duration-200 ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
                     fill="none"
@@ -440,160 +480,123 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
                 {/* Expandable options menu */}
                 {isExpanded && (
-                  variant.isLocked ? (
-                    <div className="p-5 bg-amber-50/60 dark:bg-[#15120a] border-t border-amber-200/70 dark:border-amber-900/60 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-black text-xs uppercase tracking-wider">
-                          <Lock className="w-3.5 h-3.5" />
-                          <span>{t.lockedCardMsg}</span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedCardId(null);
-                          }}
-                          className="text-[11px] font-bold text-slate-400 dark:text-amber-400/70 hover:text-amber-600 dark:hover:text-amber-300 transition-colors cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <p className="text-xs text-slate-600 dark:text-amber-100/70 leading-relaxed font-medium">
-                        {t.lockedCardDesc}
+                  <div className="p-5 bg-slate-50/90 dark:bg-[#041d16] border-t border-emerald-100 dark:border-emerald-900/60 flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <p className="text-[10px] uppercase font-black tracking-widest text-emerald-800 dark:text-emerald-400">
+                        {t.chooseFormatTitle}
                       </p>
-
-                      {/* Download locked notice */}
-                      <div className="pt-2 border-t border-amber-200/60 dark:border-amber-900/40">
-                        <div className="w-full py-2.5 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex items-center justify-between">
-                          <span className="flex items-center gap-2 font-bold text-[11px]">
-                            <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                            <span>{t.downloadLocked}</span>
-                          </span>
-                          <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                            {t.downloadUpdating}
-                          </span>
-                        </div>
-                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedCardId(null);
+                        }}
+                        className="text-[11px] font-bold text-slate-400 dark:text-emerald-400/70 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors cursor-pointer"
+                      >
+                        ✕
+                      </button>
                     </div>
-                  ) : (
-                    <div className="p-5 bg-slate-50/90 dark:bg-[#041d16] border-t border-emerald-100 dark:border-emerald-900/60 flex flex-col gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-[10px] uppercase font-black tracking-widest text-emerald-800 dark:text-emerald-400">
-                          {t.chooseFormatTitle}
-                        </p>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedCardId(null);
-                          }}
-                          className="text-[11px] font-bold text-slate-400 dark:text-emerald-400/70 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors cursor-pointer"
-                        >
-                          ✕
-                        </button>
-                      </div>
 
-                      {/* Full test option */}
-                      {isFull && (
-                        <Link
-                          to={`/test/${variant.id}?mode=full`}
-                          className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3.5 px-4 rounded-xl flex items-center justify-between shadow-lg shadow-emerald-600/30 transition-all active:scale-[0.98] group/btn"
-                        >
-                          <span className="flex items-center gap-2 text-sm tracking-wide">
-                            <span>🎯</span>
-                            {t.fullTestButton}
-                          </span>
-                          <span className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center font-bold text-xs group-hover/btn:translate-x-0.5 transition-transform">
-                            →
-                          </span>
-                        </Link>
-                      )}
+                    {/* Full test option */}
+                    {isFull && (
+                      <Link
+                        to={`/test/${variant.id}?mode=full`}
+                        className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black py-3.5 px-4 rounded-xl flex items-center justify-between shadow-lg shadow-emerald-600/30 transition-all active:scale-[0.98] group/btn"
+                      >
+                        <span className="flex items-center gap-2 text-sm tracking-wide">
+                          <span>🎯</span>
+                          {t.fullTestButton}
+                        </span>
+                        <span className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center font-bold text-xs group-hover/btn:translate-x-0.5 transition-transform">
+                          →
+                        </span>
+                      </Link>
+                    )}
 
-                      {/* Math both parts */}
-                      {hasMathBoth && !isFull && (
-                        <Link
-                          to={`/test/${variant.id}?mode=custom&sections=1,2`}
-                          className="w-full bg-white dark:bg-[#07241c] hover:bg-emerald-50 dark:hover:bg-[#0b382b] border border-emerald-200 dark:border-emerald-800/70 text-slate-800 dark:text-emerald-100 font-bold py-3 px-4 rounded-xl flex items-center justify-between transition-all shadow-xs group/btn"
-                        >
-                          <span className="text-sm flex items-center gap-2">
-                            <span>📐</span>
-                            {t.mathBoth}
-                          </span>
-                          <span className="text-emerald-600 dark:text-emerald-400 font-bold group-hover/btn:translate-x-0.5 transition-transform">→</span>
-                        </Link>
-                      )}
+                    {/* Math both parts */}
+                    {hasMathBoth && !isFull && (
+                      <Link
+                        to={`/test/${variant.id}?mode=custom&sections=1,2`}
+                        className="w-full bg-white dark:bg-[#07241c] hover:bg-emerald-50 dark:hover:bg-[#0b382b] border border-emerald-200 dark:border-emerald-800/70 text-slate-800 dark:text-emerald-100 font-bold py-3 px-4 rounded-xl flex items-center justify-between transition-all shadow-xs group/btn"
+                      >
+                        <span className="text-sm flex items-center gap-2">
+                          <span>📐</span>
+                          {t.mathBoth}
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold group-hover/btn:translate-x-0.5 transition-transform">→</span>
+                      </Link>
+                    )}
 
-                      {/* Individual sections */}
-                      <div className="flex flex-col gap-1.5 mt-1">
-                        {[1, 2, 3, 4, 5].map((secId) => {
-                          const isAvailable = variant.availableSections?.includes(secId);
-                          const secName = sectionDict[secId];
+                    {/* Individual sections */}
+                    <div className="flex flex-col gap-1.5 mt-1">
+                      {[1, 2, 3, 4, 5].map((secId) => {
+                        const isAvailable = variant.availableSections?.includes(secId);
+                        const secName = sectionDict[secId];
 
-                          return isAvailable ? (
-                            <Link
-                              key={secId}
-                              to={`/test/${variant.id}?mode=section&id=${secId}`}
-                              className="w-full bg-white dark:bg-[#07241c] border border-emerald-200/80 dark:border-emerald-800/60 hover:border-emerald-400 dark:hover:border-emerald-400 text-slate-800 dark:text-emerald-100 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold py-2.5 px-3.5 rounded-xl flex items-center justify-between transition-all shadow-xs group/item"
-                            >
-                              <span className="text-xs flex items-center gap-2">
-                                <span className="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-black text-[10px] flex items-center justify-center">
-                                  {secId}
-                                </span>
-                                <span>{secName}</span>
-                              </span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs group-item:translate-x-0.5 transition-transform">→</span>
-                            </Link>
-                          ) : (
-                            <div
-                              key={secId}
-                              className="w-full bg-slate-100/60 dark:bg-slate-900/30 border border-slate-200/50 dark:border-emerald-950/40 text-slate-400 dark:text-emerald-900 font-medium py-2.5 px-3.5 rounded-xl flex items-center justify-between cursor-not-allowed opacity-60"
-                            >
-                              <span className="text-xs flex items-center gap-2 line-through">
-                                <span className="w-5 h-5 rounded-md bg-slate-200/60 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 font-bold text-[10px] flex items-center justify-center">
-                                  {secId}
-                                </span>
-                                <span>{secName}</span>
-                              </span>
-                              <span className="text-[10px]">✕</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* PDF Version Download Link (Requested by User) */}
-                      <div className="pt-2 mt-1 border-t border-slate-200/80 dark:border-emerald-900/60">
-                        {variant.pdfUrl ? (
-                          <a
-                            href={variant.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-400/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-between transition-all group/pdf cursor-pointer"
+                        return isAvailable ? (
+                          <Link
+                            key={secId}
+                            to={`/test/${variant.id}?mode=section&id=${secId}`}
+                            className="w-full bg-white dark:bg-[#07241c] border border-emerald-200/80 dark:border-emerald-800/60 hover:border-emerald-400 dark:hover:border-emerald-400 text-slate-800 dark:text-emerald-100 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold py-2.5 px-3.5 rounded-xl flex items-center justify-between transition-all shadow-xs group/item"
                           >
-                            <span className="flex items-center gap-2">
-                              <FileText className="w-3.5 h-3.5 text-emerald-500" />
-                              <span>{t.downloadPdf}</span>
+                            <span className="text-xs flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-black text-[10px] flex items-center justify-center">
+                                {secId}
+                              </span>
+                              <span>{secName}</span>
                             </span>
-                            <span className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 group-hover/pdf:translate-y-0.5 transition-transform">
-                              <Download className="w-3.5 h-3.5" />
-                              <span>PDF</span>
-                            </span>
-                          </a>
+                            <span className="text-emerald-600 dark:text-emerald-400 font-bold text-xs group-item:translate-x-0.5 transition-transform">→</span>
+                          </Link>
                         ) : (
                           <div
-                            className="w-full py-2 px-3 rounded-xl bg-slate-100/70 dark:bg-emerald-950/40 border border-slate-200/70 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-300/70 text-xs flex items-center justify-between"
+                            key={secId}
+                            className="w-full bg-slate-100/60 dark:bg-slate-900/30 border border-slate-200/50 dark:border-emerald-950/40 text-slate-400 dark:text-emerald-900 font-medium py-2.5 px-3.5 rounded-xl flex items-center justify-between cursor-not-allowed opacity-60"
                           >
-                            <span className="flex items-center gap-1.5 text-[11px] font-medium">
-                              <FileText className="w-3.5 h-3.5 opacity-60 shrink-0" />
-                              <span>{t.downloadPdf}</span>
+                            <span className="text-xs flex items-center gap-2 line-through">
+                              <span className="w-5 h-5 rounded-md bg-slate-200/60 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 font-bold text-[10px] flex items-center justify-center">
+                                {secId}
+                              </span>
+                              <span>{secName}</span>
                             </span>
-                            <span className="px-2 py-0.5 rounded-md bg-white/60 dark:bg-[#02100c] border border-slate-200/80 dark:border-emerald-800/60 text-[10px] font-bold text-slate-600 dark:text-emerald-300/90 flex items-center gap-1 shrink-0">
-                              <Clock className="w-3 h-3 text-emerald-500/80" />
-                              <span>{t.inProgress}</span>
-                            </span>
+                            <span className="text-[10px]">✕</span>
                           </div>
-                        )}
-                      </div>
+                        );
+                      })}
                     </div>
-                  )
+
+                    {/* PDF Version Download Link (Requested by User) */}
+                    <div className="pt-2 mt-1 border-t border-slate-200/80 dark:border-emerald-900/60">
+                      {variant.pdfUrl ? (
+                        <a
+                          href={variant.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-400/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-between transition-all group/pdf cursor-pointer"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileText className="w-3.5 h-3.5 text-emerald-500" />
+                            <span>{t.downloadPdf}</span>
+                          </span>
+                          <span className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 group-hover/pdf:translate-y-0.5 transition-transform">
+                            <Download className="w-3.5 h-3.5" />
+                            <span>PDF</span>
+                          </span>
+                        </a>
+                      ) : (
+                        <div
+                          className="w-full py-2 px-3 rounded-xl bg-slate-100/70 dark:bg-emerald-950/40 border border-slate-200/70 dark:border-emerald-900/40 text-slate-500 dark:text-emerald-300/70 text-xs flex items-center justify-between"
+                        >
+                          <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                            <FileText className="w-3.5 h-3.5 opacity-60 shrink-0" />
+                            <span>{t.downloadPdf}</span>
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/60 dark:bg-[#02100c] border border-slate-200/80 dark:border-emerald-800/60 text-[10px] font-bold text-slate-600 dark:text-emerald-300/90 flex items-center gap-1 shrink-0">
+                            <Clock className="w-3 h-3 text-emerald-500/80" />
+                            <span>{t.inProgress}</span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             );
@@ -603,6 +606,26 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             <div className="col-span-full py-16 text-center text-slate-400 font-medium bg-white dark:bg-[#07241c] rounded-3xl border border-emerald-200 dark:border-emerald-800/60 border-dashed shadow-sm">
               {t.noTestsFound} <br />
               {t.tryChangeSearch}
+            </div>
+          )}
+
+          {hasMore && (
+            <div className="col-span-full flex justify-center pt-6 pb-2">
+              <button
+                type="button"
+                onClick={() => setShowAll((prev) => !prev)}
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-[#063326] via-[#083c2e] to-[#063326] hover:from-[#094635] hover:to-[#094635] border border-emerald-500/50 hover:border-emerald-400 text-white font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-black/40 hover:shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer group"
+              >
+                <span>{showAll ? t.showLess : t.showMore}</span>
+                <svg
+                  className={`w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transform transition-transform duration-200 ${showAll ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
           )}
         </div>

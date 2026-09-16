@@ -3,6 +3,7 @@ import { getOptimizedTestPageUrl } from '../utils/imageOptimization';
 import { getCustomAnswer } from './testAnswersManager';
 import {
   getQuestionsVariant16,
+  getQuestionsVariant17,
   getQuestionsVariant19,
   getQuestionsVariant20,
   getQuestionsVariant101,
@@ -2280,6 +2281,10 @@ const getRawFallbackQuestions = (vId: number): Question[] => {
 
   if (vId === 16) {
     return getQuestionsVariant16();
+  }
+
+  if (vId === 17) {
+    return getQuestionsVariant17();
   }
 
   if (vId === 19) {

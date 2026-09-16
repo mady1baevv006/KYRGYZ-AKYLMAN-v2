@@ -10,6 +10,19 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { getOptimizedTestPageUrl } from '../utils/imageOptimization';
 import { calculateOrtMainScore } from '../utils/ortCalculator';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  XCircle,
+  Award,
+  Target,
+  BarChart3,
+  RotateCcw,
+  Sparkles,
+  Layers,
+  X,
+  BookOpen,
+} from 'lucide-react';
 
 interface ResultsState {
   userAnswers?: Record<number, string>;
@@ -63,6 +76,8 @@ const I18N = {
     noTheme: 'Тема не указана',
     noSkill: 'Умение не указано',
     closeModal: 'Закрыть',
+    retryTest: 'Пройти снова',
+    sectionBreakdown: 'Успеваемость по разделам',
   },
   kg: {
     backToHome: 'Башкы бетке',
@@ -96,6 +111,8 @@ const I18N = {
     noTheme: 'Тема көрсөтүлгөн эмес',
     noSkill: 'Көндүм көрсөтүлгөн эмес',
     closeModal: 'Жабуу',
+    retryTest: 'Кайра тапшыруу',
+    sectionBreakdown: 'Бөлүмдөр боюнча жыйынтыктар',
   },
 };
 
@@ -149,16 +166,30 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-[#f3f7f5] dark:bg-[#041d16] transition-colors duration-200 flex flex-col items-center justify-center p-4 font-sans text-center">
-        <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-4">
-          {t.dataNotFound}
-        </h2>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/30 cursor-pointer active:scale-95"
-        >
-          {t.backToHome}
-        </button>
+      <div className="min-h-screen bg-[#031510] flex flex-col items-center justify-center p-4 font-sans text-center relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 max-w-md w-full bg-[#05261c] border border-emerald-800/60 rounded-3xl p-8 sm:p-10 shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5 text-emerald-400">
+            <BookOpen className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-black text-white mb-2 tracking-tight">
+            {t.dataNotFound}
+          </h2>
+          <p className="text-sm text-emerald-200/70 mb-6 font-medium">
+            {lang === 'kg'
+              ? 'Тестти кайрадан тапшыруу үчүн башкы бетке өтүңүз'
+              : 'Чтобы пройти пробный тест, перейдите на главную страницу'}
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-[#031510] font-black px-6 py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all cursor-pointer active:scale-95"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{t.backToHome}</span>
+          </button>
+        </div>
       </div>
     );
   }
@@ -279,32 +310,38 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
           onClick={() => setSelectedQuestion(null)}
         >
           <div
-            className="bg-white dark:bg-slate-800 transition-colors w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200 dark:border-slate-700"
+            className="bg-[#05261c] w-full max-w-4xl max-h-[95vh] md:max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-emerald-800/70 text-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center p-4 md:p-6 border-b border-slate-100 dark:border-slate-700 shrink-0 bg-white dark:bg-slate-800 shadow-sm z-10">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-1">
-                  {t.modalTitle}
-                </p>
-                <h3 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white leading-none">
-                  {t.modalQuestion}{' '}
-                  {activeTab === 'overall'
-                    ? selectedQuestion.question_number
-                    : getRelativeQuestionNumber(selectedQuestion.question_number, selectedQuestion.section_id)}
-                </h3>
+            <div className="flex justify-between items-center p-4 md:p-6 border-b border-emerald-800/60 shrink-0 bg-[#05261c] shadow-sm z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-0.5">
+                    {t.modalTitle}
+                  </p>
+                  <h3 className="text-lg md:text-xl font-black text-white leading-none">
+                    {t.modalQuestion}{' '}
+                    {activeTab === 'overall'
+                      ? selectedQuestion.question_number
+                      : getRelativeQuestionNumber(selectedQuestion.question_number, selectedQuestion.section_id)}
+                  </h3>
+                </div>
               </div>
               <button
                 onClick={() => setSelectedQuestion(null)}
-                className="w-10 h-10 bg-slate-100 dark:bg-slate-700 hover:bg-rose-100 dark:hover:bg-rose-900/30 hover:text-rose-600 dark:hover:text-rose-400 text-slate-500 dark:text-slate-400 rounded-xl flex items-center justify-center transition-colors font-bold text-lg cursor-pointer"
+                className="w-9 h-9 bg-emerald-900/40 hover:bg-rose-500/20 text-emerald-300 hover:text-rose-400 border border-emerald-700/50 hover:border-rose-500/50 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+                title={t.closeModal}
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Content - Question Image */}
-            <div className="flex-1 overflow-y-auto p-2 md:p-6 bg-slate-100/50 dark:bg-slate-900/50 custom-scrollbar flex flex-col gap-4 items-center">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6 bg-[#031510] custom-scrollbar flex flex-col gap-4 items-center">
               {selectedQuestion.image_url ? (
                 selectedQuestion.image_url.split('|').map((imgPart, idx) => {
                   const rawUrl = imgPart.startsWith('http') || imgPart.startsWith('/')
@@ -540,31 +577,37 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
             </div>
 
             {/* Modal Bottom Answer Bar */}
-            <div className="p-4 md:p-6 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700 shrink-0 z-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="p-4 md:p-6 bg-[#05261c] border-t border-emerald-800/60 shrink-0 z-10 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-6">
                 <div>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-emerald-300/70 font-bold uppercase tracking-wider mb-1">
                     {t.modalYourAnswer}
                   </p>
                   <span
-                    className={`inline-block px-4 py-2 rounded-xl font-black text-lg ${
+                    className={`inline-flex items-center justify-center min-w-[52px] px-4 py-2 rounded-xl font-black text-lg ${
                       userAnswers[selectedQuestion.question_number] === selectedQuestion.correct_answer
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                     }`}
                   >
                     {userAnswers[selectedQuestion.question_number] || '—'}
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-emerald-300/70 font-bold uppercase tracking-wider mb-1">
                     {t.modalCorrectKey}
                   </p>
-                  <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 rounded-xl font-black text-lg">
+                  <span className="inline-flex items-center justify-center min-w-[52px] px-4 py-2 bg-emerald-500 text-[#031510] rounded-xl font-black text-lg shadow-md shadow-emerald-500/20">
                     {selectedQuestion.correct_answer}
                   </span>
                 </div>
               </div>
+              <button
+                onClick={() => setSelectedQuestion(null)}
+                className="px-5 py-2.5 rounded-xl bg-emerald-900/50 hover:bg-emerald-800/60 border border-emerald-700/60 text-emerald-200 text-sm font-bold transition-all cursor-pointer"
+              >
+                {t.closeModal}
+              </button>
             </div>
           </div>
         </div>
@@ -572,134 +615,163 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
 
       {/* Main Container */}
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Navigation */}
-        <div className="flex items-center justify-between">
+        {/* Navigation / Actions Bar */}
+        <div className="flex items-center justify-between gap-3">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#05261c] hover:bg-emerald-900/40 border border-emerald-800/60 text-emerald-200 hover:text-white text-sm font-bold transition-all shadow-sm"
           >
-            ← {t.backToHome}
+            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <span>{t.backToHome}</span>
           </Link>
+
+          <button
+            onClick={() => {
+              if (variantId) {
+                navigate(`/test/${variantId}`);
+              } else {
+                navigate('/');
+              }
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#031510] text-sm font-black transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>{t.retryTest}</span>
+          </button>
         </div>
 
         {/* Hero Score Card */}
-        <div
-          className={`rounded-3xl p-8 md:p-10 text-white shadow-xl flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden border ${
-            mode === 'full'
-              ? 'bg-slate-900 border-slate-800'
-              : 'bg-gradient-to-br from-emerald-700 via-teal-800 to-slate-900 border-emerald-500'
-          }`}
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 pointer-events-none bg-white" />
-          <div className="relative z-10 text-center md:text-left flex-1">
-            <p className="text-xs font-black uppercase tracking-[0.2em] mb-2 text-emerald-300">
-              {mode === 'full'
-                ? t.testResult
-                : mode === 'custom'
-                ? t.certDescMath
-                : mode === 'practice'
-                ? t.practiceMode
-                : targetSectionId
-                ? sectionNames[targetSectionId]
-                : t.sectionTraining}
-            </p>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2">
-              {questions[0]?.title || `Вариант ${variantId}`}
-            </h1>
-            <p className="text-sm font-medium text-emerald-100">
-              {mode === 'full'
-                ? t.fullTestDesc
-                : mode === 'custom'
-                ? t.certDescMath
-                : mode === 'practice'
-                ? t.certDescPractice
-                : targetSectionId
-                ? sectionNames[targetSectionId]
-                : ''}
-            </p>
-          </div>
+        <div className="relative rounded-3xl p-6 sm:p-8 md:p-10 bg-[#05261c] border border-emerald-800/70 shadow-2xl overflow-hidden">
+          {/* Subtle background mesh / glow */}
+          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none transform -translate-x-1/3 translate-y-1/3" />
 
-          <div className="relative z-10 flex flex-wrap justify-center md:justify-end gap-3 md:gap-4">
-            <div
-              className={`text-center px-6 py-5 rounded-3xl shadow-xl border ${
-                mode === 'full'
-                  ? 'bg-gradient-to-b from-amber-400 to-amber-600 border-amber-300'
-                  : 'bg-emerald-600/60 backdrop-blur-md border-emerald-400/40'
-              }`}
-            >
-              <p
-                className={`text-[10px] uppercase font-black tracking-widest mb-1 ${
-                  mode === 'full' ? 'text-amber-900' : 'text-emerald-100'
-                }`}
-              >
-                {mode === 'full' ? t.ortScore : t.gainedScore}
-              </p>
-              <div className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                {mode === 'full' ? finalScore : `${totalCorrect} / ${relevantQuestions.length}`}
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="flex-1 space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-black uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>
+                  {mode === 'full'
+                    ? t.testResult
+                    : mode === 'custom'
+                    ? t.certDescMath
+                    : mode === 'practice'
+                    ? t.practiceMode
+                    : targetSectionId
+                    ? sectionNames[targetSectionId]
+                    : t.sectionTraining}
+                </span>
               </div>
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+                {questions[0]?.title || `Вариант ${variantId}`}
+              </h1>
+
+              <p className="text-sm text-emerald-200/80 font-medium max-w-xl">
+                {mode === 'full'
+                  ? t.fullTestDesc
+                  : mode === 'custom'
+                  ? t.certDescMath
+                  : mode === 'practice'
+                  ? t.certDescPractice
+                  : targetSectionId
+                  ? sectionNames[targetSectionId]
+                  : ''}
+              </p>
             </div>
 
-            <div className="text-center px-6 py-5 rounded-3xl border bg-black/20 border-white/10 hidden sm:block">
-              <p className="text-[10px] uppercase font-bold tracking-widest mb-1 text-emerald-200">
-                {t.accuracy}
-              </p>
-              <div className="flex items-end justify-center gap-1">
-                <span className="text-3xl md:text-4xl font-black text-white">{accuracyPercent}</span>
-                <span className="text-lg font-bold mb-1 text-emerald-200">%</span>
-              </div>
-            </div>
+            {/* Score & KPI Badges */}
+            <div className={`grid gap-3 shrink-0 ${mode === 'full' ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'}`}>
+              {/* Main Score - Only shown if pupil took the full test (all sections together) */}
+              {mode === 'full' && (
+                <div className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#06382a] via-[#052c20] to-[#042017] border border-emerald-500/60 shadow-xl text-center flex flex-col justify-center">
+                  <div className="flex items-center justify-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-emerald-300 mb-1">
+                    <Award className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{t.ortScore}</span>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                    {finalScore}
+                  </div>
+                </div>
+              )}
 
-            {mode === 'full' && (
-              <div className="text-center px-6 py-5 rounded-3xl border bg-black/20 border-white/10 hidden sm:block">
-                <p className="text-[10px] uppercase font-bold tracking-widest mb-1 text-emerald-200">
-                  {t.correctAnswers}
-                </p>
-                <div className="text-3xl md:text-4xl font-black text-white">
-                  {totalCorrect} <span className="text-lg text-emerald-200">/ {relevantQuestions.length}</span>
+              {/* Accuracy */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#031d15]/80 border border-emerald-800/60 text-center flex flex-col justify-center">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-300/80 mb-1">
+                  <Target className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t.accuracy}</span>
+                </div>
+                <div className="flex items-baseline justify-center gap-0.5 text-2xl sm:text-3xl font-black text-white">
+                  <span>{accuracyPercent}</span>
+                  <span className="text-sm font-bold text-emerald-400">%</span>
                 </div>
               </div>
-            )}
+
+              {/* Correct count */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#031d15]/80 border border-emerald-800/60 text-center flex flex-col justify-center">
+                <div className="flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-300/80 mb-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{t.correctAnswers}</span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-white">
+                  <span>{totalCorrect}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-emerald-300/60 ml-1">
+                    /{relevantQuestions.length}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
         {visibleTabs.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {visibleTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-3 rounded-2xl font-bold text-sm transition-all whitespace-nowrap cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+            {visibleTabs.map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap cursor-pointer flex items-center gap-2 ${
+                    isSelected
+                      ? 'bg-emerald-500 text-[#031510] shadow-lg shadow-emerald-500/25 font-black'
+                      : 'bg-[#05261c] hover:bg-emerald-900/40 border border-emerald-800/60 text-emerald-200/80 hover:text-emerald-100'
+                  }`}
+                >
+                  <Layers className={`w-4 h-4 ${isSelected ? 'text-[#031510]' : 'text-emerald-400'}`} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* Answer Map Card */}
-        <div className="bg-white dark:bg-slate-800 transition-colors p-6 md:p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white mb-1">
-                {t.mapTitle}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                {t.mapSubtitle}
-              </p>
+        <div className="bg-[#05261c] border border-emerald-800/70 p-6 sm:p-8 rounded-3xl shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-emerald-800/50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                  {t.mapTitle}
+                </h2>
+                <p className="text-xs text-emerald-300/70 font-medium">
+                  {t.mapSubtitle}
+                </p>
+              </div>
             </div>
+
             {/* Legend */}
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-emerald-500 inline-block shadow-sm" />
+            <div className="flex items-center gap-4 text-xs font-bold shrink-0">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>{t.legendCorrect}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3.5 h-3.5 rounded bg-rose-500 inline-block shadow-sm" />
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300">
+                <XCircle className="w-4 h-4 text-rose-400" />
                 <span>{t.legendError}</span>
               </div>
             </div>
@@ -718,21 +790,21 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                 const isCorrect = userAns === q.correct_answer;
 
                 const colorStyle = isCorrect
-                  ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 dark:border-emerald-700 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-200 shadow-sm'
-                  : 'bg-rose-100 dark:bg-rose-900/30 border-rose-500 dark:border-rose-700 text-rose-800 dark:text-rose-400 hover:bg-rose-200 shadow-sm';
+                  ? 'bg-emerald-500/15 border-emerald-500/60 text-emerald-200 hover:bg-emerald-500/25 shadow-sm'
+                  : 'bg-rose-500/15 border-rose-500/50 text-rose-200 hover:bg-rose-500/25 shadow-sm';
 
                 return (
                   <button
                     key={q.question_number}
                     onClick={() => setSelectedQuestion(q)}
-                    className={`relative h-12 md:h-14 rounded-xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer transform hover:scale-105 active:scale-95 ${colorStyle}`}
+                    className={`relative h-13 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer transform hover:scale-105 active:scale-95 ${colorStyle}`}
                   >
-                    <span className="font-black text-xs md:text-sm">
+                    <span className="font-black text-xs sm:text-sm text-white">
                       {activeTab === 'overall'
                         ? q.question_number
                         : getRelativeQuestionNumber(q.question_number, q.section_id)}
                     </span>
-                    <span className="text-[9px] font-bold -mt-0.5 opacity-80 uppercase">
+                    <span className="text-[10px] font-extrabold uppercase mt-0.5 opacity-90">
                       {userAns || '—'}
                     </span>
                   </button>

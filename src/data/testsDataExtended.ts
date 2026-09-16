@@ -466,20 +466,22 @@ export const GRAMMAR_SKILLS_KG = [
 ];
 
 // ==========================================
-// 1. ЦООМО №16 (Variant 16)
+// 1. ЦООМО №16 (Variant 16) - Все 5 разделов (150 заданий)
 // ==========================================
 export const getQuestionsVariant16 = (): Question[] => {
   const vId = 16;
   const questions: Question[] = [];
 
-  // Часть 1:
-  // Фото 1 = 1-8 (включ.)
-  // Фото 2 = 9-21 (включ.)
-  // Фото 3 = 22-30 (включ.)
+  // ==========================================
+  // SECTION 1: Математика Часть 1 (1-30)
+  // Фото 1 = 1-8: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.png
+  // Фото 2 = 9-21: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.png
+  // Фото 3 = 22-30: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png
+  // ==========================================
   const section1PagesV16 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787398651/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787398651/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787398652/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789540587/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_1.3.png'),
   ];
 
   const getSection1PageV16 = (qNum: number): string => {
@@ -514,20 +516,22 @@ export const getQuestionsVariant16 = (): Question[] => {
     });
   }
 
-  // Часть 2:
-  // Фото 1 = 31-35 (включ.)
-  // Фото 2 = 36-40 (включ.)
-  // Фото 3 = 41-47 (включ.)
-  // Фото 4 = 48-52 (включ.)
-  // Фото 5 = 53-57 (включ.)
-  // Фото 6 = 58-60 (включ.)
+  // ==========================================
+  // SECTION 2: Математика Часть 2 (31-60)
+  // Фото 1 = 31-35: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.png
+  // Фото 2 = 36-40: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.png
+  // Фото 3 = 41-47: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.png
+  // Фото 4 = 48-52: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.png
+  // Фото 5 = 53-57: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.png
+  // Фото 6 = 58-60: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.png
+  // ==========================================
   const section2PagesV16 = [
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399615/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399615/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399614/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399614/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399614/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.jpg'),
-    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1787399614/%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_16_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.jpg'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.3.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.4.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541294/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_%D0%9C%D0%B0%D1%82%D0%B5%D0%BC_2.6.png'),
   ];
 
   const getSection2PageV16 = (qNum: number): string => {
@@ -557,6 +561,273 @@ export const getQuestionsVariant16 = (): Question[] => {
       image_url: pageImg,
       correct_answer: defaultAnswersV16Part2[ansIdx] || 'А',
       title: 'ЦООМО №16',
+      theme_color: 'emerald',
+      language: 'ru',
+      sub_section: MATH2_TOPICS_RU[ansIdx] || 'Математика II',
+      skill: MATH2_SKILLS_RU[ansIdx] || 'Умение решать задачи ОРТ',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 3: Аналогии и дополнение предложений (61-90)
+  // Фото 1 = 61-68 (1-8): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541434/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png
+  // Фото 2 = 69-80 (9-20): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541435/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png
+  // Фото 3 = 81-86 (21-26): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541435/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png
+  // Фото 4 = 87-90 (27-30): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541434/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png
+  // ==========================================
+  const section3PagesV16 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541434/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541435/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541435/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541434/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%90%D0%BD%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8%D0%B8_%D0%B8_%D0%B4%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D1%8F.png'),
+  ];
+
+  const getSection3PageV16 = (qNum: number): string => {
+    if (qNum <= 68) return section3PagesV16[0];
+    if (qNum <= 80) return section3PagesV16[1];
+    if (qNum <= 86) return section3PagesV16[2];
+    return section3PagesV16[3];
+  };
+
+  const defaultAnswersV16Part3: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 61; i <= 90; i++) {
+    const pageImg = getSection3PageV16(i);
+    const ansIdx = i - 61;
+
+    questions.push({
+      id: 16000 + i,
+      variant_number: vId,
+      section_id: 3,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV16Part3[ansIdx] || 'А',
+      title: 'ЦООМО №16',
+      theme_color: 'emerald',
+      language: 'ru',
+      sub_section: 'Аналогии и дополнение предложений',
+      skill: 'Умение решать словесно-логические задачи ОРТ',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 4: Чтение и понимание (91-120)
+  // Фото 1 = 91 (1): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 2 = 92-93 (2-3): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 3 = 94-100 (4-10): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 4 = 101-102 (11-12): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 5 = 103-107 (13-17): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 6 = 108-110 (18-20): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 7 = 111-112 (21-22): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 8 = 113-118 (23-28): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // Фото 9 = 119-120 (29-30): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png
+  // ==========================================
+  const section4PagesV16 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541571/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_6_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_7_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_8_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541572/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_9_%D0%A7%D1%82%D0%B5%D0%BD%D0%B8%D0%B5_%D0%B8_%D0%BF%D0%BE%D0%BD%D0%B8%D0%BC%D0%B0%D0%BD%D0%B8%D0%B5.png'),
+  ];
+
+  const getSection4PageV16 = (qNum: number): string => {
+    const rel = qNum - 90; // 1-30
+    if (rel <= 1) return section4PagesV16[0];
+    if (rel <= 3) return section4PagesV16[1];
+    if (rel <= 10) return section4PagesV16[2];
+    if (rel <= 12) return section4PagesV16[3];
+    if (rel <= 17) return section4PagesV16[4];
+    if (rel <= 20) return section4PagesV16[5];
+    if (rel <= 22) return section4PagesV16[6];
+    if (rel <= 28) return section4PagesV16[7];
+    return section4PagesV16[8];
+  };
+
+  const defaultAnswersV16Part4: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 91; i <= 120; i++) {
+    const pageImg = getSection4PageV16(i);
+    const ansIdx = i - 91;
+
+    questions.push({
+      id: 16000 + i,
+      variant_number: vId,
+      section_id: 4,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV16Part4[ansIdx] || 'А',
+      title: 'ЦООМО №16',
+      theme_color: 'emerald',
+      language: 'ru',
+      sub_section: 'Чтение и понимание текста',
+      skill: 'Умение анализировать и понимать текст ОРТ',
+      is_practice: false,
+    });
+  }
+
+  // ==========================================
+  // SECTION 5: Практическая грамматика русского языка (121-150)
+  // Фото 1 = 121-124 (1-4): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541673/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png
+  // Фото 2 = 125-132 (5-12): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541673/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png
+  // Фото 3 = 133-140 (13-20): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png
+  // Фото 4 = 141-145 (21-25): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png
+  // Фото 5 = 146-150 (26-30): https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png
+  // ==========================================
+  const section5PagesV16 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541673/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541673/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_3_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_4_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789541674/16_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_5_%D0%9F%D1%80%D0%B0%D0%BA%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F_%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0.png'),
+  ];
+
+  const getSection5PageV16 = (qNum: number): string => {
+    const rel = qNum - 120; // 1-30
+    if (rel <= 4) return section5PagesV16[0];
+    if (rel <= 12) return section5PagesV16[1];
+    if (rel <= 20) return section5PagesV16[2];
+    if (rel <= 25) return section5PagesV16[3];
+    return section5PagesV16[4];
+  };
+
+  const defaultAnswersV16Part5: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 121; i <= 150; i++) {
+    const pageImg = getSection5PageV16(i);
+    const ansIdx = i - 121;
+
+    questions.push({
+      id: 16000 + i,
+      variant_number: vId,
+      section_id: 5,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV16Part5[ansIdx] || 'А',
+      title: 'ЦООМО №16',
+      theme_color: 'emerald',
+      language: 'ru',
+      sub_section: 'Практическая грамматика русского языка',
+      skill: 'Умение применять грамматические и пунктуационные нормы ОРТ',
+      is_practice: false,
+    });
+  }
+
+  return questions;
+};
+
+// ==========================================
+// ЦООМО №17 (Variant 17) - Математика 1 и 2
+// ==========================================
+export const getQuestionsVariant17 = (): Question[] => {
+  const vId = 17;
+  const questions: Question[] = [];
+
+  // Часть 1:
+  // Фото 1 = 1-9: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550786/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.1.png
+  // Фото 2 = 10-17: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550785/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.2.png
+  // Фото 3 = 18-25: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550786/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.3.png
+  // Фото 4 = 26-30: https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550785/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.4.png
+  const section1PagesV17 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550786/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550785/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550786/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.3.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550785/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_1.4.png'),
+  ];
+
+  const getSection1PageV17 = (qNum: number): string => {
+    if (qNum <= 9) return section1PagesV17[0];
+    if (qNum <= 17) return section1PagesV17[1];
+    if (qNum <= 25) return section1PagesV17[2];
+    return section1PagesV17[3];
+  };
+
+  const defaultAnswersV17Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
+    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  ];
+
+  for (let i = 1; i <= 30; i++) {
+    const pageImg = getSection1PageV17(i);
+    const ansIdx = i - 1;
+
+    questions.push({
+      id: 17000 + i,
+      variant_number: vId,
+      section_id: 1,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV17Part1[ansIdx] || 'А',
+      title: 'ЦООМО №17',
+      theme_color: 'emerald',
+      language: 'ru',
+      sub_section: MATH1_TOPICS_RU[ansIdx] || 'Математика I',
+      skill: MATH1_SKILLS_RU[ansIdx] || 'Умение решать задачи ОРТ',
+      is_practice: false,
+    });
+  }
+
+  // Часть 2:
+  // Фото 1 = 31-33 (до 35) - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.1.png
+  // Фото 2 = 36-41 - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550845/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.2.png
+  // Фото 3 = 42-45 - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.3.png
+  // Фото 4 = 46-50 - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.4.png
+  // Фото 5 = 51-55 - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550847/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.5.png
+  // Фото 6 = 56-60 - https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550847/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.6.png
+  const section2PagesV17 = [
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.1.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550845/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.2.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.3.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550846/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.4.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550847/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.5.png'),
+    getOptimizedTestPageUrl('https://res.cloudinary.com/rw9qhk3a/image/upload/v1789550847/17_%D0%A6%D0%9E%D0%9E%D0%9C%D0%9E_2.6.png'),
+  ];
+
+  const getSection2PageV17 = (qNum: number): string => {
+    if (qNum <= 35) return section2PagesV17[0];
+    if (qNum <= 41) return section2PagesV17[1];
+    if (qNum <= 45) return section2PagesV17[2];
+    if (qNum <= 50) return section2PagesV17[3];
+    if (qNum <= 55) return section2PagesV17[4];
+    return section2PagesV17[5];
+  };
+
+  const defaultAnswersV17Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+  ];
+
+  for (let i = 31; i <= 60; i++) {
+    const pageImg = getSection2PageV17(i);
+    const ansIdx = i - 31;
+
+    questions.push({
+      id: 17000 + i,
+      variant_number: vId,
+      section_id: 2,
+      question_number: i,
+      image_url: pageImg,
+      correct_answer: defaultAnswersV17Part2[ansIdx] || 'А',
+      title: 'ЦООМО №17',
       theme_color: 'emerald',
       language: 'ru',
       sub_section: MATH2_TOPICS_RU[ansIdx] || 'Математика II',

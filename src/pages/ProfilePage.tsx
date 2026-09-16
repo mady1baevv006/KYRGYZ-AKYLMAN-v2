@@ -320,7 +320,11 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
 
   const history = user.testHistory || [];
   const testsCount = history.length;
-  const bestScore = history.length > 0 ? Math.max(...history.map((h) => h.totalScore)) : 0;
+  const fullTests = history.filter((h) => h.mode === 'full');
+  const bestScore =
+    fullTests.length > 0
+      ? Math.max(...fullTests.map((h) => h.totalScore))
+      : 0;
   const avgAccuracy =
     history.length > 0
       ? Math.round(history.reduce((sum, h) => sum + (h.accuracy || 0), 0) / history.length)
@@ -1275,10 +1279,10 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
 
                       <div className="text-right shrink-0">
                         <span className="text-[9px] uppercase font-bold text-emerald-300/70 block">
-                          {t.score}
+                          {record.mode === 'full' ? (lang === 'kg' ? 'ЖРТ баллы' : 'Балл ОРТ') : t.score}
                         </span>
                         <span className="text-base sm:text-xl font-black text-amber-400 drop-shadow-xs">
-                          {record.totalScore}
+                          {record.mode === 'full' ? record.totalScore : `${record.correctAnswers} / ${record.totalQuestions}`}
                         </span>
                       </div>
                     </div>
