@@ -34,6 +34,7 @@ import {
   AtSign,
   Lock,
   ArrowLeft,
+  Calculator,
 } from 'lucide-react';
 import { useAuth, UserTestRecord } from '../context/AuthContext';
 import { AppLanguage, SubscriptionPlan } from '../types';
@@ -42,6 +43,7 @@ import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
 import { CoursesSection } from '../components/courses/CoursesSection';
+import { ExercisesSection } from '../components/ExercisesSection';
 import { AuthModal } from '../components/AuthModal';
 import { SetLoginModal } from '../components/SetLoginModal';
 import { processAndCompressImage } from '../utils/imageUpload';
@@ -62,7 +64,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'courses'>('history');
+  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'courses' | 'exercises'>('history');
   const [showAuthMethodText, setShowAuthMethodText] = useState(false);
 
   const getAuthMethodText = (provider?: string) => {
@@ -1146,9 +1148,24 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
           <School className="w-4 h-4" />
           <span>{lang === 'kg' ? 'Курстар' : 'Курсы'}</span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveProfileTab('exercises')}
+          className={`px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
+            activeProfileTab === 'exercises'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 scale-[1.02]'
+              : 'bg-[#06261d] text-emerald-200/80 hover:text-white border border-emerald-800/70 hover:border-emerald-600'
+          }`}
+        >
+          <Calculator className="w-4 h-4" />
+          <span>{lang === 'kg' ? 'Көнүгүүлөр' : 'Упражнения'}</span>
+        </button>
       </div>
 
-      {activeProfileTab === 'courses' ? (
+      {activeProfileTab === 'exercises' ? (
+        <ExercisesSection lang={lang} />
+      ) : activeProfileTab === 'courses' ? (
         isAdmin ? (
           <CoursesSection lang={lang} />
         ) : (
@@ -1168,7 +1185,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 : 'Раздел курсов временно закрыт на обновление учебных материалов и программ администратором.'}
             </p>
             <button
-              onClick={() => setActiveProfileTab('tests')}
+              onClick={() => setActiveProfileTab('history')}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-[#031510] shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
