@@ -207,8 +207,19 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
   let rawScore = 0;
   const sectionCorrectMap: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
+  const checkIsCorrect = (q: Question, userAns?: string): boolean => {
+    // В ЦООМО №17 вопросы 34 и 38: какой бы ответ не был - неправильно у всех без исключений
+    if (Number(variantId) === 17 && (q.question_number === 34 || q.question_number === 38)) {
+      return false;
+    }
+    if (!userAns || !q.correct_answer || q.correct_answer === '—') {
+      return false;
+    }
+    return userAns === q.correct_answer;
+  };
+
   relevantQuestions.forEach((q) => {
-    if (userAnswers[q.question_number] === q.correct_answer) {
+    if (checkIsCorrect(q, userAnswers[q.question_number])) {
       totalCorrect++;
       rawScore += SECTION_COEFFICIENTS[q.section_id] || 1;
       if (sectionCorrectMap[q.section_id] !== undefined) {
@@ -278,7 +289,7 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
     let correctCount = 0;
 
     subset.forEach((q) => {
-      const isRight = userAnswers[q.question_number] === q.correct_answer;
+      const isRight = checkIsCorrect(q, userAnswers[q.question_number]);
       if (isRight) correctCount++;
       const sub = q.sub_section || t.noTheme;
       const skill = q.skill || t.noSkill;
@@ -585,7 +596,7 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
                   </p>
                   <span
                     className={`inline-flex items-center justify-center min-w-[52px] px-4 py-2 rounded-xl font-black text-lg ${
-                      userAnswers[selectedQuestion.question_number] === selectedQuestion.correct_answer
+                      checkIsCorrect(selectedQuestion, userAnswers[selectedQuestion.question_number])
                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                         : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                     }`}
@@ -787,7 +798,7 @@ export const ResultsPage: React.FC<{ lang?: AppLanguage }> = ({ lang: propLang }
               })
               .map((q) => {
                 const userAns = userAnswers[q.question_number];
-                const isCorrect = userAns === q.correct_answer;
+                const isCorrect = checkIsCorrect(q, userAns);
 
                 const colorStyle = isCorrect
                   ? 'bg-emerald-500/15 border-emerald-500/60 text-emerald-200 hover:bg-emerald-500/25 shadow-sm'

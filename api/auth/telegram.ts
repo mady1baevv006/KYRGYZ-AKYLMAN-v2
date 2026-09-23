@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { upsertTelegramUser } from '../usersStore.js';
 
 const BOT_TOKEN = (
   process.env.TELEGRAM_BOT_TOKEN ||
@@ -140,6 +141,12 @@ export default async function handler(req: any, res: any) {
     }
 
     console.log(`[Telegram Auth Vercel] Successfully verified user @${result.userData?.username || result.userData?.id}`);
+
+    try {
+      upsertTelegramUser(result.userData);
+    } catch (persistErr) {
+      console.warn('[Telegram Auth Vercel] Failed to persist user:', persistErr);
+    }
 
     const resp = {
       success: true,

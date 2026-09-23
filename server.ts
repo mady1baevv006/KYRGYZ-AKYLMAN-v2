@@ -4,6 +4,13 @@ import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import sendEmailCodeHandler from './api/email/send-code';
 import verifyEmailCodeHandler from './api/email/verify-code';
+import {
+  getAllUsers,
+  upsertUser,
+  upsertTelegramUser,
+  updateUser,
+  deleteUser,
+} from './api/usersStore';
 
 // --- Telegram Bot Authentication State ---
 interface TelegramAuthSession {
@@ -158,6 +165,12 @@ function handleTelegramMessage(message: any, token: string) {
         username: from.username ? `@${from.username}` : `@id${from.id}`,
         auth_date: Math.floor(Date.now() / 1000),
       };
+
+      try {
+        upsertTelegramUser(session.user);
+      } catch (e) {
+        console.warn('[Telegram User Persist Error]', e);
+      }
 
       console.log(`[Telegram Auth] Successfully authenticated user @${from.username || from.id} for session ${matchedToken}`);
 
@@ -315,6 +328,12 @@ async function startServer() {
         `[Telegram Widget] Successfully verified user @${result.userData?.username || result.userData?.id} via HMAC-SHA-256`
       );
 
+      try {
+        upsertTelegramUser(result.userData);
+      } catch (e) {
+        console.warn('[Telegram Widget Persist Error]', e);
+      }
+
       return res.status(200).json({
         ok: true,
         success: true,
@@ -394,6 +413,12 @@ async function startServer() {
       auth_date: Math.floor(Date.now() / 1000),
     };
 
+    try {
+      upsertTelegramUser(session.user);
+    } catch (e) {
+      console.warn('[Mock Telegram Persist Error]', e);
+    }
+
     res.json({ ok: true, session });
   });
 
@@ -412,6 +437,68 @@ async function startServer() {
   });
   app.all('/api/email/verify-code', (req, res) => {
     verifyEmailCodeHandler(req as any, res as any);
+  });
+
+  // --- Centralized User Registry Endpoints (For Admin & Cross-device Sync) ---
+  app.get('/api/admin/users', (req, res) => {
+    try {
+      const users = getAllUsers();
+      res.json({ ok: true, success: true, users, total: users.length });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
+  });
+
+  app.post('/api/admin/users', (req, res) => {
+    try {
+      const action = req.body?.action;
+      if (action === 'update') {
+        const { userId, data } = req.body || {};
+        const updated = updateUser(userId, data);
+        return res.json({ ok: true, user: updated });
+      }
+      if (action === 'delete') {
+        const { userId } = req.body || {};
+        const deleted = deleteUser(userId);
+        return res.json({ ok: true, deleted });
+      }
+      const user = req.body?.user || req.body;
+      const saved = upsertUser(user);
+      res.json({ ok: true, user: saved });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
+  });
+
+  app.post('/api/users/sync', (req, res) => {
+    try {
+      const user = req.body?.user || req.body;
+      if (!user) return res.status(400).json({ ok: false, error: 'No user data provided' });
+      const saved = upsertUser(user);
+      res.json({ ok: true, success: true, user: saved });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
+  });
+
+  app.post('/api/admin/users/update', (req, res) => {
+    try {
+      const { userId, data } = req.body || {};
+      const updated = updateUser(userId, data);
+      res.json({ ok: true, user: updated });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
+  });
+
+  app.post('/api/admin/users/delete', (req, res) => {
+    try {
+      const { userId } = req.body || {};
+      const deleted = deleteUser(userId);
+      res.json({ ok: true, deleted });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
   });
 
   // --- Admin & Test Variants Local API Endpoints ---

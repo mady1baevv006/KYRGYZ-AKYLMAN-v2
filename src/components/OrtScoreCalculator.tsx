@@ -373,14 +373,6 @@ export const OrtScoreCalculator: React.FC<OrtScoreCalculatorProps> = ({ lang = '
                     {isKg ? '/ 245 балл' : '/ 245 баллов'}
                   </span>
                 </div>
-
-                {/* Level Badge (SchoolClub exact levels A, B, C) */}
-                <div className="flex justify-center pt-1">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    <Award className="w-3.5 h-3.5 text-emerald-400" />
-                    {isKg ? mainResult.levelLabel.ky : mainResult.levelLabel.ru}
-                  </span>
-                </div>
               </div>
 
               {/* Progress and Stats */}

@@ -490,10 +490,38 @@ export const getQuestionsVariant16 = (): Question[] => {
     return section1PagesV16[2];
   };
 
-  const defaultAnswersV16Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
-    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  // Официальные правильные ответы ЦООМО №16 (Математика, Часть 1: вопросы 1-30)
+  const officialAnswersV16Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'Б', // 1
+    'А', // 2
+    'В', // 3
+    'В', // 4
+    'А', // 5
+    'В', // 6
+    'Б', // 7
+    'А', // 8
+    'Б', // 9
+    'А', // 10
+    'В', // 11
+    'А', // 12
+    'В', // 13
+    'Б', // 14
+    'А', // 15
+    'В', // 16
+    'Б', // 17
+    'А', // 18
+    'А', // 19
+    'В', // 20
+    'Б', // 21
+    'А', // 22
+    'Б', // 23
+    'Б', // 24
+    'А', // 25
+    'Б', // 26
+    'Г', // 27
+    'Б', // 28
+    'Б', // 29
+    'А', // 30
   ];
 
   for (let i = 1; i <= 30; i++) {
@@ -506,7 +534,7 @@ export const getQuestionsVariant16 = (): Question[] => {
       section_id: 1,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV16Part1[ansIdx] || 'А',
+      correct_answer: officialAnswersV16Part1[ansIdx] || 'А',
       title: 'ЦООМО №16',
       theme_color: 'emerald',
       language: 'ru',
@@ -543,10 +571,38 @@ export const getQuestionsVariant16 = (): Question[] => {
     return section2PagesV16[5];
   };
 
-  const defaultAnswersV16Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+  // Официальные правильные ответы ЦООМО №16 (Математика, Часть 2: вопросы 31-60)
+  const officialAnswersV16Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
+    'Б', // 31
+    'Д', // 32
+    'Д', // 33
+    'В', // 34
+    'А', // 35
+    'В', // 36
+    'В', // 37
+    'В', // 38
+    'В', // 39
+    'Г', // 40
+    'А', // 41
+    'В', // 42
+    'Г', // 43
+    'Г', // 44
+    'А', // 45
+    'Д', // 46
+    'Д', // 47
+    'Г', // 48
+    'Б', // 49
+    'Г', // 50
+    'Б', // 51
+    'Г', // 52
+    'Д', // 53
+    'Д', // 54
+    'В', // 55
+    'А', // 56
+    'Б', // 57
+    'Б', // 58
+    'Д', // 59
+    'В', // 60
   ];
 
   for (let i = 31; i <= 60; i++) {
@@ -559,7 +615,7 @@ export const getQuestionsVariant16 = (): Question[] => {
       section_id: 2,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV16Part2[ansIdx] || 'А',
+      correct_answer: officialAnswersV16Part2[ansIdx] || 'А',
       title: 'ЦООМО №16',
       theme_color: 'emerald',
       language: 'ru',
@@ -759,10 +815,38 @@ export const getQuestionsVariant17 = (): Question[] => {
     return section1PagesV17[3];
   };
 
-  const defaultAnswersV17Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
-    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  // Официальные правильные ответы ЦООМО №17 (Математика, Часть 1: вопросы 1-30)
+  const officialAnswersV17Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'А', // 1
+    'В', // 2
+    'А', // 3
+    'Б', // 4
+    'А', // 5
+    'А', // 6
+    'В', // 7
+    'А', // 8
+    'А', // 9
+    'А', // 10
+    'А', // 11
+    'А', // 12
+    'В', // 13
+    'А', // 14
+    'В', // 15
+    'А', // 16
+    'Б', // 17
+    'Б', // 18
+    'А', // 19
+    'Б', // 20
+    'Б', // 21
+    'А', // 22
+    'В', // 23
+    'В', // 24
+    'А', // 25
+    'А', // 26
+    'Г', // 27
+    'Б', // 28
+    'Б', // 29
+    'В', // 30
   ];
 
   for (let i = 1; i <= 30; i++) {
@@ -775,7 +859,7 @@ export const getQuestionsVariant17 = (): Question[] => {
       section_id: 1,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV17Part1[ansIdx] || 'А',
+      correct_answer: officialAnswersV17Part1[ansIdx] || 'А',
       title: 'ЦООМО №17',
       theme_color: 'emerald',
       language: 'ru',
@@ -810,10 +894,39 @@ export const getQuestionsVariant17 = (): Question[] => {
     return section2PagesV17[5];
   };
 
-  const defaultAnswersV17Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+  // Официальные правильные ответы ЦООМО №17 (Математика, Часть 2: вопросы 31-60)
+  // Примечание: вопросы 34 и 38 - аннулированы / неправильно без исключений
+  const officialAnswersV17Part2: string[] = [
+    'Б', // 31
+    'Д', // 32
+    'В', // 33
+    '—', // 34: какой бы ответ не был - неправильно сделай у всех без исключений
+    'Г', // 35
+    'Д', // 36
+    'В', // 37
+    '—', // 38: какой бы ответ не был - неправильно сделай у всех без исключений
+    'Г', // 39
+    'В', // 40
+    'Г', // 41
+    'Б', // 42
+    'Б', // 43
+    'В', // 44
+    'Б', // 45
+    'Б', // 46
+    'А', // 47
+    'В', // 48
+    'В', // 49
+    'Г', // 50
+    'Г', // 51
+    'Д', // 52
+    'Г', // 53
+    'А', // 54
+    'Д', // 55
+    'Б', // 56
+    'Б', // 57
+    'А', // 58
+    'В', // 59
+    'Г', // 60
   ];
 
   for (let i = 31; i <= 60; i++) {
@@ -826,7 +939,7 @@ export const getQuestionsVariant17 = (): Question[] => {
       section_id: 2,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV17Part2[ansIdx] || 'А',
+      correct_answer: officialAnswersV17Part2[ansIdx] || 'А',
       title: 'ЦООМО №17',
       theme_color: 'emerald',
       language: 'ru',
@@ -968,10 +1081,11 @@ export const getQuestionsVariant20 = (): Question[] => {
     return section1PagesV20[2];
   };
 
-  const defaultAnswersV20Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
-    'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г',
-    'А', 'Б', 'В', 'Г', 'А', 'Б', 'В', 'Г', 'А', 'Б',
+  // Официальные правильные ответы ЦООМО №20 (Часть 1: вопросы 1 - 30)
+  const officialAnswersV20Part1: ('А' | 'Б' | 'В' | 'Г')[] = [
+    'Б', 'В', 'В', 'А', 'А', 'Б', 'А', 'В', 'А', 'А', // 1 - 10
+    'В', 'Б', 'Б', 'А', 'В', 'А', 'Б', 'В', 'А', 'Б', // 11 - 20
+    'Б', 'А', 'Б', 'Б', 'А', 'В', 'В', 'А', 'Г', 'Б', // 21 - 30
   ];
 
   for (let i = 1; i <= 30; i++) {
@@ -984,7 +1098,7 @@ export const getQuestionsVariant20 = (): Question[] => {
       section_id: 1,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV20Part1[ansIdx] || 'А',
+      correct_answer: officialAnswersV20Part1[ansIdx] || 'А',
       title: 'ЦООМО №20',
       theme_color: 'emerald',
       language: 'ru',
@@ -1019,10 +1133,11 @@ export const getQuestionsVariant20 = (): Question[] => {
     return section2PagesV20[5];
   };
 
-  const defaultAnswersV20Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
-    'А', 'Б', 'В', 'Г', 'Д', 'А', 'Б', 'В', 'Г', 'Д',
+  // Официальные правильные ответы ЦООМО №20 (Часть 2: вопросы 31 - 60)
+  const officialAnswersV20Part2: ('А' | 'Б' | 'В' | 'Г' | 'Д')[] = [
+    'Г', 'Д', 'А', 'Г', 'Д', 'Д', 'В', 'В', 'Д', 'Б', // 31 - 40
+    'Г', 'В', 'Г', 'В', 'В', 'Б', 'Б', 'Д', 'В', 'Г', // 41 - 50
+    'Г', 'Д', 'А', 'Б', 'Б', 'Г', 'Г', 'Б', 'Д', 'Д', // 51 - 60
   ];
 
   for (let i = 31; i <= 60; i++) {
@@ -1035,7 +1150,7 @@ export const getQuestionsVariant20 = (): Question[] => {
       section_id: 2,
       question_number: i,
       image_url: pageImg,
-      correct_answer: defaultAnswersV20Part2[ansIdx] || 'А',
+      correct_answer: officialAnswersV20Part2[ansIdx] || 'А',
       title: 'ЦООМО №20',
       theme_color: 'emerald',
       language: 'ru',

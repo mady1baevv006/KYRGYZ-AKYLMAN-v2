@@ -35,6 +35,7 @@ export const UsersManager: React.FC = () => {
   const {
     user: currentUser,
     adminGetAllUsers,
+    adminFetchRemoteUsers,
     adminSetUserSubscription,
     adminUpdateUser,
     adminDeleteUser,
@@ -47,6 +48,8 @@ export const UsersManager: React.FC = () => {
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'standard' | 'premium'>('all');
   const [authFilter, setAuthFilter] = useState<'all' | 'google' | 'telegram' | 'email_code' | 'sync'>('all');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
 
   // Modals state
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
@@ -63,22 +66,49 @@ export const UsersManager: React.FC = () => {
   const [newPlan, setNewPlan] = useState<'free' | 'standard' | 'premium'>('premium');
   const [newIsPaid, setNewIsPaid] = useState(true);
 
-  // Refresh users list
-  const refreshList = () => {
-    const list = adminGetAllUsers();
-    const seenIds = new Set<string>();
-    const deduplicated: UserProfile[] = [];
-    for (const u of list) {
-      if (u && u.id && !seenIds.has(u.id)) {
-        seenIds.add(u.id);
-        deduplicated.push(u);
+  // Refresh users list (local + remote server fetch)
+  const refreshList = async () => {
+    setIsRefreshing(true);
+    try {
+      const localList = adminGetAllUsers();
+      const seenIds = new Set<string>();
+      const deduplicated: UserProfile[] = [];
+      for (const u of localList) {
+        if (u && u.id && !seenIds.has(u.id)) {
+          seenIds.add(u.id);
+          deduplicated.push(u);
+        }
       }
+      setUsersList(deduplicated);
+
+      if (adminFetchRemoteUsers) {
+        const remoteMerged = await adminFetchRemoteUsers();
+        if (remoteMerged && remoteMerged.length > 0) {
+          const remoteSeen = new Set<string>();
+          const remoteDedup: UserProfile[] = [];
+          for (const u of remoteMerged) {
+            if (u && u.id && !remoteSeen.has(u.id)) {
+              remoteSeen.add(u.id);
+              remoteDedup.push(u);
+            }
+          }
+          setUsersList(remoteDedup);
+        }
+      }
+      setLastRefreshedAt(new Date());
+    } catch (err) {
+      console.warn('[UsersManager] Refresh error:', err);
+    } finally {
+      setIsRefreshing(false);
     }
-    setUsersList(deduplicated);
   };
 
   useEffect(() => {
     refreshList();
+    const interval = setInterval(() => {
+      refreshList();
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const showToast = (msg: string) => {
@@ -223,6 +253,42 @@ export const UsersManager: React.FC = () => {
     return true;
   });
 
+  // Helper to extract timestamp for sorting
+  const getUserRegistrationTime = (u: UserProfile): number => {
+    if (u.registeredAt) {
+      const t = new Date(u.registeredAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (u.lastLoginAt) {
+      const t = new Date(u.lastLoginAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (typeof u.id === 'string' && u.id.startsWith('user_')) {
+      const parts = u.id.split('_');
+      const num = parseInt(parts[1], 10);
+      if (!isNaN(num) && num > 1000000000) return num;
+    }
+    return 0;
+  };
+
+  // Sort: Master Admin pinned at the very top, all other users sorted by registration time (newest at top, oldest at bottom)
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    const isMasterAdminA =
+      a.id === 'admin_mady1baevv' ||
+      a.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      a.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const isMasterAdminB =
+      b.id === 'admin_mady1baevv' ||
+      b.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      b.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+    if (isMasterAdminA && !isMasterAdminB) return -1;
+    if (!isMasterAdminA && isMasterAdminB) return 1;
+
+    // Newest registered at top, older at bottom
+    return getUserRegistrationTime(b) - getUserRegistrationTime(a);
+  });
+
   // Metrics
   const totalCount = usersList.length;
   const premiumCount = usersList.filter((u) => u.subscriptionPlan === 'premium').length;
@@ -248,18 +314,31 @@ export const UsersManager: React.FC = () => {
               Все зарегистрированные пользователи
             </h2>
             <p className="text-xs sm:text-sm text-emerald-200/70 mt-1 max-w-2xl">
-              Полный реестр всех способов авторизации: Telegram, Google вход, 6-значный код подтверждения почты, а также синхронизированные единые профили.
+              Полный реестр всех способов авторизации: Telegram, Google вход, 6-значный код подтверждения почты, а также синхронизированные профили. Новые регистрации отображаются вверху списка.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsAddUserModalOpen(true)}
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer hover:brightness-110 active:scale-95 transition-all shrink-0"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Добавить пользователя</span>
-          </button>
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            <button
+              type="button"
+              onClick={() => refreshList()}
+              disabled={isRefreshing}
+              className="px-4 py-3 rounded-2xl bg-[#031510] hover:bg-[#072f24] text-emerald-300 border border-emerald-700/60 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-95 disabled:opacity-50"
+              title={`Последнее обновление: ${lastRefreshedAt.toLocaleTimeString('ru-RU')}`}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-400' : ''}`} />
+              <span className="hidden sm:inline">Обновить</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsAddUserModalOpen(true)}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer hover:brightness-110 active:scale-95 transition-all"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Добавить пользователя</span>
+            </button>
+          </div>
         </div>
 
         {/* Quick Stats Grid: Plans & Providers */}
@@ -471,7 +550,7 @@ export const UsersManager: React.FC = () => {
 
       {/* Users List */}
       <div className="space-y-3">
-        {filteredUsers.length === 0 ? (
+        {sortedUsers.length === 0 ? (
           <div className="p-10 rounded-3xl bg-[#06261d] border border-emerald-800/60 text-center space-y-2">
             <Users className="w-10 h-10 mx-auto text-emerald-600 opacity-60" />
             <h4 className="text-base font-bold text-white">Пользователи не найдены</h4>
@@ -480,12 +559,20 @@ export const UsersManager: React.FC = () => {
             </p>
           </div>
         ) : (
-          filteredUsers.map((u, idx) => {
+          sortedUsers.map((u, idx) => {
             const isAdminAccount = u.identifier.toLowerCase() === ADMIN_EMAIL.toLowerCase();
             const isPaidPrem = (u.subscriptionPlan === 'premium' && u.isPaid) || isAdminAccount;
             const isPaidStan = u.subscriptionPlan === 'standard' && u.isPaid;
             const testCount = u.testHistory?.length || 0;
-            const regDate = u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('ru-RU') : '—';
+            const regDate = u.registeredAt
+              ? new Date(u.registeredAt).toLocaleString('ru-RU', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '—';
 
             // Calculate trial status
             const regTimestamp = u.registeredAt ? new Date(u.registeredAt).getTime() : Date.now();

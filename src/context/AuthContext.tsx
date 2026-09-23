@@ -413,12 +413,24 @@ interface AuthContextType {
   adminDeleteUser: (userId: string) => void;
   adminResetTrial: (userId: string) => void;
   adminCreateUser: (userData: Omit<UserProfile, 'id' | 'testHistory'>) => { success: boolean; error?: string };
+  adminFetchRemoteUsers: () => Promise<UserProfile[]>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const USERS_STORAGE_KEY = 'ort_registered_users_v2';
 const CURRENT_USER_KEY = 'ort_current_user_v2';
+
+export const syncUserWithServer = (userProfile: UserProfile): void => {
+  if (!userProfile) return;
+  try {
+    fetch('/api/users/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: userProfile }),
+    }).catch(() => {});
+  } catch {}
+};
 
 export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
   if (!Array.isArray(usersList)) return [DEFAULT_ADMIN_PROFILE];
@@ -461,16 +473,26 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
       continue;
     }
 
-    // Check if this user shares an email or identifier with an already processed user (e.g. Google auth + 6-digit code)
+    // Check if this user shares an email or identifier with an already processed user
+    const tgId = u.telegramId;
     const existingIndex = result.findIndex((r) => {
+      if (tgId !== undefined && r.telegramId !== undefined) {
+        return Number(tgId) === Number(r.telegramId);
+      }
+      if (tgId !== undefined || r.telegramId !== undefined) {
+        if (email && r.email && email === r.email) return true;
+        if (u.telegramUsername && r.telegramUsername && u.telegramUsername.toLowerCase() === r.telegramUsername.toLowerCase()) return true;
+        return false;
+      }
       const rEmail = (r.email || (r.identifier?.includes('@') && !r.identifier.startsWith('@') ? r.identifier : '')).toLowerCase();
       if (email && rEmail && email === rEmail) return true;
-      if (lowerIdentifier && r.identifier?.toLowerCase() === lowerIdentifier) return true;
+      if (lowerIdentifier && lowerIdentifier.length > 2 && r.identifier?.toLowerCase() === lowerIdentifier) return true;
+      if (u.id && r.id && u.id === r.id) return true;
       return false;
     });
 
     if (existingIndex !== -1) {
-      // Merge into the existing synchronized profile!
+      // Merge into the existing synchronized profile
       const existing = result[existingIndex];
       const mergedProviders = Array.from(
         new Set([
@@ -485,6 +507,8 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
         id: existing.id,
         identifier: existing.identifier || u.identifier,
         email: existing.email || u.email || (email || undefined),
+        telegramUsername: existing.telegramUsername || u.telegramUsername,
+        telegramId: existing.telegramId !== undefined ? existing.telegramId : u.telegramId,
         name:
           existing.name && existing.name !== 'Ученик' && !existing.name.startsWith('Ученик (')
             ? existing.name
@@ -492,6 +516,8 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
         avatar: existing.avatar && !existing.avatar.includes('snow_leopard.svg') ? existing.avatar : u.avatar || existing.avatar,
         authProviders: mergedProviders,
         authProvider: existing.authProvider || u.authProvider,
+        registeredAt: existing.registeredAt || u.registeredAt || new Date().toISOString(),
+        lastLoginAt: u.lastLoginAt || existing.lastLoginAt || new Date().toISOString(),
         isPaid: existing.isPaid || u.isPaid,
         subscriptionPlan:
           existing.subscriptionPlan === 'premium' || u.subscriptionPlan === 'premium'
@@ -1217,6 +1243,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return getUsers();
   };
 
+  const adminFetchRemoteUsers = async (): Promise<UserProfile[]> => {
+    try {
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && (data.ok || data.success) && Array.isArray(data.users) && data.users.length > 0) {
+          const currentLocal = getUsers();
+          const merged = deduplicateUsers([...data.users, ...currentLocal]);
+          saveUsers(merged);
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthContext] adminFetchRemoteUsers error:', e);
+    }
+    return getUsers();
+  };
+
   const adminSetUserSubscription = (
     userId: string,
     plan: 'free' | 'standard' | 'premium',
@@ -1236,6 +1280,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(updatedSelf);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
       }
+
+      try {
+        fetch('/api/admin/users/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            data: { subscriptionPlan: plan, isPaid, subscriptionExpiry: expiry },
+          }),
+        }).catch(() => {});
+      } catch {}
     }
   };
 
@@ -1251,6 +1306,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(updatedSelf);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
       }
+
+      try {
+        fetch('/api/admin/users/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, data }),
+        }).catch(() => {});
+      } catch {}
     }
   };
 
@@ -1258,13 +1321,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const users = getUsers();
     const updated = users.filter((u) => u.id !== userId);
     saveUsers(updated);
+
+    try {
+      fetch('/api/admin/users/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      }).catch(() => {});
+    } catch {}
   };
 
   const adminResetTrial = (userId: string) => {
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === userId);
     if (idx !== -1) {
-      users[idx].registeredAt = new Date().toISOString();
+      const nowIso = new Date().toISOString();
+      users[idx].registeredAt = nowIso;
       users[idx].subscriptionPlan = 'free';
       users[idx].isPaid = false;
       saveUsers(users);
@@ -1272,13 +1344,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (user && user.id === userId) {
         const updatedSelf = {
           ...user,
-          registeredAt: new Date().toISOString(),
+          registeredAt: nowIso,
           subscriptionPlan: 'free',
           isPaid: false,
         };
         setUser(updatedSelf);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
       }
+
+      try {
+        fetch('/api/admin/users/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            data: { registeredAt: nowIso, subscriptionPlan: 'free', isPaid: false },
+          }),
+        }).catch(() => {});
+      } catch {}
     }
   };
 
@@ -1310,6 +1393,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updated = [...users, newUser];
     saveUsers(updated);
+
+    try {
+      fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', user: newUser }),
+      }).catch(() => {});
+    } catch {}
+
     return { success: true };
   };
 
@@ -1353,6 +1445,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserLogin,
         saveTestResult,
         adminGetAllUsers,
+        adminFetchRemoteUsers,
         adminSetUserSubscription,
         adminUpdateUser,
         adminDeleteUser,

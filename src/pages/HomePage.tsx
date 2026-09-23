@@ -112,6 +112,7 @@ const HOME_TRANSLATIONS = {
     selectFormat: 'Выбрать формат',
     hideSections: 'Скрыть разделы',
     chooseFormatTitle: 'Выбери формат тренировки:',
+    closeButtonText: 'Назад / Закрыть разделы',
     fullTestButton: 'ПОЛНЫЙ ТЕСТ ОРТ',
     mathBoth: 'Математика (Обе части)',
     downloadPdf: 'Скачать PDF версию этого теста',
@@ -142,6 +143,7 @@ const HOME_TRANSLATIONS = {
     selectFormat: 'Форматты тандоо',
     hideSections: 'Бөлүмдөрдү жашыруу',
     chooseFormatTitle: 'Машыгуу форматын танда:',
+    closeButtonText: 'Артка / Бөлүмдөрдү жабуу',
     fullTestButton: 'ТОЛУК ЖРТ ТЕСТИ',
     mathBoth: 'Математика (Эки бөлүгү тең)',
     downloadPdf: 'Бул тесттин PDF версиясын көчүрүп алуу',
@@ -183,19 +185,37 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
         setExpandedCardId(null);
       }
     };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (expandedCardId === null) return;
+      const target = e.target as HTMLElement | null;
+      // If clicking inside the currently expanded card or inside interactive elements of it, ignore
+      if (target && target.closest(`[data-variant-card-id="${expandedCardId}"]`)) {
+        return;
+      }
+      setExpandedCardId(null);
+    };
+    const handlePopState = () => {
+      setExpandedCardId(null);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    document.addEventListener('click', handleClickOutside, true);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleClickOutside, true);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [expandedCardId]);
 
   useEffect(() => {
     setLanguageFilter(lang === 'kg' ? 'kg' : 'ru');
     setShowAll(false);
-    setExpandedCardId(null);
   }, [lang]);
 
   useEffect(() => {
     setShowAll(false);
-    setExpandedCardId(null);
   }, [languageFilter]);
 
   useEffect(() => {
@@ -308,17 +328,14 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
       </section>
 
       {/* Main content: filters and variant cards */}
-      <section id="tests-section" className="max-w-5xl mx-auto px-3 sm:px-4 pt-10 sm:pt-16 pb-8 sm:pb-14 relative z-20">
+      <section id="tests-section" className="max-w-5xl mx-auto px-3 sm:px-4 pt-10 sm:pt-16 pb-8 sm:pb-14">
         {/* Filter controls: compact and right-aligned on desktop, responsive on mobile */}
         <div className="flex justify-center sm:justify-end mb-6 sm:mb-8">
           <div className="bg-[#06261d] p-1.5 sm:p-2 rounded-2xl shadow-xl shadow-black/40 border border-emerald-800/50 w-full sm:w-auto inline-flex items-center justify-center sm:justify-end transition-all">
             {/* Language tabs */}
             <div className="grid grid-cols-2 gap-1 p-1 bg-[#031510] rounded-xl w-full sm:w-72 border border-emerald-900/50">
               <button
-                onClick={() => {
-                  setLanguageFilter('ru');
-                  setExpandedCardId(null);
-                }}
+                onClick={() => setLanguageFilter('ru')}
                 className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 text-center truncate ${
                   languageFilter === 'ru'
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -329,10 +346,7 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                 <span className="truncate">{t.langRu}</span>
               </button>
               <button
-                onClick={() => {
-                  setLanguageFilter('kg');
-                  setExpandedCardId(null);
-                }}
+                onClick={() => setLanguageFilter('kg')}
                 className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 text-center truncate ${
                   languageFilter === 'kg'
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
@@ -345,15 +359,6 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             </div>
           </div>
         </div>
-
-        {/* Global Backdrop overlay when a test card format window is expanded */}
-        {expandedCardId !== null && (
-          <div
-            className="fixed inset-0 z-20 bg-black/45 backdrop-blur-[2px] transition-opacity cursor-pointer animate-in fade-in duration-200"
-            onClick={() => setExpandedCardId(null)}
-            aria-label="Закрыть окно выбора теста"
-          />
-        )}
 
         {/* Variants Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
@@ -370,19 +375,14 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             return (
               <div
                 key={variant.id}
+                data-variant-card-id={variant.id}
                 style={{ borderColor: '#334290' }}
-                onClick={(e) => {
-                  if (isBlurred) {
-                    e.stopPropagation();
-                    setExpandedCardId(null);
-                  }
-                }}
                 className={`group relative bg-white dark:bg-[#07241c] rounded-3xl border-2 transition-all duration-300 overflow-hidden flex flex-col ${
                   isExpanded
-                    ? 'shadow-2xl shadow-[#334290]/30 ring-2 ring-[#334290]/90 scale-[1.02] z-30'
+                    ? 'shadow-2xl shadow-[#334290]/30 ring-2 ring-[#334290]/90 scale-[1.02]'
                     : isBlurred
-                    ? 'opacity-40 blur-[3px] grayscale-[25%] scale-[0.98] cursor-pointer hover:opacity-60 z-10'
-                    : 'shadow-lg shadow-[#334290]/10 dark:shadow-black/30 hover:shadow-2xl hover:shadow-[#334290]/20 hover:-translate-y-1 z-10'
+                    ? 'opacity-40 blur-[3px] grayscale-[25%] scale-[0.98]'
+                    : 'shadow-lg shadow-[#334290]/10 dark:shadow-black/30 hover:shadow-2xl hover:shadow-[#334290]/20 hover:-translate-y-1'
                 }`}
               >
                 {/* Subtle Top Glow Line */}
@@ -394,14 +394,7 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
 
                 {/* Card Main Body */}
                 <div
-                  onClick={(e) => {
-                    if (isBlurred) {
-                      e.stopPropagation();
-                      setExpandedCardId(null);
-                    } else {
-                      toggleCard(variant.id);
-                    }
-                  }}
+                  onClick={() => toggleCard(variant.id)}
                   className="p-6 cursor-pointer select-none flex flex-col flex-1"
                 >
                   {/* Title with CEETO Logo inside White Circle */}
@@ -596,6 +589,19 @@ export const HomePage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
                         </div>
                       )}
                     </div>
+
+                    {/* Back / Close Action Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedCardId(null);
+                      }}
+                      className="w-full mt-2 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-slate-200 dark:border-emerald-800/60 text-slate-700 dark:text-emerald-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <span>✕</span>
+                      <span>{t.closeButtonText}</span>
+                    </button>
                   </div>
                 )}
               </div>

@@ -200,10 +200,10 @@ export const AiPlatformShowcaseSection: React.FC<AiPlatformShowcaseSectionProps>
 
             {/* Pixel Dinosaur Mascot with retro animated bouncing badge with text "ОРТ" */}
             <div className="relative group cursor-pointer hover:scale-105 transition-transform shrink-0">
-              <div className="p-1.5 sm:p-2 md:p-2.5 rounded-xl bg-[#06291e] border-2 border-emerald-400/60 shadow-lg shadow-emerald-500/20 flex items-center justify-center text-emerald-300 group-hover:text-emerald-200">
-                <PixelDinosaurSvg className="w-5 h-6 sm:w-6.5 sm:h-7.5 md:w-8 md:h-9" />
+              <div className="p-1 sm:p-1.5 md:p-2 rounded-lg bg-[#06291e] border-2 border-emerald-400/60 shadow-md shadow-emerald-500/20 flex items-center justify-center text-emerald-300 group-hover:text-emerald-200">
+                <PixelDinosaurSvg className="w-4 h-5 sm:w-5 sm:h-6 md:w-6.5 md:h-7.5" />
               </div>
-              <div className="absolute -top-2.5 -right-2.5 px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[8px] uppercase tracking-wider shadow-md animate-bounce">
+              <div className="absolute -top-2 -right-2 px-1 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[7px] uppercase tracking-wider shadow-md animate-bounce">
                 ОРТ
               </div>
             </div>
