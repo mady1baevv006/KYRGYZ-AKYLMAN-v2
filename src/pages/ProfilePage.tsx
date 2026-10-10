@@ -42,7 +42,6 @@ import { KYRGYZ_UNIVERSITIES } from '../data/constants';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
-import { CoursesSection } from '../components/courses/CoursesSection';
 import { ExercisesSection } from '../components/ExercisesSection';
 import { AuthModal } from '../components/AuthModal';
 import { SetLoginModal } from '../components/SetLoginModal';
@@ -64,7 +63,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'courses' | 'exercises'>('history');
+  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'exercises'>('history');
   const [showAuthMethodText, setShowAuthMethodText] = useState(false);
 
   const getAuthMethodText = (provider?: string) => {
@@ -1097,7 +1096,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
         </div>
       </div>
 
-      {/* Section Level Navigation Tabs: История тестов, Теория & Курсы */}
+      {/* Section Level Navigation Tabs: История тестов, Теория & Упражнения */}
       <div className="flex flex-wrap items-center justify-start gap-2.5 pt-1">
         <button
           type="button"
@@ -1138,19 +1137,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
 
         <button
           type="button"
-          onClick={() => setActiveProfileTab('courses')}
-          className={`px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
-            activeProfileTab === 'courses'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 scale-[1.02]'
-              : 'bg-[#06261d] text-emerald-200/80 hover:text-white border border-emerald-800/70 hover:border-emerald-600'
-          }`}
-        >
-          <School className="w-4 h-4" />
-          <span>{lang === 'kg' ? 'Курстар' : 'Курсы'}</span>
-        </button>
-
-        <button
-          type="button"
           onClick={() => setActiveProfileTab('exercises')}
           className={`px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
             activeProfileTab === 'exercises'
@@ -1165,34 +1151,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
 
       {activeProfileTab === 'exercises' ? (
         <ExercisesSection lang={lang} />
-      ) : activeProfileTab === 'courses' ? (
-        isAdmin ? (
-          <CoursesSection lang={lang} />
-        ) : (
-          <div className="bg-[#05261c] border border-emerald-800/60 rounded-3xl p-8 sm:p-12 text-center shadow-2xl max-w-lg mx-auto my-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5 text-emerald-300 shadow-inner">
-              <Lock className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-400" />
-            </div>
-            <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase tracking-wider border border-emerald-500/30 mb-3">
-              {lang === 'kg' ? 'Жаңыртууда' : 'Обновление'}
-            </span>
-            <h2 className="text-xl sm:text-2xl font-black text-white mb-2 tracking-tight">
-              {lang === 'kg' ? 'Временно недоступен' : 'Временно недоступен'}
-            </h2>
-            <p className="text-xs sm:text-sm text-emerald-200/70 font-medium leading-relaxed mb-6">
-              {lang === 'kg'
-                ? 'Курстар бөлүмү администратор тарабынан жаңыланууда. Жакында ачылат.'
-                : 'Раздел курсов временно закрыт на обновление учебных материалов и программ администратором.'}
-            </p>
-            <button
-              onClick={() => setActiveProfileTab('history')}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-[#031510] shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>{lang === 'kg' ? 'Вернуться назад' : 'Вернуться назад'}</span>
-            </button>
-          </div>
-        )
       ) : activeProfileTab === 'theories' ? (
         <TheoriesSection
           user={user}

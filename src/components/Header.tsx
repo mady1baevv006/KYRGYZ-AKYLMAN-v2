@@ -7,7 +7,6 @@ import {
   ArrowRight,
   Check,
   Crown,
-  School,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';

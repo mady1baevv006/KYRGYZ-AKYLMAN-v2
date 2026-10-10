@@ -697,8 +697,8 @@ export const THEORIES_DATA: Record<'algebra' | 'geometry' | 'russian' | 'english
             videos: [
               {
                 id: 'rus-video-3',
-                titleRu: 'Экспресс-курс: Практическая грамматика без ошибок',
-                titleKg: 'Экспресс-курс: Практикалык грамматиканы катасыз өздөштүрүү',
+                titleRu: 'Практическая грамматика без ошибок',
+                titleKg: 'Практикалык грамматиканы катасыз өздөштүрүү',
                 duration: '15:30',
                 videoUrl: 'https://youtu.be/How87IgS9Pw?si=hXOCGsqDSIcqMmXq',
                 thumbnailUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=800&q=80',
