@@ -457,7 +457,7 @@ export function deleteUser(userId: string): boolean {
 
   const prevLen = memoryUsers.length;
   memoryUsers = memoryUsers.filter(
-    (u) => u.id !== userId && u.identifier?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()
+       (u) => u.id !== userId
   );
 
   if (memoryUsers.length !== prevLen) {
