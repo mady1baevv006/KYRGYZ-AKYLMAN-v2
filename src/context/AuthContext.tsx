@@ -1318,19 +1318,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const adminDeleteUser = (userId: string) => {
-    const users = getUsers();
-    const updated = users.filter((u) => u.id !== userId);
-    saveUsers(updated);
+     const adminDeleteUser = async (userId: string) => {
+     const users = getUsers();
+     const target = users.find((u) => u.id === userId);
+     const updated = users.filter((u) => u.id !== userId);
+     saveUsers(updated);
 
-    try {
-      fetch('/api/admin/users/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      }).catch(() => {});
-    } catch {}
-  };
+     try {
+       await fetch('/api/admin/users', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           action: 'delete',
+           userId,
+           email: target?.email || target?.identifier || '',
+         }),
+       });
+     } catch {}
+   };
 
   const adminResetTrial = (userId: string) => {
     const users = getUsers();
