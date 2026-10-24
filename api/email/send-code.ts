@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
-import { setMemoryEmailCode } from './codeStore';
+import { setMemoryEmailCode } from './codeStore.js';
 
 function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -40,10 +40,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // 3. Try sending email via Resend if RESEND_API_KEY is configured
   let sentViaEmail = false;
-  if (process.env.RESEND_API_KEY) {
+  let emailErrorMessage = '';
+  if (!process.env.RESEND_API_KEY) {
+    emailErrorMessage = 'не настроена отправка писем (нет RESEND_API_KEY)';
+  } else {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
+      const sendResult = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'KYRGYZ AKYLMAN <onboarding@resend.dev>',
         to: normalizedEmail,
         subject: `Код входа: ${code}`,
@@ -59,18 +62,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           </div>
         </div>`,
       });
-      sentViaEmail = true;
-    } catch (resendErr) {
-      console.warn('[Email Auth] Resend delivery failed, code stored in-memory:', resendErr);
+      if (sendResult.error) {
+        emailErrorMessage = sendResult.error.message || 'ошибка сервиса почты';
+        console.error('[Email Auth] Resend error:', sendResult.error);
+      } else {
+        sentViaEmail = true;
+      }
+    } catch (resendErr: any) {
+      emailErrorMessage = resendErr?.message || 'ошибка сервиса почты';
+      console.error('[Email Auth] Resend delivery failed:', resendErr);
     }
   }
 
-  console.log(`[Email Auth Code] Generated 6-digit code for ${normalizedEmail}: [${code}] (sentViaEmail: ${sentViaEmail})`);
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+
+  // На боевом сайте код НИКОГДА не отдаём в браузер: иначе любой сможет войти под чужой почтой.
+  if (!sentViaEmail && isProduction) {
+    return res.status(502).json({
+      error: `Не удалось отправить письмо с кодом: ${emailErrorMessage}`,
+    });
+  }
+
+  console.log(`[Email Auth Code] Code generated for ${normalizedEmail} (sentViaEmail: ${sentViaEmail})`);
 
   return res.status(200).json({
     success: true,
     sentViaEmail,
-    devCode: process.env.NODE_ENV !== 'production' || !sentViaEmail ? code : undefined,
+    devCode: !isProduction && !sentViaEmail ? code : undefined,
     message: 'Код отправлен на почту',
   });
 }
