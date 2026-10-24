@@ -3,6 +3,8 @@ import { getAllUsers, updateUser, deleteUser, upsertUser } from '../usersStore.j
 import type { UserProfile } from '../usersStore.js';
 import { getAdminAuth } from '../firebaseAdmin.js';
 
+const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
+
 /**
  * Читает ВСЕХ пользователей из Firebase Authentication (то, что видно в Firebase Console).
  * Благодаря этому в админ-панели появляются все, кто хоть раз вошёл через Google.
@@ -71,7 +73,6 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
     }
   }
 
-  const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
   const isAdmin = (u: UserProfile) =>
     u.id === 'admin_mady1baevv' || (u.email || '').toLowerCase() === ADMIN_EMAIL;
 
@@ -131,12 +132,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       if (action === 'delete') {
-        const { userId } = req.body || {};
-        if (!userId) {
+        const { userId, email } = req.body || {};
+        const targetEmail = String(email || '').trim().toLowerCase();
+        if (!userId && !targetEmail) {
           return res.status(400).json({ ok: false, error: 'Отсутствует userId' });
         }
-        const deleted = deleteUser(userId);
-        return res.status(200).json({ ok: true, deleted });
+        if (userId === 'admin_mady1baevv' || targetEmail === ADMIN_EMAIL) {
+          return res.status(403).json({ ok: false, error: 'Нельзя удалить главного администратора' });
+        }
+
+        // 1) Удаляем из Firebase Authentication (иначе пользователь появится снова)
+        let authDeleted = false;
+        let authError: string | undefined;
+        try {
+          const auth = getAdminAuth();
+          let uid: string | undefined;
+          if (userId) {
+            try { await auth.getUser(userId); uid = userId; } catch { /* не найден по id */ }
+          }
+          if (!uid && targetEmail.includes('@')) {
+            try { uid = (await auth.getUserByEmail(targetEmail)).uid; } catch { /* не найден по email */ }
+          }
+          if (uid) {
+            await auth.deleteUser(uid);
+            authDeleted = true;
+          }
+        } catch (e: any) {
+          authError = e?.message || 'Не удалось удалить из Firebase Authentication';
+          console.error('[API /api/admin/users] Auth delete error:', e);
+        }
+
+        // 2) Удаляем из нашего хранилища (по id и по email)
+        let deleted = userId ? deleteUser(userId) : false;
+        if (targetEmail) {
+          for (const u of getAllUsers()) {
+            const same =
+              (u.email || '').toLowerCase() === targetEmail ||
+              (u.identifier || '').toLowerCase() === targetEmail;
+            if (same && u.id !== 'admin_mady1baevv') {
+              deleted = deleteUser(u.id) || deleted;
+            }
+          }
+        }
+
+        return res.status(200).json({ ok: !authError, deleted, authDeleted, authError });
       }
 
       if (action === 'create') {
