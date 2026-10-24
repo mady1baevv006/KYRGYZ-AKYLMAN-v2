@@ -4,16 +4,13 @@ import {
   ArrowRight,
   User,
   Mail,
-  Phone,
   Sparkles,
   CheckCircle2,
   AlertCircle,
-  Smartphone,
-  AlertTriangle,
+  AtSign,
 } from 'lucide-react';
 import { AppLanguage } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { detectKyrgyzOperator } from '../utils/kyrgyzOperators';
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock';
 
 interface AuthModalProps {
@@ -22,7 +19,6 @@ interface AuthModalProps {
   lang?: AppLanguage;
 }
 
-type AuthMethod = 'email' | 'phone';
 type EmailStep = 'email' | 'code';
 
 const DEFAULT_BOT_ID = (import.meta as any).env?.VITE_TELEGRAM_BOT_ID || '8778115011';
@@ -74,14 +70,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   useBodyScrollLock(isOpen);
 
-  const { user, loginWithGoogle, loginWithTelegram, loginWithCode } = useAuth();
-
-  const [method, setMethod] = useState<AuthMethod>('email');
+  const { user, loginWithGoogle, loginWithTelegram, loginWithCode, adminGetAllUsers } = useAuth();
 
   // Inputs
   const [emailInput, setEmailInput] = useState('');
-  const [phoneRaw, setPhoneRaw] = useState('');
   const [nameInput, setNameInput] = useState('');
+  const [loginInput, setLoginInput] = useState('');
   const [codeInput, setCodeInput] = useState('');
   const [emailStep, setEmailStep] = useState<EmailStep>('email');
 
@@ -92,7 +86,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
 
-  const detectedOperator = detectKyrgyzOperator(phoneRaw);
   const isKg = lang === 'kg';
 
   useEffect(() => {
@@ -105,6 +98,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setEmailLoading(false);
       setEmailStep('email');
       setCodeInput('');
+      setLoginInput('');
     }
   }, [isOpen]);
 
@@ -118,9 +112,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setPhoneRaw(val);
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const cleaned = raw.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
+    setLoginInput(cleaned);
     setErrorMessage('');
   };
 
@@ -213,6 +208,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
+    if (loginInput.trim()) {
+      const trimmedLogin = loginInput.trim();
+      if (trimmedLogin.length < 3) {
+        setErrorMessage(isKg ? 'Логин кеминде 3 белгиден турушу керек' : 'Логин должен содержать от 3 до 15 знаков');
+        return;
+      }
+      if (!/^[a-zA-Z0-9]+$/.test(trimmedLogin)) {
+        setErrorMessage(isKg ? 'Логинге латын тамгалары жана сандар гана жарайт' : 'Разрешены только латинские буквы и цифры');
+        return;
+      }
+      const allUsers = adminGetAllUsers ? adminGetAllUsers() : [];
+      const isTaken = allUsers.some(
+        (u) =>
+          (u.email || u.identifier || '').toLowerCase() !== emailInput.trim().toLowerCase() &&
+          u.login &&
+          u.login.trim().toLowerCase() === trimmedLogin.toLowerCase()
+      );
+      if (isTaken) {
+        setErrorMessage(
+          isKg
+            ? 'Бул логин башка колдонуучу тарабынан ээленген. Башка логин тандаңыз'
+            : 'Этот логин уже занят другим учеником. Выберите другой.'
+        );
+        return;
+      }
+    }
+
     setEmailLoading(true);
     try {
       const res = await fetch('/api/email/send-code', {
@@ -257,7 +279,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const data = await res.json();
 
       if (res.ok && data.success) {
-        const result = loginWithCode(emailInput.trim(), nameInput.trim());
+        const result = loginWithCode(emailInput.trim(), nameInput.trim(), loginInput.trim());
         if (result.success) {
           setSuccessMessage(isKg ? '🎉 Ийгиликтүү кирдиңиз!' : '🎉 Успешный вход!');
           setTimeout(() => {
@@ -265,6 +287,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             setSuccessMessage('');
             setEmailStep('email');
             setCodeInput('');
+            setLoginInput('');
           }, 700);
         } else {
           setErrorMessage(result.error || 'Ошибка входа');
@@ -277,19 +300,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } finally {
       setEmailLoading(false);
     }
-  };
-
-  // ==========================================
-  // 4. SMS METHOD (TEMPORARILY DISABLED)
-  // ==========================================
-  const handlePhoneFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSuccessMessage('');
-    setErrorMessage(
-      isKg
-        ? 'Сайт даярдоо процессинде: SMS-код аркылуу кирүү убактылуу жеткиликсиз. Сураныч, Google же email аркылуу кириңиз.'
-        : 'Сайт в процессе подготовки: вход по SMS-коду временно недоступен. Пожалуйста, используйте Google или email.'
-    );
   };
 
   if (!isOpen) return null;
@@ -391,54 +401,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/40 border border-emerald-900/60 mb-4">
-          <button
-            type="button"
-            onClick={() => {
-              setMethod('email');
-              setErrorMessage('');
-            }}
-            className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              method === 'email'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Mail className="w-3.5 h-3.5 shrink-0" />
-            <span>{isKg ? 'Электрондук почта' : 'Электронная почта'}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMethod('phone');
-              setErrorMessage('');
-            }}
-            className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-              method === 'phone'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5 shrink-0" />
-            <span>SMS-код</span>
-          </button>
-        </div>
-
+        {/* Email Direct Authorization Form */}
         <div>
-          {method === 'email' && emailStep === 'email' && (
-            <form onSubmit={handleSendEmailCode} className="space-y-4">
+          {emailStep === 'email' && (
+            <form onSubmit={handleSendEmailCode} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                  {isKg ? 'Электрондук почтаңыз' : 'Электронная почта'}
+                  {isKg ? 'Электрондук почтаңыз' : 'Электронная почта'} <span className="text-emerald-400">*</span>
                 </label>
                 <div className="relative">
                   <input
                     type="email"
+                    required
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     placeholder="student@gmail.com"
-                    className="w-full pl-11 pr-4 py-3 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
+                    className="w-full pl-11 pr-4 py-2.5 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
                   />
                   <Mail className="w-4 h-4 text-emerald-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
@@ -446,7 +424,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1.5">
-                  {isKg ? 'Сиздин атыңыз (колдонуучу аты)' : 'Ваше имя пользователя'}
+                  {isKg ? 'Сиздин атыңыз' : 'Ваше имя пользователя'}
                 </label>
                 <div className="relative">
                   <input
@@ -460,10 +438,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
+              {/* Mandatory Unique Login Field */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-200">
+                    {isKg ? 'Сиздин уникалдуу логиниңиз' : 'Ваш уникальный логин'} <span className="text-emerald-400">*</span>
+                  </label>
+                  <span className="text-[10px] text-amber-300 font-bold flex items-center gap-1">
+                    🔒 {isKg ? 'Бир гана жолу' : 'Только при регистрации'}
+                  </span>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 font-bold text-sm">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    value={loginInput}
+                    onChange={handleLoginChange}
+                    placeholder="aktan2026"
+                    maxLength={15}
+                    className="w-full pl-8 pr-16 py-2.5 bg-[#031510] border border-emerald-800/80 rounded-2xl text-sm font-bold font-mono text-white focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">
+                    {loginInput.length}/15
+                  </span>
+                </div>
+                <span className="text-[10px] text-emerald-300/70 mt-1 block">
+                  {isKg
+                    ? 'Латын тамгалары жана сандар (3-15 белги). Кайталанбайт жана өзгөртүлбөйт.'
+                    : 'Только латинские буквы и цифры (3-15 символов). Без повторов, нельзя изменить.'}
+                </span>
+              </div>
+
               <button
                 type="submit"
                 disabled={emailLoading}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {emailLoading ? (
                   <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -478,12 +489,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {method === 'email' && emailStep === 'code' && (
+          {emailStep === 'code' && (
             <form onSubmit={handleVerifyEmailCode} className="space-y-4">
               <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-600/50 text-emerald-200 text-xs">
                 {isKg
                   ? `Код "${emailInput}" почтасына жиберилди`
                   : `Код отправлен на ${emailInput}`}
+                {loginInput.trim() && (
+                  <div className="font-mono text-emerald-300 font-bold mt-1">
+                    Логин: @{loginInput.trim()}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -504,7 +520,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="submit"
                 disabled={emailLoading}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
               >
                 {emailLoading ? (
                   <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
@@ -528,56 +544,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="w-full text-center text-xs text-emerald-300/70 hover:text-emerald-200 underline cursor-pointer"
               >
                 {isKg ? 'Почтаны өзгөртүү' : 'Изменить почту / отправить код заново'}
-              </button>
-            </form>
-          )}
-
-          {method === 'phone' && (
-            <form onSubmit={handlePhoneFormSubmit} className="space-y-4">
-              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/50 text-amber-200 text-xs space-y-2">
-                <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-                  <span>
-                    {isKg ? 'SMS-код аркылуу кирүү убактылуу жеткиликсиз' : 'Вход через SMS-код временно недоступен'}
-                  </span>
-                </div>
-                <p className="text-amber-200/90 leading-relaxed">
-                  {isKg
-                    ? 'Сайт даярдоо процессинде. SMS-код аркылуу кирүү убактылуу өчүрүлгөн. Сураныч, Google же email аркылуу кириңиз.'
-                    : 'Сайт находится на стадии подготовки. Вход по SMS-коду временно отключен. Пожалуйста, используйте вход через Google или email.'}
-                </p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-slate-400">
-                    {isKg ? 'Телефон номериңиз' : 'Номер телефона'}
-                  </label>
-                  {detectedOperator && (
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${detectedOperator.colorBadge} opacity-70`}>
-                      {detectedOperator.name}
-                    </span>
-                  )}
-                </div>
-                <div className="relative">
-                  <input
-                    type="tel"
-                    value={phoneRaw}
-                    onChange={handlePhoneChange}
-                    placeholder="+996 (700) 12-34-56"
-                    className="w-full pl-11 pr-4 py-3 bg-[#031510] border border-emerald-800/60 rounded-2xl text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition-all"
-                  />
-                  <Phone className="w-4 h-4 text-emerald-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500/80 via-teal-400/80 to-emerald-500/80 hover:from-emerald-400 hover:to-emerald-400 text-slate-950 font-black text-sm hover:scale-[1.01] active:scale-95 transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-slate-950" />
-                <span>{isKg ? 'SMS-код алуу' : 'Получить SMS-код'}</span>
-                <ArrowRight className="w-4 h-4 text-slate-950" />
               </button>
             </form>
           )}

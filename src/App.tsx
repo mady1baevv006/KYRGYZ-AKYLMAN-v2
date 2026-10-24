@@ -14,6 +14,7 @@ import { TwinklingStars } from './components/TwinklingStars';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { TrialWelcomeModal } from './components/TrialWelcomeModal';
+import { SetLoginModal } from './components/SetLoginModal';
 import { CreativeLoader } from './components/CreativeLoader';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 
@@ -150,6 +151,15 @@ const AppContent: React.FC<{
         onClose={closeTrialWelcomeModal}
         lang={lang}
       />
+      {/* Mandatory unique login picker for all users who don't have one yet */}
+      {user && !user.login && user.identifier?.toLowerCase() !== 'mady1baevv@kyrgyzakylman.com' && (
+        <SetLoginModal
+          isOpen={true}
+          onClose={() => {}}
+          isMandatory={true}
+          lang={lang}
+        />
+      )}
     </div>
   );
 };

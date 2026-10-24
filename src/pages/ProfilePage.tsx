@@ -34,7 +34,6 @@ import {
   AtSign,
   Lock,
   ArrowLeft,
-  Calculator,
 } from 'lucide-react';
 import { useAuth, UserTestRecord } from '../context/AuthContext';
 import { AppLanguage, SubscriptionPlan } from '../types';
@@ -42,7 +41,6 @@ import { KYRGYZ_UNIVERSITIES } from '../data/constants';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { SubscriptionModal } from '../components/SubscriptionModal';
 import { TheoriesSection } from '../components/TheoriesSection';
-import { ExercisesSection } from '../components/ExercisesSection';
 import { AuthModal } from '../components/AuthModal';
 import { SetLoginModal } from '../components/SetLoginModal';
 import { processAndCompressImage } from '../utils/imageUpload';
@@ -63,7 +61,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<SubscriptionPlan | null>(null);
   const [showAllHistory, setShowAllHistory] = useState(false);
-  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories' | 'exercises'>('history');
+  const [activeProfileTab, setActiveProfileTab] = useState<'history' | 'theories'>('history');
   const [showAuthMethodText, setShowAuthMethodText] = useState(false);
 
   const getAuthMethodText = (provider?: string) => {
@@ -733,45 +731,6 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                 </div>
               </div>
 
-              {/* Immutable Login Field */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-slate-200">
-                    {lang === 'kg' ? 'Логин (өзгөртүү мүмкүн эмес)' : 'Логин (нельзя изменить)'}
-                  </label>
-                  <span className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
-                    🔒 {lang === 'kg' ? 'Бир гана жолу' : 'Только при регистрации'}
-                  </span>
-                </div>
-                <div className={`flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-mono ${
-                  isPremium
-                    ? 'bg-[#0f0b03] border border-amber-500/40 text-amber-200'
-                    : 'bg-[#031510] border border-emerald-800/60 text-emerald-300'
-                }`}>
-                  <span>{user?.login ? `@${user.login}` : (lang === 'kg' ? 'Логин тандала элек' : 'Логин ещё не выбран')}</span>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                    <span className="text-[10px] uppercase font-sans">{lang === 'kg' ? 'Кирүү:' : 'Вход:'}</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowAuthMethodText((prev) => !prev)}
-                      className={`inline-flex items-center justify-center p-1 rounded-md shadow-xs shrink-0 cursor-pointer transition-all hover:scale-105 active:scale-95 ${
-                        isPremium
-                          ? 'bg-[#1e1605] border border-amber-500/50 text-amber-300'
-                          : 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-400'
-                      }`}
-                      title={getAuthMethodText(user?.authProvider)}
-                    >
-                      {renderAuthProviderIcon(user?.authProvider, isPremium)}
-                    </button>
-                    {showAuthMethodText && (
-                      <span className="text-[10px] font-medium text-slate-300 opacity-50 select-none animate-in fade-in duration-200">
-                        {getAuthMethodText(user?.authProvider)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
               {/* Name Field */}
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1.5">{t.nameLabel}</label>
@@ -1134,24 +1093,9 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
           <GraduationCap className="w-4 h-4" />
           <span>{lang === 'kg' ? 'Теория' : 'Теория'}</span>
         </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveProfileTab('exercises')}
-          className={`px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer ${
-            activeProfileTab === 'exercises'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-lg shadow-emerald-500/25 scale-[1.02]'
-              : 'bg-[#06261d] text-emerald-200/80 hover:text-white border border-emerald-800/70 hover:border-emerald-600'
-          }`}
-        >
-          <Calculator className="w-4 h-4" />
-          <span>{lang === 'kg' ? 'Көнүгүүлөр' : 'Упражнения'}</span>
-        </button>
       </div>
 
-      {activeProfileTab === 'exercises' ? (
-        <ExercisesSection lang={lang} />
-      ) : activeProfileTab === 'theories' ? (
+      {activeProfileTab === 'theories' ? (
         <TheoriesSection
           user={user}
           lang={lang}

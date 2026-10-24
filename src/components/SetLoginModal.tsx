@@ -8,6 +8,7 @@ interface SetLoginModalProps {
   onClose: () => void;
   lang?: AppLanguage;
   onSuccess?: (login: string) => void;
+  isMandatory?: boolean;
 }
 
 export const SetLoginModal: React.FC<SetLoginModalProps> = ({
@@ -15,6 +16,7 @@ export const SetLoginModal: React.FC<SetLoginModalProps> = ({
   onClose,
   lang = 'ru',
   onSuccess,
+  isMandatory = false,
 }) => {
   const { user, setUserLogin } = useAuth();
   const [loginInput, setLoginInput] = useState('');
@@ -81,17 +83,29 @@ export const SetLoginModal: React.FC<SetLoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/70 rounded-3xl p-6 sm:p-7 shadow-2xl text-white text-left space-y-5">
-        
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (!isMandatory && e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className="relative w-full max-w-md bg-gradient-to-b from-[#06291e] via-[#041d16] to-[#02130e] border border-emerald-700/70 rounded-3xl p-6 sm:p-7 shadow-2xl text-white text-left space-y-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button (Hidden if mandatory) */}
+        {!isMandatory && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Закрыть"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
 
         {isSuccess ? (
           <div className="py-8 text-center space-y-3 animate-in zoom-in-95 duration-200">
@@ -110,16 +124,29 @@ export const SetLoginModal: React.FC<SetLoginModalProps> = ({
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-black uppercase tracking-wider">
                 <AtSign className="w-3.5 h-3.5" />
-                <span>{isKg ? 'Логин тандоо' : 'Выбор логина'}</span>
+                <span>{isKg ? 'Милдеттүү логин' : 'Обязательный логин'}</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-black text-white pt-1">
-                {isKg ? 'Сайттагы логиниңизди тандаңыз' : 'Укажите ваш логин на сайте'}
+                {isKg ? 'Сайттагы логиниңизди тандаңыз' : 'Укажите ваш уникальный логин'}
               </h3>
-              <p className="text-xs text-amber-300/90 font-medium leading-relaxed pt-1">
-                {isKg
-                  ? '⚠️ Логин катталууда бир гана жолу тандалат. Кийин аны өзгөртүү мүмкүн эмес.'
-                  : '⚠️ Логин выбирается только один раз. Изменить его после сохранения будет невозможно.'}
-              </p>
+              
+              {/* Deletion Warning Banner */}
+              <div className="mt-2.5 p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-xs leading-relaxed space-y-1">
+                <div className="font-black text-amber-300 flex items-center gap-1.5 text-xs">
+                  <span>⚠️</span>
+                  <span>{isKg ? 'Маанилүү эскертүү!' : 'Важное предупреждение!'}</span>
+                </div>
+                <p>
+                  {isKg
+                    ? 'Бардык колдонуучулар үчүн өздүк логин тандоо милдеттүү. 1 жума ичинде логин тандалбаган аккаунттар автоматтык түрдө өчүрүлөт!'
+                    : 'Наличие уникального логина обязательно для всех пользователей. Аккаунты без установленного логина удаляются через неделю!'}
+                </p>
+                <p className="text-[11px] text-amber-300/80 pt-0.5">
+                  {isKg
+                    ? 'Логин бир гана жолу тандалат жана кийин өзгөртүлбөйт.'
+                    : 'Логин задается один раз и не подлежит изменению.'}
+                </p>
+              </div>
             </div>
 
             {/* Rules list */}
@@ -134,7 +161,7 @@ export const SetLoginModal: React.FC<SetLoginModalProps> = ({
               </div>
               <div className="flex items-center gap-2 font-semibold">
                 <span className="text-emerald-400 text-sm">✦</span>
-                <span>{isKg ? 'Боштук, чекит, үтүр жана белгилерге тыюу салынат' : 'Без точек, пробелов, кавычек, скобок и спецсимволов'}</span>
+                <span>{isKg ? 'Бир колдонуучуга бир гана кайталанбас логин' : 'Один уникальный логин на пользователя (без повторов)'}</span>
               </div>
             </div>
 
@@ -171,19 +198,21 @@ export const SetLoginModal: React.FC<SetLoginModalProps> = ({
               )}
 
               <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer text-center"
-                >
-                  {isKg ? 'Кийинчерээк' : 'Позже'}
-                </button>
+                {!isMandatory && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer text-center"
+                  >
+                    {isKg ? 'Кийинчерээк' : 'Позже'}
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={loginInput.trim().length < 3}
-                  className="flex-1 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 cursor-pointer text-center"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-500/30 cursor-pointer text-center"
                 >
-                  {isKg ? 'Сактоо' : 'Сохранить логин'}
+                  {isKg ? 'Сактоо жана улантуу' : 'Сохранить логин и продолжить'}
                 </button>
               </div>
             </form>
