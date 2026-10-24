@@ -3,7 +3,7 @@ import {
   getMemoryEmailCode,
   incrementMemoryAttempts,
   deleteMemoryEmailCode,
-} from './codeStore';
+} from './codeStore.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
