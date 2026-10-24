@@ -1201,9 +1201,9 @@ export const UsersManager: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  adminDeleteUser(userToDelete.id);
-                  refreshList();
+                   onClick={async () => {
+     await adminDeleteUser(userToDelete.id);
+     refreshList();
                   showToast(`Пользователь ${userToDelete.name} (${userToDelete.identifier}) успешно удален`);
                   setUserToDelete(null);
                 }}
