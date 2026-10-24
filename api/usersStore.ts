@@ -50,7 +50,9 @@ export const DEFAULT_ADMIN_PROFILE: UserProfile = {
   hasSeenWelcomeGift: true,
 };
 
-const SEED_USERS: UserProfile[] = [
+   const SEED_USERS: UserProfile[] = [DEFAULT_ADMIN_PROFILE];
+
+   const OLD_DEMO_USERS: UserProfile[] = [
   DEFAULT_ADMIN_PROFILE,
   {
     id: 'user_seed_google',
