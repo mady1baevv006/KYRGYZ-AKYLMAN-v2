@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAllUsers, updateUser, deleteUser, upsertUser } from '../usersStore.js';
+import { getAllUsers, updateUser, deleteUser, upsertUser, deleteUsersWithoutLogin, formatUserLogin } from '../usersStore.js';
 import type { UserProfile } from '../usersStore.js';
 import { getAdminAuth } from '../firebaseAdmin.js';
 
@@ -50,10 +50,16 @@ async function getFirebaseAuthUsers(): Promise<UserProfile[]> {
 
 /** Объединяет пользователей из Firebase Auth с тем, что уже лежит в нашем хранилище. */
 function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfile[] {
+  const isAdmin = (u: UserProfile) =>
+    u.id === 'admin_mady1baevv' || (u.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
   const byEmail = new Map<string, number>();
   const merged: UserProfile[] = stored.map((u, i) => {
     if (u.email) byEmail.set(u.email.toLowerCase(), i);
-    return { ...u };
+    return {
+      ...u,
+      login: isAdmin(u) ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+    };
   });
 
   for (const a of authUsers) {
@@ -62,6 +68,7 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
       const s = merged[idx];
       merged[idx] = {
         ...s,
+        login: isAdmin(s) ? '@mady1baevv' : (s.login || formatUserLogin(undefined, s.email || s.identifier)),
         // даты берём из Firebase — они самые точные
         registeredAt: a.registeredAt && new Date(a.registeredAt).getTime() > 0 ? a.registeredAt : s.registeredAt,
         lastLoginAt: a.lastLoginAt || s.lastLoginAt,
@@ -69,14 +76,22 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
         name: s.name && s.name !== 'Ученик' ? s.name : a.name,
       };
     } else {
-      merged.push(a);
+      // Пользователь из Firebase Auth — добавляем в список с его логином вида @логин
+      const userLogin = isAdmin(a) ? '@mady1baevv' : formatUserLogin(a.login, a.email || a.identifier);
+      merged.push({
+        ...a,
+        login: userLogin,
+      });
     }
   }
 
-  const isAdmin = (u: UserProfile) =>
-    u.id === 'admin_mady1baevv' || (u.email || '').toLowerCase() === ADMIN_EMAIL;
+  // Все пользователи обязательно имеют логин вида @username
+  const allFormatted = merged.map((u) => ({
+    ...u,
+    login: isAdmin(u) ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+  }));
 
-  return merged.sort((a, b) => {
+  return allFormatted.sort((a, b) => {
     if (isAdmin(a)) return -1;
     if (isAdmin(b)) return 1;
     return new Date(b.registeredAt || 0).getTime() - new Date(a.registeredAt || 0).getTime();
@@ -176,6 +191,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         return res.status(200).json({ ok: !authError, deleted, authDeleted, authError });
+      }
+
+      if (action === 'cleanup_no_login') {
+        const deletedFromStore = deleteUsersWithoutLogin();
+        let authDeletedCount = 0;
+        try {
+          const auth = getAdminAuth();
+          const page = await auth.listUsers(1000);
+          const validUsers = getAllUsers();
+          const validEmails = new Set(validUsers.map((u) => (u.email || '').toLowerCase()).filter(Boolean));
+          for (const u of page.users) {
+            const email = (u.email || '').toLowerCase();
+            if (email === ADMIN_EMAIL.toLowerCase()) continue;
+            // If user in Firebase Auth doesn't have an account with a login in validEmails, delete from Auth
+            if (!validEmails.has(email)) {
+              try {
+                await auth.deleteUser(u.uid);
+                authDeletedCount++;
+              } catch {}
+            }
+          }
+        } catch (e: any) {
+          console.warn('[API /api/admin/users] Auth cleanup error:', e);
+        }
+
+        return res.status(200).json({
+          ok: true,
+          deletedCount: deletedFromStore + authDeletedCount,
+          deletedFromStore,
+          authDeletedCount,
+        });
       }
 
       if (action === 'create') {

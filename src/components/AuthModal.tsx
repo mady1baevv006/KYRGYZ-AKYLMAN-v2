@@ -208,31 +208,45 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    if (loginInput.trim()) {
-      const trimmedLogin = loginInput.trim();
-      if (trimmedLogin.length < 3) {
-        setErrorMessage(isKg ? 'Логин кеминде 3 белгиден турушу керек' : 'Логин должен содержать от 3 до 15 знаков');
-        return;
-      }
-      if (!/^[a-zA-Z0-9]+$/.test(trimmedLogin)) {
-        setErrorMessage(isKg ? 'Логинге латын тамгалары жана сандар гана жарайт' : 'Разрешены только латинские буквы и цифры');
-        return;
-      }
-      const allUsers = adminGetAllUsers ? adminGetAllUsers() : [];
-      const isTaken = allUsers.some(
-        (u) =>
-          (u.email || u.identifier || '').toLowerCase() !== emailInput.trim().toLowerCase() &&
-          u.login &&
-          u.login.trim().toLowerCase() === trimmedLogin.toLowerCase()
+    const cleanLogin = loginInput.trim().replace(/^@+/, '').toLowerCase();
+    if (!cleanLogin) {
+      setErrorMessage(
+        isKg
+          ? 'Логинди жазыңыз (@логин) — бул авторизация үчүн милдеттүү'
+          : 'Укажите ваш логин (@логин) — это обязательная часть авторизации'
       );
-      if (isTaken) {
-        setErrorMessage(
-          isKg
-            ? 'Бул логин башка колдонуучу тарабынан ээленген. Башка логин тандаңыз'
-            : 'Этот логин уже занят другим учеником. Выберите другой.'
-        );
-        return;
-      }
+      return;
+    }
+    if (cleanLogin.length < 3 || cleanLogin.length > 15) {
+      setErrorMessage(
+        isKg
+          ? 'Логин 3төн 15ке чейинки белгиден турушу керек'
+          : 'Логин должен содержать от 3 до 15 знаков'
+      );
+      return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(cleanLogin)) {
+      setErrorMessage(
+        isKg
+          ? 'Логинге латын тамгалары жана сандар гана жарайт'
+          : 'Разрешены только латинские буквы и цифры'
+      );
+      return;
+    }
+    const allUsers = adminGetAllUsers ? adminGetAllUsers() : [];
+    const isTaken = allUsers.some(
+      (u) =>
+        (u.email || u.identifier || '').toLowerCase() !== emailInput.trim().toLowerCase() &&
+        u.login &&
+        u.login.trim().replace(/^@+/, '').toLowerCase() === cleanLogin
+    );
+    if (isTaken) {
+      setErrorMessage(
+        isKg
+          ? 'Бул логин башка колдонуучу тарабынан ээленген. Башка логин тандаңыз'
+          : 'Этот логин уже занят другим учеником. Выберите другой.'
+      );
+      return;
     }
 
     setEmailLoading(true);

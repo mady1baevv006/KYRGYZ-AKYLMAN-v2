@@ -28,10 +28,27 @@ export interface UserProfile {
 
 export const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
 
+/**
+ * Formats user login strictly as @username (lowercase, alphanumeric/underscore, 3-15 chars)
+ */
+export function formatUserLogin(login?: string, fallbackIdentifier?: string): string {
+  if (login && typeof login === 'string' && login.trim()) {
+    const clean = login.trim().replace(/^@+/, '').toLowerCase();
+    return `@${clean}`;
+  }
+  if (fallbackIdentifier && typeof fallbackIdentifier === 'string') {
+    const raw = fallbackIdentifier.trim().toLowerCase();
+    const base = raw.includes('@') ? raw.split('@')[0] : raw;
+    const clean = base.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 15) || 'student';
+    return `@${clean}`;
+  }
+  return `@student_${Date.now().toString().slice(-4)}`;
+}
+
 export const DEFAULT_ADMIN_PROFILE: UserProfile = {
   id: 'admin_mady1baevv',
   name: 'Абдраим Мадылбаев (Администратор)',
-  login: 'mady1baevv',
+  login: '@mady1baevv',
   identifier: ADMIN_EMAIL,
   email: ADMIN_EMAIL,
   telegramUsername: '@mady1baevv',
@@ -166,7 +183,16 @@ function loadUsersFromDisk(): void {
       const content = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        memoryUsers = parsed;
+        memoryUsers = parsed.map((u: UserProfile) => {
+          const isMasterAdmin =
+            u.id === 'admin_mady1baevv' ||
+            u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+            u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+          return {
+            ...u,
+            login: isMasterAdmin ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+          };
+        });
         ensureAdminUser();
         isLoaded = true;
         return;
@@ -212,6 +238,7 @@ function ensureAdminUser(): void {
       ...memoryUsers[adminIndex],
       ...DEFAULT_ADMIN_PROFILE,
       id: 'admin_mady1baevv',
+      login: '@mady1baevv',
       identifier: ADMIN_EMAIL,
       email: ADMIN_EMAIL,
       subscriptionPlan: 'premium',
@@ -222,12 +249,22 @@ function ensureAdminUser(): void {
 }
 
 /**
- * Returns all users sorted: Admin at top, then newest registered first
+ * Returns all users sorted: Admin at top, then newest registered first.
+ * Every user is guaranteed to have their login formatted as @username.
  */
 export function getAllUsers(): UserProfile[] {
   loadUsersFromDisk();
 
-  return [...memoryUsers].sort((a, b) => {
+  return [...memoryUsers].map((u) => {
+    const isMasterAdmin =
+      u.id === 'admin_mady1baevv' ||
+      u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    return {
+      ...u,
+      login: isMasterAdmin ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+    };
+  }).sort((a, b) => {
     const isAdminA = a.id === 'admin_mady1baevv' || a.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
     const isAdminB = b.id === 'admin_mady1baevv' || b.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
     if (isAdminA) return -1;
@@ -320,10 +357,16 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
       ])
     );
 
+    const cleanLogin = formatUserLogin(
+      user.login || existing.login,
+      user.email || user.identifier || existing.email || existing.identifier
+    );
+
     const updated: UserProfile = {
       ...existing,
       ...user,
       id: existing.id,
+      login: cleanLogin,
       name: (user.name && user.name !== 'Ученик' ? user.name : existing.name) || 'Ученик',
       identifier: existing.identifier || user.identifier || '',
       email: existing.email || user.email,
@@ -357,9 +400,15 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
     rawId ||
     (rawTgId ? `tg_${rawTgId}` : `user_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`);
 
+  const cleanLogin = formatUserLogin(
+    user.login,
+    user.email || user.identifier || rawEmail || newId
+  );
+
   const created: UserProfile = {
     id: newId,
     name: user.name || (user.telegramUsername ? `@${user.telegramUsername.replace('@', '')}` : 'Ученик'),
+    login: cleanLogin,
     identifier: user.identifier || (rawTgUsername ? rawTgUsername : rawEmail || newId),
     email: user.email,
     telegramUsername: user.telegramUsername,
@@ -433,9 +482,15 @@ export function updateUser(userId: string, data: Partial<UserProfile>): UserProf
   if (idx === -1) return null;
 
   const current = memoryUsers[idx];
+  const cleanLogin =
+    data.login !== undefined
+      ? (data.login ? formatUserLogin(data.login, current.email || current.identifier) : undefined)
+      : (current.login ? formatUserLogin(current.login, current.email || current.identifier) : undefined);
+
   const updated: UserProfile = {
     ...current,
     ...data,
+    login: cleanLogin,
     id: current.id, // Immutable ID
     registeredAt: current.registeredAt, // Preserve original registration time
   };
@@ -465,4 +520,25 @@ export function deleteUser(userId: string): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * Purges all non-admin users without a login from disk and memory
+ */
+export function deleteUsersWithoutLogin(): number {
+  loadUsersFromDisk();
+  const prevLen = memoryUsers.length;
+  memoryUsers = memoryUsers.filter((u) => {
+    const isMasterAdmin =
+      u.id === 'admin_mady1baevv' ||
+      u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    if (isMasterAdmin) return true;
+    return Boolean(u.login && typeof u.login === 'string' && u.login.trim().length > 0);
+  });
+  const deletedCount = prevLen - memoryUsers.length;
+  if (deletedCount > 0) {
+    saveUsersToDisk();
+  }
+  return deletedCount;
 }

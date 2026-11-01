@@ -58,6 +58,7 @@ export const UsersManager: React.FC = () => {
 
   // New user form state
   const [newName, setNewName] = useState('');
+  const [newLogin, setNewLogin] = useState('');
   const [newIdentifier, setNewIdentifier] = useState('');
   const [newPassword, setNewPassword] = useState('123456');
   const [newAuthProvider, setNewAuthProvider] = useState<'google' | 'telegram' | 'email_code' | 'password'>('email_code');
@@ -65,6 +66,7 @@ export const UsersManager: React.FC = () => {
   const [newUniversity, setNewUniversity] = useState(KYRGYZ_UNIVERSITIES[0]);
   const [newPlan, setNewPlan] = useState<'free' | 'standard' | 'premium'>('premium');
   const [newIsPaid, setNewIsPaid] = useState(true);
+  const [isCleaningUpNoLogin, setIsCleaningUpNoLogin] = useState(false);
 
   // Refresh users list (local + remote server fetch)
   const refreshList = async () => {
@@ -149,16 +151,57 @@ export const UsersManager: React.FC = () => {
     setUserToDelete(targetUser);
   };
 
+  // 1-click cleanup of all users who don't have a login
+  const handleCleanupNoLoginUsers = async (count: number) => {
+    if (!window.confirm(`Удалить все аккаунты без логина (${count} шт.)? Они смогут заново авторизоваться на сайте и выбрать логин.`)) {
+      return;
+    }
+    setIsCleaningUpNoLogin(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cleanup_no_login' }),
+      });
+      const data = await res.json();
+      // Also purge local store
+      const current = adminGetAllUsers();
+      const cleaned = current.filter((u) => {
+        if (u.id === 'admin_mady1baevv' || u.identifier.toLowerCase() === ADMIN_EMAIL.toLowerCase()) return true;
+        return Boolean(u.login && u.login.trim().length > 0);
+      });
+      localStorage.setItem('ort_registered_users_v2', JSON.stringify(cleaned));
+      await refreshList();
+      showToast(`Успешно удалено аккаунтов без логина: ${data.deletedCount ?? count}`);
+    } catch (e: any) {
+      showToast('Ошибка при очистке: ' + (e?.message || 'Не удалось очистить'));
+    } finally {
+      setIsCleaningUpNoLogin(false);
+    }
+  };
+
   const handleCreateUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newIdentifier.trim()) return;
 
     const trimmedId = newIdentifier.trim();
+    const cleanLogin = newLogin.trim().toLowerCase().replace(/^@+/, '');
+
+    if (!cleanLogin) {
+      alert('Укажите уникальный логин для ученика (от 3 до 15 латинских букв и цифр)');
+      return;
+    }
+    if (cleanLogin.length < 3 || cleanLogin.length > 15 || !/^[a-zA-Z0-9]+$/.test(cleanLogin)) {
+      alert('Логин должен состоять только из латинских букв и цифр (от 3 до 15 знаков)');
+      return;
+    }
+
     const isEmail = trimmedId.includes('@');
     const isTg = trimmedId.startsWith('@') || newAuthProvider === 'telegram';
 
     const res = adminCreateUser({
       name: newName.trim() || 'Ученик',
+      login: cleanLogin,
       identifier: trimmedId,
       email: isEmail ? trimmedId : undefined,
       telegramUsername: isTg ? trimmedId : undefined,
@@ -182,18 +225,22 @@ export const UsersManager: React.FC = () => {
     refreshList();
     setIsAddUserModalOpen(false);
     setNewName('');
+    setNewLogin('');
     setNewIdentifier('');
     setNewPassword('123456');
     setNewAuthProvider('email_code');
-    showToast(`Пользователь ${trimmedId} успешно создан с тарифом ${newPlan}!`);
+    showToast(`Пользователь @${cleanLogin} (${trimmedId}) успешно создан с тарифом ${newPlan}!`);
   };
 
   const handleEditUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
 
+    const cleanLogin = editingUser.login ? editingUser.login.trim().toLowerCase().replace(/^@+/, '') : undefined;
+
     adminUpdateUser(editingUser.id, {
       name: editingUser.name,
+      login: cleanLogin,
       identifier: editingUser.identifier,
       password: editingUser.password,
       targetScore: Number(editingUser.targetScore) || 215,
@@ -205,7 +252,7 @@ export const UsersManager: React.FC = () => {
 
     refreshList();
     setEditingUser(null);
-    showToast(`Данные пользователя ${editingUser.name} успешно обновлены!`);
+    showToast(`Данные пользователя ${editingUser.name} (@${cleanLogin || '—'}) успешно обновлены!`);
   };
 
   // Check user providers helper
@@ -230,8 +277,10 @@ export const UsersManager: React.FC = () => {
   // Filtered users
   const filteredUsers = usersList.filter((u) => {
     const query = searchQuery.toLowerCase().trim();
+    const cleanQuery = query.replace(/^@+/, '');
     const matchQuery =
       u.name.toLowerCase().includes(query) ||
+      (u.login && (u.login.toLowerCase().includes(cleanQuery) || (`@${u.login.toLowerCase()}`).includes(query))) ||
       u.identifier.toLowerCase().includes(query) ||
       (u.email && u.email.toLowerCase().includes(query)) ||
       (u.telegramUsername && u.telegramUsername.toLowerCase().includes(query)) ||
@@ -291,6 +340,13 @@ export const UsersManager: React.FC = () => {
 
   // Metrics
   const totalCount = usersList.length;
+  const withLoginCount = usersList.filter((u) => Boolean(u.login && u.login.trim())).length;
+  const withoutLoginUsers = usersList.filter(
+    (u) =>
+      u.id !== 'admin_mady1baevv' &&
+      u.identifier?.toLowerCase() !== ADMIN_EMAIL.toLowerCase() &&
+      (!u.login || !u.login.trim())
+  );
   const premiumCount = usersList.filter((u) => u.subscriptionPlan === 'premium').length;
   const standardCount = usersList.filter((u) => u.subscriptionPlan === 'standard').length;
   const freeCount = usersList.filter((u) => u.subscriptionPlan === 'free' || !u.subscriptionPlan).length;
@@ -314,7 +370,7 @@ export const UsersManager: React.FC = () => {
               Все зарегистрированные пользователи
             </h2>
             <p className="text-xs sm:text-sm text-emerald-200/70 mt-1 max-w-2xl">
-              Полный реестр всех способов авторизации: Telegram, Google вход, 6-значный код подтверждения почты, а также синхронизированные профили. Новые регистрации отображаются вверху списка.
+              Полный реестр учеников с уникальными логинами (@логин). Новые регистрации отображаются вверху списка.
             </p>
           </div>
 
@@ -341,13 +397,23 @@ export const UsersManager: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Stats Grid: Plans & Providers */}
+        {/* Quick Stats Grid: Plans, Logins & Providers */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6 pt-5 border-t border-emerald-800/60">
           <div className="p-3 rounded-2xl bg-[#031510] border border-emerald-900/80">
             <span className="text-[10px] font-bold text-emerald-300/70 uppercase tracking-wider block">
               Всего
             </span>
             <span className="text-xl font-black text-white">{totalCount}</span>
+          </div>
+
+          <div className="p-3 rounded-2xl bg-[#031510] border border-emerald-400/50 bg-gradient-to-br from-[#031510] to-emerald-950/40">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                С логином (@)
+              </span>
+              <span className="text-xs font-mono font-black text-emerald-400">@</span>
+            </div>
+            <span className="text-xl font-black text-emerald-300">{withLoginCount}</span>
           </div>
 
           <div className="p-3 rounded-2xl bg-[#031510] border border-sky-500/40">
@@ -380,16 +446,6 @@ export const UsersManager: React.FC = () => {
             <span className="text-xl font-black text-amber-300">{emailCodeCount}</span>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#031510] border border-emerald-400/50 bg-gradient-to-br from-[#031510] to-emerald-950/40">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
-                Синхрон (G+Код)
-              </span>
-              <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
-            </div>
-            <span className="text-xl font-black text-emerald-300">{syncCount}</span>
-          </div>
-
           <div className="p-3 rounded-2xl bg-[#031510] border border-amber-500/50">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-amber-300/80 uppercase tracking-wider">
@@ -400,6 +456,34 @@ export const UsersManager: React.FC = () => {
             <span className="text-xl font-black text-amber-400">{premiumCount}</span>
           </div>
         </div>
+
+        {/* Warning banner and 1-click cleanup if any accounts without login exist */}
+        {withoutLoginUsers.length > 0 && (
+          <div className="mt-4 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-xs font-black text-white">
+                  Обнаружены аккаунты без логина: {withoutLoginUsers.length}
+                </p>
+                <p className="text-[11px] text-rose-200/80 mt-0.5">
+                  По регламенту ученики без логинов должны быть удалены из базы, чтобы пройти повторную авторизацию и создать логин.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleCleanupNoLoginUsers(withoutLoginUsers.length)}
+              disabled={isCleaningUpNoLogin}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white text-xs font-black transition-all cursor-pointer shadow-md shadow-rose-600/30 active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isCleaningUpNoLogin ? 'Удаление...' : `Удалить аккаунты без логина (${withoutLoginUsers.length})`}</span>
+            </button>
+          </div>
+        )}
 
         {toastMessage && (
           <div className="mt-4 p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400 text-emerald-200 text-xs font-bold flex items-center gap-2 animate-in fade-in">
@@ -419,7 +503,7 @@ export const UsersManager: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Поиск по имени, email, Telegram (@...), телефону..."
+              placeholder="Поиск по имени, @логину, email, Telegram (@...), университету..."
               className="w-full pl-10 pr-4 py-2.5 bg-[#06261d] border border-emerald-800/60 rounded-2xl text-xs sm:text-sm font-medium text-white placeholder-emerald-300/40 focus:outline-none focus:border-emerald-400 transition-colors"
             />
           </div>
@@ -611,16 +695,39 @@ export const UsersManager: React.FC = () => {
                         >
                           {u.name}
                         </h4>
+
+                        {/* Prominent Login Badge */}
+                        {(() => {
+                          const displayLogin = u.login
+                            ? (u.login.startsWith('@') ? u.login : `@${u.login}`)
+                            : (isAdminAccount ? '@mady1baevv' : null);
+                          return displayLogin ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/25 text-emerald-200 border border-emerald-400/60 flex items-center gap-1 font-mono shadow-sm">
+                              <span>{displayLogin}</span>
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                              Без логина
+                            </span>
+                          );
+                        })()}
+
                         {isAdminAccount && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/40 flex items-center gap-1">
                             <Shield className="w-3 h-3 text-amber-400" />
-                            <span>ГЛАВНЫЙ АДМИНИСТРАТОР</span>
+                            <span>ГЛАВНЫЙ АДМИНИСТРАТОР (@mady1baevv)</span>
                           </span>
                         )}
                       </div>
 
                       {/* User Login Identifier & Auth Badges */}
-                      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                      <div className="flex items-center gap-2 flex-wrap mt-1">
+                        <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#031510] border border-emerald-700/60 text-xs">
+                          <span className="text-emerald-400 font-bold">Логин:</span>
+                          <span className="text-emerald-200 font-mono font-black">
+                            {u.login ? (u.login.startsWith('@') ? u.login : `@${u.login}`) : (isAdminAccount ? '@mady1baevv' : '—')}
+                          </span>
+                        </div>
                         <p className="text-xs text-emerald-200/80 font-mono font-medium truncate">
                           {u.identifier}
                         </p>
@@ -838,14 +945,32 @@ export const UsersManager: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1">
-                  Email или номер телефона (Логин)
+                  Уникальный логин ученика (@логин) <span className="text-emerald-400">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 font-bold font-mono text-sm">@</span>
+                  <input
+                    type="text"
+                    required
+                    value={newLogin}
+                    onChange={(e) => setNewLogin(e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15).toLowerCase())}
+                    placeholder="studentlogin"
+                    className="w-full pl-8 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-mono text-emerald-300 focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+                <p className="text-[11px] text-emerald-300/60 mt-1">Только латинские буквы и цифры (от 3 до 15 знаков, без пробелов)</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-200 mb-1">
+                  Email / Почта (Идентификатор)
                 </label>
                 <input
                   type="text"
                   required
                   value={newIdentifier}
                   onChange={(e) => setNewIdentifier(e.target.value)}
-                  placeholder="aibek@gmail.com или +996700000000"
+                  placeholder="aibek@gmail.com"
                   className="w-full px-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-medium text-white focus:outline-none focus:border-emerald-400"
                 />
               </div>
@@ -1035,7 +1160,29 @@ export const UsersManager: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-200 mb-1">
-                  Email или телефон (Логин)
+                  Уникальный логин ученика (@логин)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 font-bold font-mono text-sm">@</span>
+                  <input
+                    type="text"
+                    value={editingUser.login || ''}
+                    onChange={(e) =>
+                      setEditingUser({
+                        ...editingUser,
+                        login: e.target.value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15).toLowerCase(),
+                      })
+                    }
+                    placeholder="studentlogin"
+                    className="w-full pl-8 pr-4 py-2.5 bg-[#031510] border border-emerald-800/60 rounded-xl text-sm font-mono text-emerald-300 focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+                <p className="text-[11px] text-emerald-300/60 mt-1">Отображается в профиле и админ-панели (латинские буквы и цифры)</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-200 mb-1">
+                  Email или телефон (Идентификатор)
                 </label>
                 <input
                   type="text"
@@ -1172,7 +1319,13 @@ export const UsersManager: React.FC = () => {
                 <span className="font-bold text-white">{userToDelete.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Логин / Почта / Номер:</span>
+                <span className="text-slate-400">Уникальный логин:</span>
+                <span className="font-mono font-bold text-emerald-400">
+                  {userToDelete.login ? (userToDelete.login.startsWith('@') ? userToDelete.login : `@${userToDelete.login}`) : '— (без логина)'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Идентификатор / Почта:</span>
                 <span className="font-bold text-emerald-300">{userToDelete.identifier}</span>
               </div>
               <div className="flex justify-between">

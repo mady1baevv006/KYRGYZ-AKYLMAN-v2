@@ -510,7 +510,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ lang }) => {
                     isPremium ? 'text-amber-200' : 'text-emerald-100'
                   }`}
                 >
-                  {user.login ? `@${user.login}` : user.identifier}
+                  {user.login ? (user.login.startsWith('@') ? user.login : `@${user.login}`) : user.identifier}
                 </span>
 
                 {/* Compact icon directly to the right of login showing auth method, clickable to reveal subtle auth method text */}

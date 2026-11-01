@@ -174,10 +174,27 @@ export function computeSubscriptionStatus(user: UserProfile | null): UserSubscri
 
 export const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
 
+/**
+ * Formats user login strictly as @username (lowercase, alphanumeric/underscore, 3-15 chars)
+ */
+export function formatUserLogin(login?: string, fallbackIdentifier?: string): string {
+  if (login && typeof login === 'string' && login.trim()) {
+    const clean = login.trim().replace(/^@+/, '').toLowerCase();
+    return `@${clean}`;
+  }
+  if (fallbackIdentifier && typeof fallbackIdentifier === 'string') {
+    const raw = fallbackIdentifier.trim().toLowerCase();
+    const base = raw.includes('@') && !raw.startsWith('@') ? raw.split('@')[0] : raw.replace(/^@+/, '');
+    const clean = base.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 15) || 'student';
+    return `@${clean}`;
+  }
+  return `@student_${Date.now().toString().slice(-4)}`;
+}
+
 const DEFAULT_ADMIN_PROFILE: UserProfile = {
   id: 'admin_mady1baevv',
   name: 'Абдраим Мадылбаев (Администратор)',
-  login: 'mady1baevv',
+  login: '@mady1baevv',
   identifier: ADMIN_EMAIL,
   email: ADMIN_EMAIL,
   telegramUsername: '@mady1baevv',
@@ -392,7 +409,7 @@ interface AuthContextType {
   closeTrialWelcomeModal: () => void;
   login: (identifier: string, pass: string) => { success: boolean; error?: string };
   register: (name: string, identifier: string, pass: string) => { success: boolean; error?: string };
-  loginWithCode: (identifier: string, name?: string) => { success: boolean; error?: string };
+  loginWithCode: (identifier: string, name?: string, customLogin?: string) => { success: boolean; error?: string };
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   loginWithTelegram: (telegramUserOrUsername?: string | TelegramUser, name?: string) => { success: boolean; error?: string };
   loginWithWhatsApp: (phoneOrUsername?: string, name?: string) => { success: boolean; error?: string };
@@ -568,7 +585,17 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
     result.unshift(DEFAULT_ADMIN_PROFILE);
   }
 
-  return result;
+  // Guarantee every user has a cleanly formatted @username login
+  return result.map((u) => {
+    const isMasterAdmin =
+      u.id === 'admin_mady1baevv' ||
+      u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    return {
+      ...u,
+      login: isMasterAdmin ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+    };
+  });
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -581,12 +608,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return {
             ...parsed,
             id: 'admin_mady1baevv',
+            login: '@mady1baevv',
             subscriptionPlan: 'premium',
             isPaid: true,
             subscriptionExpiry: '2027-06-01',
           };
         }
-        return parsed;
+        return {
+          ...parsed,
+          login: formatUserLogin(parsed.login, parsed.email || parsed.identifier),
+        };
       }
       return null;
     } catch {
@@ -749,10 +780,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { success: true };
   };
 
-  const loginWithCode = (identifier: string, name?: string) => {
+  const loginWithCode = (identifier: string, name?: string, customLogin?: string) => {
     const trimmedId = identifier.trim();
     if (!trimmedId) {
-      return { success: false, error: 'Укажите номер телефона или email' };
+      return { success: false, error: 'Укажите email' };
     }
 
     const isEmail = trimmedId.includes('@');
@@ -777,6 +808,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         new Set([...currentProviders, isEmail ? 'email_code' : 'phone_code'])
       );
 
+      const assignedLogin = isAdminAccount
+        ? '@mady1baevv'
+        : existing.login
+        ? formatUserLogin(existing.login, normalizedEmail)
+        : formatUserLogin(customLogin, normalizedEmail);
+
       const updatedUser: UserProfile = {
         ...existing,
         identifier: isEmail ? normalizedEmail : existing.identifier,
@@ -785,6 +822,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name && name.trim() && (!existing.name || existing.name === 'Ученик' || existing.name.startsWith('Ученик ('))
             ? name.trim()
             : existing.name,
+        login: assignedLogin,
         authProvider: existing.authProvider || (isEmail ? 'email_code' : 'phone_code'),
         authProviders: updatedProviders,
         lastLoginAt: new Date().toISOString(),
@@ -798,14 +836,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      syncUserWithServer(updatedUser);
       return { success: true };
     } else {
       // Auto-register new student via phone or email code
+      const assignedLogin = isAdminAccount
+        ? '@mady1baevv'
+        : formatUserLogin(customLogin, normalizedEmail || trimmedId);
+
       const newUser: UserProfile = {
         id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
         name:
           name?.trim() ||
           (isEmail ? normalizedEmail.split('@')[0] : 'Ученик (' + trimmedId.slice(-4) + ')'),
+        login: assignedLogin,
         identifier: isEmail ? normalizedEmail : trimmedId,
         email: isEmail ? normalizedEmail : undefined,
         password: '',
@@ -837,6 +881,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
       localStorage.setItem('user', JSON.stringify(newUser));
+      syncUserWithServer(newUser);
       if (!isAdminAccount) {
         setIsTrialWelcomeOpen(true);
       }
@@ -875,6 +920,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...existing,
           email: email,
           identifier: existing.identifier || email,
+          login: isAdminAccount ? '@mady1baevv' : formatUserLogin(existing.login, email),
           name:
             existing.name && existing.name !== 'Ученик' && !existing.name.startsWith('Ученик (')
               ? existing.name
@@ -893,11 +939,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(updatedUser);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
         localStorage.setItem('user', JSON.stringify(updatedUser));
+        syncUserWithServer(updatedUser);
         return { success: true };
       } else {
         const newUser: UserProfile = {
           id: isAdminAccount ? 'admin_mady1baevv' : 'user_' + Date.now(),
           name: displayName,
+          login: isAdminAccount ? '@mady1baevv' : formatUserLogin(undefined, email),
           identifier: email,
           email: email,
           password: '',
@@ -925,6 +973,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(newUser);
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
         localStorage.setItem('user', JSON.stringify(newUser));
+        syncUserWithServer(newUser);
         if (!isAdminAccount) {
           setIsTrialWelcomeOpen(true);
         }
@@ -988,6 +1037,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedUser: UserProfile = {
         ...existing,
         name: displayName || existing.name,
+        login: isAdminAccount ? '@mady1baevv' : formatUserLogin(existing.login, cleanUsername),
         telegramUsername: cleanUsername,
         telegramId: telegramId || existing.telegramId,
         avatar: avatarUrl !== '/avatars/snow_leopard.svg' ? avatarUrl : existing.avatar,
@@ -1003,11 +1053,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      syncUserWithServer(updatedUser);
       return { success: true };
     } else {
       const newUser: UserProfile = {
         id: isAdminAccount ? 'admin_mady1baevv' : telegramId ? `tg_${telegramId}` : 'user_' + Date.now(),
         name: displayName,
+        login: isAdminAccount ? '@mady1baevv' : formatUserLogin(cleanUsername, String(telegramId || '')),
         identifier: cleanUsername,
         telegramUsername: cleanUsername,
         telegramId: telegramId,
@@ -1036,6 +1088,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(newUser);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
       localStorage.setItem('user', JSON.stringify(newUser));
+      syncUserWithServer(newUser);
       if (!isAdminAccount) {
         setIsTrialWelcomeOpen(true);
       }
@@ -1155,18 +1208,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const setUserLogin = (newLogin: string) => {
-    const trimmed = newLogin.trim();
-    if (!trimmed) {
+    const clean = newLogin.trim().replace(/^@+/, '').toLowerCase();
+    if (!clean) {
       return { success: false, error: 'Логин не может быть пустым' };
     }
-    if (trimmed.length > 15) {
+    if (clean.length > 15) {
       return { success: false, error: 'Логин не должен превышать 15 символов' };
     }
-    if (trimmed.length < 3) {
+    if (clean.length < 3) {
       return { success: false, error: 'Логин должен содержать минимум 3 символа' };
     }
     // Strict alphanumeric: Latin letters and digits only! No spaces, dots, quotes, etc.
-    if (!/^[a-zA-Z0-9]+$/.test(trimmed)) {
+    if (!/^[a-zA-Z0-9]+$/.test(clean)) {
       return {
         success: false,
         error: 'Разрешены только латинские буквы и цифры (без точек, пробелов, кавычек и знаков)',
@@ -1177,6 +1230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Пользователь не авторизован' };
     }
 
+    const formattedLogin = `@${clean}`;
     const isAdminAccount = user.identifier?.trim().toLowerCase() === ADMIN_EMAIL.toLowerCase();
     if (user.login && !isAdminAccount) {
       return { success: false, error: 'Логин задается один раз при регистрации. Менять его невозможно.' };
@@ -1184,21 +1238,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const users = getUsers();
     const isTaken = users.some(
-      (u) => u.id !== user.id && u.login && u.login.trim().toLowerCase() === trimmed.toLowerCase()
+      (u) =>
+        u.id !== user.id &&
+        u.login &&
+        u.login.trim().replace(/^@+/, '').toLowerCase() === clean
     );
     if (isTaken) {
       return { success: false, error: 'Этот логин уже занят другим пользователем. Выберите другой.' };
     }
 
-    const updatedUser: UserProfile = { ...user, login: trimmed };
+    const updatedUser: UserProfile = { ...user, login: formattedLogin };
     setUser(updatedUser);
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
 
     const idx = users.findIndex((u) => u.id === user.id);
     if (idx !== -1) {
       users[idx] = updatedUser;
       saveUsers(users);
     }
+
+    syncUserWithServer(updatedUser);
 
     return { success: true };
   };
@@ -1299,20 +1359,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === userId);
     if (idx !== -1) {
-      users[idx] = { ...users[idx], ...data };
+      const cleanLogin =
+        data.login !== undefined
+          ? data.login
+            ? formatUserLogin(data.login, users[idx].identifier)
+            : undefined
+          : users[idx].login;
+      const updatedUser = { ...users[idx], ...data, login: cleanLogin };
+      users[idx] = updatedUser;
       saveUsers(users);
 
       if (user && user.id === userId) {
-        const updatedSelf = { ...user, ...data };
-        setUser(updatedSelf);
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
+        setUser(updatedUser);
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       }
 
       try {
-        fetch('/api/admin/users/update', {
+        fetch('/api/admin/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, data }),
+          body: JSON.stringify({ action: 'update', userId, data: { ...data, login: cleanLogin } }),
         }).catch(() => {});
       } catch {}
     }
@@ -1359,10 +1425,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        fetch('/api/admin/users/update', {
+        fetch('/api/admin/users', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            action: 'update',
             userId,
             data: { registeredAt: nowIso, subscriptionPlan: 'free', isPaid: false },
           }),
@@ -1373,6 +1440,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const adminCreateUser = (userData: Omit<UserProfile, 'id' | 'testHistory'>) => {
     const trimmedId = userData.identifier.trim().toLowerCase();
+    const cleanLogin = userData.login
+      ? formatUserLogin(userData.login, userData.identifier)
+      : formatUserLogin(undefined, userData.identifier);
     const users = getUsers();
     const exists = users.some((u) => u.identifier.trim().toLowerCase() === trimmedId);
 
@@ -1380,10 +1450,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Пользователь с таким email/телефоном уже существует' };
     }
 
+    if (!cleanLogin) {
+      return { success: false, error: 'Укажите уникальный логин для ученика' };
+    }
+
+    const rawClean = cleanLogin.replace(/^@+/, '').toLowerCase();
+    const loginTaken = users.some(
+      (u) => u.login && u.login.trim().replace(/^@+/, '').toLowerCase() === rawClean
+    );
+    if (loginTaken) {
+      return { success: false, error: 'Этот логин уже занят другим пользователем' };
+    }
+
     const newUser: UserProfile = {
       ...userData,
       id: 'user_' + Date.now(),
       name: userData.name.trim() || 'Ученик',
+      login: cleanLogin,
       identifier: userData.identifier.trim(),
       password: userData.password || '123456',
       avatar: userData.avatar || '/avatars/snow_leopard.svg',
