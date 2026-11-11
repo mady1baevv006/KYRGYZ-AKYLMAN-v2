@@ -31,6 +31,7 @@ import { UserProfile, useAuth } from '../context/AuthContext';
 import { THEORIES_DATA, TheoryBlock, TheoryTopic } from '../data/theoriesData';
 import { SUBSCRIPTION_PLANS } from '../data/subscriptions';
 import { TheoryPlanSelectionModal } from './TheoryPlanSelectionModal';
+import { TheoryContentRenderer } from './TheoryContentRenderer';
 import { TrialNoticeBanner } from './TrialNoticeBanner';
 import { MathSubjectBackground } from './subject-backgrounds/MathSubjectBackground';
 import { RussianSubjectBackground } from './subject-backgrounds/RussianSubjectBackground';
@@ -685,7 +686,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
             </div>
           </div>
 
-          {/* List of Rectangular Blocks */}
+          {/* List of Rectangular Blocks / Parts */}
           <div className="space-y-4">
             {subject.blocks.map((block) => (
               <div
@@ -696,22 +697,22 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-emerald-800/50">
                   <div>
                     <span className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1.5">
-                      {isKg ? `${block.number}-Блок` : `Блок ${block.number}`}
+                      {selectedSubjectId === 'algebra' || selectedSubjectId === 'geometry'
+                        ? (isKg ? `${block.number}-Бөлүк` : `Часть ${block.number}`)
+                        : (isKg ? `${block.number}-Блок` : `Блок ${block.number}`)}
                     </span>
                     <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                      {isKg ? block.titleKg : block.titleRu}
+                      {(isKg ? block.titleKg : block.titleRu).replace(/^(Часть\s+\d+|Блок\s+\d+|\d+-(Бөлүк|Блок)):\s*/i, '').trim()}
                     </h3>
-                    <p className="text-xs sm:text-sm text-emerald-200/70 mt-1">
-                      {isKg ? block.descKg : block.descRu}
-                    </p>
                   </div>
                 </div>
 
-                {/* Topics inside this block */}
+                {/* Topics inside this block / part */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                   {block.topics.map((topic, idx) => {
                     const rawTitle = isKg ? topic.titleKg : topic.titleRu;
                     const cleanTitle = rawTitle.replace(/^\d+[\.\)\-\s]+/, '').trim();
+                    const topicNumber = topic.number ?? idx + 1;
 
                     return (
                       <div
@@ -731,7 +732,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                                 : 'bg-white/5 border border-white/10 text-slate-400'
                             }`}
                           >
-                            {idx + 1}
+                            {topicNumber}
                           </div>
                           <div className="min-w-0 flex-1">
                             <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-emerald-300 transition-colors leading-snug break-words">
@@ -775,13 +776,26 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               className="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-emerald-700/50 text-xs sm:text-sm font-bold text-emerald-200 flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 text-emerald-400" />
-              <span>{isKg ? 'Блокторго кайтуу' : 'Назад к блокам'}</span>
+              <span>
+                {isKg
+                  ? 'Темаларга кайтуу'
+                  : selectedSubjectId === 'algebra' || selectedSubjectId === 'geometry'
+                  ? 'Назад к темам'
+                  : 'Назад к блокам'}
+              </span>
             </button>
 
-            <div className="text-xs sm:text-sm font-bold text-emerald-300/80 flex items-center gap-2">
+            <div className="text-xs sm:text-sm font-bold text-emerald-300/80 flex items-center gap-2 flex-wrap">
               <span>{isKg ? subject.titleKg : subject.titleRu}</span>
               <span>/</span>
+              <span>
+                {selectedSubjectId === 'algebra' || selectedSubjectId === 'geometry'
+                  ? (isKg ? `${selectedBlock?.number}-Бөлүк` : `Часть ${selectedBlock?.number}`)
+                  : (isKg ? `${selectedBlock?.number}-Блок` : `Блок ${selectedBlock?.number}`)}
+              </span>
+              <span>/</span>
               <span className="text-white">
+                {selectedTopic.number ? `№${selectedTopic.number}. ` : ''}
                 {(isKg ? selectedTopic.titleKg : selectedTopic.titleRu).replace(/^\d+[\.\)\-\s]+/, '').trim()}
               </span>
             </div>
@@ -797,7 +811,23 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
               <MathSubjectBackground className="opacity-25" />
             )}
             <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider mb-2">
+                <span>
+                  {selectedSubjectId === 'algebra' || selectedSubjectId === 'geometry'
+                    ? (isKg ? `${selectedBlock?.number}-Бөлүк` : `Часть ${selectedBlock?.number}`)
+                    : (isKg ? `${selectedBlock?.number}-Блок` : `Блок ${selectedBlock?.number}`)}
+                </span>
+                {selectedTopic.number && (
+                  <>
+                    <span>•</span>
+                    <span>{isKg ? `${selectedTopic.number}-тема` : `Тема ${selectedTopic.number}`}</span>
+                  </>
+                )}
+              </div>
               <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+                {selectedTopic.number ? (
+                  <span className="text-emerald-400 mr-2 font-mono">№{selectedTopic.number}.</span>
+                ) : null}
                 {(isKg ? selectedTopic.titleKg : selectedTopic.titleRu).replace(/^\d+[\.\)\-\s]+/, '').trim()}
               </h1>
             </div>
@@ -1570,9 +1600,10 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                     </div>
                   </>
                 ) : (
-                  <div className="p-5 sm:p-6 rounded-2xl bg-[#041a14] border border-emerald-700/50 whitespace-pre-line text-sm text-emerald-100">
-                    {isKg ? selectedTopic.contentKg || selectedTopic.contentRu : selectedTopic.contentRu}
-                  </div>
+                  <TheoryContentRenderer
+                    content={isKg ? (selectedTopic.contentKg || selectedTopic.contentRu || '') : (selectedTopic.contentRu || '')}
+                    isKg={isKg}
+                  />
                 )}
               </div>
 
@@ -2065,7 +2096,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                             : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
-                          {isKg ? 'Математика • 1-бөлүм' : 'Математика • Раздел 1'}
+                          {isKg ? 'Математика • 4 бөлүк (28 тема)' : 'Математика • 4 части (28 тем)'}
                         </span>
                       </div>
                     </div>
@@ -2094,7 +2125,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                             : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
-                          {isKg ? 'Математика • 2-бөлүм' : 'Математика • Раздел 2'}
+                          {isKg ? 'Математика • 2 бөлүк (14 тема)' : 'Математика • 2 части (14 тем)'}
                         </span>
                       </div>
                     </div>
@@ -2312,7 +2343,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                             : 'Числа, делимость, уравнения, неравенства, модули, прогрессии и текстовые задачи ОРТ'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">
-                          {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
+                          {isKg ? 'Математика • 4 бөлүк (28 тема)' : 'Математика • 4 части (28 тем)'}
                         </span>
                       </div>
                     </div>
@@ -2341,7 +2372,7 @@ export const TheoriesSection: React.FC<TheoriesSectionProps> = ({
                             : 'Треугольники, четырехугольники, окружности, площади фигур и стереометрия ОРТ'}
                         </p>
                         <span className="inline-block mt-2 text-[10px] font-extrabold uppercase tracking-wider text-teal-400">
-                          {isKg ? 'Математика • Негизги предмет' : 'Математика • Основной предмет'}
+                          {isKg ? 'Математика • 2 бөлүк (14 тема)' : 'Математика • 2 части (14 тем)'}
                         </span>
                       </div>
                     </div>

@@ -15,6 +15,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { TrialWelcomeModal } from './components/TrialWelcomeModal';
 import { SetLoginModal } from './components/SetLoginModal';
+import { TelegramChannelPromoModal } from './components/TelegramChannelPromoModal';
 import { CreativeLoader } from './components/CreativeLoader';
 import { ScrollToTopButton } from './components/ScrollToTopButton';
 
@@ -160,6 +161,8 @@ const AppContent: React.FC<{
           lang={lang}
         />
       )}
+      {/* Telegram Channel Promo Modal shown on entering the site */}
+      <TelegramChannelPromoModal lang={lang} />
     </div>
   );
 };

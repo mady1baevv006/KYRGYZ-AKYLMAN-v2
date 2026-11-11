@@ -80,11 +80,11 @@ export const Footer: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
             {/* Emerald Icon-Only Social Buttons */}
             <div className="flex items-center gap-2 ml-2">
               <a
-                href="https://t.me/kyrgyzakylman"
+                href="https://t.me/kyrgyzakylmanedu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/90 border border-emerald-800/60 text-emerald-400 hover:text-emerald-200 transition-all flex items-center justify-center active:scale-95 shadow-sm"
-                title="Telegram: @kyrgyzakylman"
+                title="Telegram: @kyrgyzakylmanedu"
                 aria-label="Telegram"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
