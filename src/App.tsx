@@ -161,8 +161,8 @@ const AppContent: React.FC<{
           lang={lang}
         />
       )}
-      {/* Telegram Channel Promo Modal shown on entering the site */}
-      <TelegramChannelPromoModal lang={lang} />
+      {/* Telegram Channel Promo Modal shown on entering the site ONLY for unauthorized visitors */}
+      {!user && <TelegramChannelPromoModal lang={lang} />}
     </div>
   );
 };
