@@ -1,5 +1,13 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAllUsers, updateUser, deleteUser, upsertUser, deleteUsersWithoutLogin, formatUserLogin } from '../usersStore.js';
+import {
+  getAllUsers,
+  getAllUsersAsync,
+  updateUserAsync,
+  deleteUser,
+  upsertUserAsync,
+  deleteUsersWithoutLogin,
+  formatUserLogin,
+} from '../usersStore.js';
 import type { UserProfile } from '../usersStore.js';
 import { getAdminAuth } from '../firebaseAdmin.js';
 
@@ -26,6 +34,7 @@ async function getFirebaseAuthUsers(): Promise<UserProfile[]> {
 
       const created = u.metadata.creationTime ? new Date(u.metadata.creationTime) : null;
       const lastSignIn = u.metadata.lastSignInTime ? new Date(u.metadata.lastSignInTime) : null;
+      const claims = (u.customClaims || {}) as Record<string, any>;
 
       result.push({
         id: u.uid,
@@ -38,8 +47,10 @@ async function getFirebaseAuthUsers(): Promise<UserProfile[]> {
         registeredAt: created && !isNaN(created.getTime()) ? created.toISOString() : new Date(0).toISOString(),
         lastLoginAt: lastSignIn && !isNaN(lastSignIn.getTime()) ? lastSignIn.toISOString() : undefined,
         testHistory: [],
-        subscriptionPlan: 'free',
-        isPaid: false,
+        subscriptionPlan: (claims.subscriptionPlan as UserProfile['subscriptionPlan']) || 'free',
+        isPaid: Boolean(claims.isPaid),
+        subscriptionExpiry: claims.subscriptionExpiry || '2027-06-01',
+        subscriptionUpdatedAt: claims.subscriptionUpdatedAt,
       });
     }
     pageToken = page.pageToken;
@@ -54,8 +65,10 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
     u.id === 'admin_mady1baevv' || (u.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   const byEmail = new Map<string, number>();
+  const byId = new Map<string, number>();
   const merged: UserProfile[] = stored.map((u, i) => {
     if (u.email) byEmail.set(u.email.toLowerCase(), i);
+    if (u.id) byId.set(u.id, i);
     return {
       ...u,
       login: isAdmin(u) ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
@@ -63,9 +76,15 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
   });
 
   for (const a of authUsers) {
-    const idx = a.email ? byEmail.get(a.email.toLowerCase()) : undefined;
+    const idx =
+      (a.email ? byEmail.get(a.email.toLowerCase()) : undefined) ??
+      (a.id ? byId.get(a.id) : undefined);
     if (idx !== undefined) {
       const s = merged[idx];
+      const sTs = s.subscriptionUpdatedAt ? new Date(s.subscriptionUpdatedAt).getTime() : 0;
+      const aTs = a.subscriptionUpdatedAt ? new Date(a.subscriptionUpdatedAt).getTime() : 0;
+      const useAuthClaims = aTs > sTs || (!s.subscriptionUpdatedAt && !s.isPaid && Boolean(a.isPaid));
+
       merged[idx] = {
         ...s,
         login: isAdmin(s) ? '@mady1baevv' : (s.login || formatUserLogin(undefined, s.email || s.identifier)),
@@ -74,6 +93,14 @@ function mergeUsers(stored: UserProfile[], authUsers: UserProfile[]): UserProfil
         lastLoginAt: a.lastLoginAt || s.lastLoginAt,
         avatar: s.avatar && !s.avatar.includes('snow_leopard.svg') ? s.avatar : a.avatar,
         name: s.name && s.name !== 'Ученик' ? s.name : a.name,
+        ...(useAuthClaims
+          ? {
+              subscriptionPlan: a.subscriptionPlan || s.subscriptionPlan || 'free',
+              isPaid: a.isPaid !== undefined ? Boolean(a.isPaid) : Boolean(s.isPaid),
+              subscriptionExpiry: a.subscriptionExpiry || s.subscriptionExpiry || '2027-06-01',
+              subscriptionUpdatedAt: a.subscriptionUpdatedAt || s.subscriptionUpdatedAt,
+            }
+          : {}),
       };
     } else {
       // Пользователь из Firebase Auth — добавляем в список с его логином вида @логин
@@ -112,7 +139,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === 'GET') {
-      const stored = getAllUsers();
+      const stored = await getAllUsersAsync();
       let users = stored;
       let authError: string | undefined;
 
@@ -138,12 +165,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const action = req.body?.action;
 
       if (action === 'update') {
-        const { userId, data } = req.body || {};
-        if (!userId) {
+        const { userId, data, email, identifier, telegramId, telegramUsername, fallbackUser } = req.body || {};
+        if (!userId && !email && !identifier && telegramId === undefined) {
           return res.status(400).json({ ok: false, error: 'Отсутствует userId' });
         }
-        const updated = updateUser(userId, data);
-        return res.status(200).json({ ok: true, user: updated });
+        const mergedFallback: Partial<UserProfile> | undefined =
+          fallbackUser ||
+          (email || identifier || telegramId !== undefined || telegramUsername
+            ? { id: userId, email, identifier, telegramId, telegramUsername }
+            : userId
+            ? { id: userId, ...(data || {}) }
+            : undefined);
+
+        const updated = await updateUserAsync(userId || '', data || {}, mergedFallback);
+        return res.status(200).json({ ok: Boolean(updated), user: updated });
       }
 
       if (action === 'delete') {
@@ -229,13 +264,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!user) {
           return res.status(400).json({ ok: false, error: 'Отсутствуют данные пользователя' });
         }
-        const created = upsertUser(user);
+        const created = await upsertUserAsync(user, { fromAdmin: true });
         return res.status(200).json({ ok: true, user: created });
       }
 
       // Default POST behavior: upsert user
       const user = req.body?.user || req.body;
-      const saved = upsertUser(user);
+      const saved = await upsertUserAsync(user, { fromAdmin: true });
       return res.status(200).json({ ok: true, user: saved });
     }
 

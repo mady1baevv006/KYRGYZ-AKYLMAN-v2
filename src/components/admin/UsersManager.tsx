@@ -121,13 +121,29 @@ export const UsersManager: React.FC = () => {
   };
 
   // Quick 1-click subscription actions
-  const handleQuickSetPlan = (
+  const handleQuickSetPlan = async (
     targetUser: UserProfile,
     plan: 'free' | 'standard' | 'premium',
     isPaid: boolean
   ) => {
-    adminSetUserSubscription(targetUser.id, plan, isPaid, '2027-06-01');
-    refreshList();
+    const nowIso = new Date().toISOString();
+    // Optimistically reflect in UI immediately
+    setUsersList((prev) =>
+      prev.map((u) =>
+        u.id === targetUser.id ||
+        (targetUser.email && u.email?.toLowerCase() === targetUser.email.toLowerCase()) ||
+        (targetUser.identifier && u.identifier?.toLowerCase() === targetUser.identifier.toLowerCase())
+          ? {
+              ...u,
+              subscriptionPlan: plan,
+              isPaid,
+              subscriptionExpiry: '2027-06-01',
+              subscriptionUpdatedAt: nowIso,
+            }
+          : u
+      )
+    );
+
     const planName =
       plan === 'premium'
         ? 'Премиальная подписка (VIP)'
@@ -135,11 +151,14 @@ export const UsersManager: React.FC = () => {
         ? 'Доступная подписка'
         : 'Бесплатный тариф';
     showToast(`Пользователю ${targetUser.name} успешно установлен тариф «${planName}»!`);
+
+    await adminSetUserSubscription(targetUser.id, plan, isPaid, '2027-06-01', targetUser);
+    await refreshList();
   };
 
-  const handleResetTrial = (targetUser: UserProfile) => {
-    adminResetTrial(targetUser.id);
-    refreshList();
+  const handleResetTrial = async (targetUser: UserProfile) => {
+    await adminResetTrial(targetUser.id);
+    await refreshList();
     showToast(`Пользователю ${targetUser.name} сброшен 24-часовой пробный период!`);
   };
 
@@ -232,13 +251,14 @@ export const UsersManager: React.FC = () => {
     showToast(`Пользователь @${cleanLogin} (${trimmedId}) успешно создан с тарифом ${newPlan}!`);
   };
 
-  const handleEditUserSubmit = (e: React.FormEvent) => {
+  const handleEditUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
 
     const cleanLogin = editingUser.login ? editingUser.login.trim().toLowerCase().replace(/^@+/, '') : undefined;
+    const targetName = editingUser.name;
 
-    adminUpdateUser(editingUser.id, {
+    await adminUpdateUser(editingUser.id, {
       name: editingUser.name,
       login: cleanLogin,
       identifier: editingUser.identifier,
@@ -250,9 +270,9 @@ export const UsersManager: React.FC = () => {
       subscriptionExpiry: editingUser.subscriptionExpiry || '2027-06-01',
     });
 
-    refreshList();
+    await refreshList();
     setEditingUser(null);
-    showToast(`Данные пользователя ${editingUser.name} (@${cleanLogin || '—'}) успешно обновлены!`);
+    showToast(`Данные пользователя ${targetName} (@${cleanLogin || '—'}) успешно обновлены!`);
   };
 
   // Check user providers helper

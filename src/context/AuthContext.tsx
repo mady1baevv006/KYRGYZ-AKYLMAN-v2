@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { loginWithGoogle as firebaseLoginWithGoogle, logoutFirebase } from '../firebase';
 
 export interface UserTestRecord {
@@ -49,6 +49,7 @@ export interface UserProfile {
   subscriptionPlan?: 'free' | 'standard' | 'premium';
   subscriptionExpiry?: string;
   isPaid?: boolean;
+  subscriptionUpdatedAt?: string;
   hasSeenWelcomeGift?: boolean;
   hasExtendedTrial?: boolean;
 }
@@ -174,9 +175,30 @@ export function computeSubscriptionStatus(user: UserProfile | null): UserSubscri
 
 export const ADMIN_EMAIL = 'mady1baevv@kyrgyzakylman.com';
 
-/**
- * Formats user login strictly as @username (lowercase, alphanumeric/underscore, 3-15 chars)
- */
+export function extractNameFromEmail(email: string, displayName?: string): string {
+  if (
+    displayName &&
+    displayName.trim() &&
+    displayName !== 'Ученик' &&
+    displayName !== 'Google User' &&
+    displayName !== 'Ученик Google' &&
+    !displayName.startsWith('Ученик (')
+  ) {
+    return displayName.trim();
+  }
+  if (!email || !email.includes('@')) {
+    return 'Ученик';
+  }
+  const prefix = email.split('@')[0];
+  const parts = prefix.replace(/[^a-zA-Zа-яА-Я0-9_.-]/g, '').split(/[._-]+/).filter(Boolean);
+  if (parts.length > 0) {
+    return parts
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+      .join(' ');
+  }
+  return prefix;
+}
+
 export function formatUserLogin(login?: string, fallbackIdentifier?: string): string {
   if (login && typeof login === 'string' && login.trim()) {
     const clean = login.trim().replace(/^@+/, '').toLowerCase();
@@ -184,7 +206,7 @@ export function formatUserLogin(login?: string, fallbackIdentifier?: string): st
   }
   if (fallbackIdentifier && typeof fallbackIdentifier === 'string') {
     const raw = fallbackIdentifier.trim().toLowerCase();
-    const base = raw.includes('@') && !raw.startsWith('@') ? raw.split('@')[0] : raw.replace(/^@+/, '');
+    const base = raw.includes('@') ? raw.split('@')[0] : raw;
     const clean = base.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 15) || 'student';
     return `@${clean}`;
   }
@@ -425,9 +447,10 @@ interface AuthContextType {
     userId: string,
     plan: 'free' | 'standard' | 'premium',
     isPaid: boolean,
-    expiry?: string
-  ) => void;
-  adminUpdateUser: (userId: string, data: Partial<UserProfile>) => void;
+    expiry?: string,
+    targetUserSnapshot?: UserProfile
+  ) => Promise<{ ok: boolean; user?: UserProfile } | void> | void;
+  adminUpdateUser: (userId: string, data: Partial<UserProfile>) => Promise<void> | void;
   adminDeleteUser: (userId: string) => void;
   adminResetTrial: (userId: string) => void;
   adminCreateUser: (userData: Omit<UserProfile, 'id' | 'testHistory'>) => { success: boolean; error?: string };
@@ -439,15 +462,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const USERS_STORAGE_KEY = 'ort_registered_users_v2';
 const CURRENT_USER_KEY = 'ort_current_user_v2';
 
-export const syncUserWithServer = (userProfile: UserProfile): void => {
-  if (!userProfile) return;
+export const syncUserWithServer = async (userProfile: UserProfile): Promise<UserProfile | null> => {
+  if (!userProfile) return null;
   try {
-    fetch('/api/users/sync', {
+    const res = await fetch('/api/users/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
       body: JSON.stringify({ user: userProfile }),
-    }).catch(() => {});
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && (data.ok || data.success) && data.user) {
+        return data.user as UserProfile;
+      }
+    }
   } catch {}
+  return null;
 };
 
 export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
@@ -519,6 +550,40 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
         ])
       );
 
+      const existingSubTs = existing.subscriptionUpdatedAt
+        ? new Date(existing.subscriptionUpdatedAt).getTime()
+        : 0;
+      const uSubTs = u.subscriptionUpdatedAt ? new Date(u.subscriptionUpdatedAt).getTime() : 0;
+
+      let resolvedIsPaid: boolean;
+      let resolvedPlan: 'free' | 'standard' | 'premium';
+      let resolvedExpiry: string | undefined;
+      let resolvedSubUpdatedAt: string | undefined;
+
+      if (existingSubTs > 0 || uSubTs > 0) {
+        if (uSubTs > existingSubTs) {
+          resolvedIsPaid = Boolean(u.isPaid);
+          resolvedPlan = u.subscriptionPlan || 'free';
+          resolvedExpiry = u.subscriptionExpiry || existing.subscriptionExpiry;
+          resolvedSubUpdatedAt = u.subscriptionUpdatedAt;
+        } else {
+          resolvedIsPaid = Boolean(existing.isPaid);
+          resolvedPlan = existing.subscriptionPlan || 'free';
+          resolvedExpiry = existing.subscriptionExpiry || u.subscriptionExpiry;
+          resolvedSubUpdatedAt = existing.subscriptionUpdatedAt;
+        }
+      } else {
+        resolvedIsPaid = Boolean(existing.isPaid || u.isPaid);
+        resolvedPlan =
+          existing.subscriptionPlan === 'premium' || u.subscriptionPlan === 'premium'
+            ? 'premium'
+            : existing.subscriptionPlan === 'standard' || u.subscriptionPlan === 'standard'
+            ? 'standard'
+            : existing.subscriptionPlan || u.subscriptionPlan || 'free';
+        resolvedExpiry = existing.subscriptionExpiry || u.subscriptionExpiry;
+        resolvedSubUpdatedAt = undefined;
+      }
+
       result[existingIndex] = {
         ...existing,
         ...u,
@@ -536,13 +601,10 @@ export const deduplicateUsers = (usersList: UserProfile[]): UserProfile[] => {
         authProvider: existing.authProvider || u.authProvider,
         registeredAt: existing.registeredAt || u.registeredAt || new Date().toISOString(),
         lastLoginAt: u.lastLoginAt || existing.lastLoginAt || new Date().toISOString(),
-        isPaid: existing.isPaid || u.isPaid,
-        subscriptionPlan:
-          existing.subscriptionPlan === 'premium' || u.subscriptionPlan === 'premium'
-            ? 'premium'
-            : existing.subscriptionPlan === 'standard' || u.subscriptionPlan === 'standard'
-            ? 'standard'
-            : existing.subscriptionPlan || u.subscriptionPlan || 'free',
+        isPaid: resolvedIsPaid,
+        subscriptionPlan: resolvedPlan,
+        subscriptionExpiry: resolvedExpiry,
+        subscriptionUpdatedAt: resolvedSubUpdatedAt,
         testHistory: [...(existing.testHistory || []), ...(u.testHistory || [])].filter(
           (test, i, arr) => arr.findIndex((t) => t.id === test.id) === i
         ),
@@ -628,6 +690,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isTrialWelcomeOpen, setIsTrialWelcomeOpen] = useState(false);
   const [tick, setTick] = useState(0);
+  const userRef = useRef<UserProfile | null>(user);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -639,6 +706,148 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 30000);
     return () => clearInterval(timer);
   }, []);
+
+  const isSameIdentity = (a: Partial<UserProfile>, b: Partial<UserProfile>): boolean => {
+    if (a.id && b.id && a.id === b.id) return true;
+    if (a.telegramId !== undefined && b.telegramId !== undefined && Number(a.telegramId) === Number(b.telegramId)) {
+      return true;
+    }
+    const aEmail = (a.email || (a.identifier?.includes('@') && !a.identifier.startsWith('@') ? a.identifier : '')).trim().toLowerCase();
+    const bEmail = (b.email || (b.identifier?.includes('@') && !b.identifier.startsWith('@') ? b.identifier : '')).trim().toLowerCase();
+    if (aEmail && bEmail && aEmail === bEmail) return true;
+
+    const aIdLower = (a.identifier || '').trim().toLowerCase();
+    const bIdLower = (b.identifier || '').trim().toLowerCase();
+    if (aIdLower && bIdLower && aIdLower === bIdLower) return true;
+    if (aEmail && bIdLower && aEmail === bIdLower) return true;
+    if (bEmail && aIdLower && bEmail === aIdLower) return true;
+    return false;
+  };
+
+  const applyServerUserSnapshot = useCallback((serverUser: UserProfile | null): UserProfile | null => {
+    const cur = userRef.current;
+    if (!cur || !serverUser || !isSameIdentity(cur, serverUser)) return cur;
+
+    const nextPlan = serverUser.subscriptionPlan ?? cur.subscriptionPlan ?? 'free';
+    const nextIsPaid =
+      serverUser.isPaid !== undefined ? Boolean(serverUser.isPaid) : Boolean(cur.isPaid);
+    const nextExpiry = serverUser.subscriptionExpiry || cur.subscriptionExpiry;
+    const nextSubUpdatedAt = serverUser.subscriptionUpdatedAt || cur.subscriptionUpdatedAt;
+    const nextRegisteredAt = serverUser.registeredAt || cur.registeredAt;
+    const nextLogin = serverUser.login || cur.login;
+    const nextExtended =
+      serverUser.hasExtendedTrial !== undefined ? serverUser.hasExtendedTrial : cur.hasExtendedTrial;
+
+    const mergedHistory = [...(cur.testHistory || []), ...(serverUser.testHistory || [])].filter(
+      (t, i, arr) => t && t.id && arr.findIndex((x) => x && x.id === t.id) === i
+    );
+
+    const changed =
+      cur.subscriptionPlan !== nextPlan ||
+      Boolean(cur.isPaid) !== nextIsPaid ||
+      cur.subscriptionExpiry !== nextExpiry ||
+      cur.subscriptionUpdatedAt !== nextSubUpdatedAt ||
+      cur.registeredAt !== nextRegisteredAt ||
+      cur.hasExtendedTrial !== nextExtended ||
+      cur.login !== nextLogin ||
+      mergedHistory.length !== (cur.testHistory || []).length;
+
+    if (!changed) return cur;
+
+    const merged: UserProfile = {
+      ...cur,
+      login: nextLogin,
+      registeredAt: nextRegisteredAt,
+      hasExtendedTrial: nextExtended,
+      subscriptionPlan: nextPlan,
+      isPaid: nextIsPaid,
+      subscriptionExpiry: nextExpiry,
+      subscriptionUpdatedAt: nextSubUpdatedAt,
+      testHistory: mergedHistory,
+    };
+
+    userRef.current = merged;
+    setUser(merged);
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(merged));
+    localStorage.setItem('user', JSON.stringify(merged));
+
+    try {
+      const rawList = localStorage.getItem(USERS_STORAGE_KEY);
+      const parsedList: UserProfile[] = rawList ? JSON.parse(rawList) : [];
+      const updatedList = parsedList.map((u) => (isSameIdentity(u, merged) ? { ...u, ...merged, id: u.id } : u));
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(deduplicateUsers(updatedList)));
+    } catch {}
+
+    return merged;
+  }, []);
+
+  const refreshCurrentUserFromServer = useCallback(async () => {
+    const cur = userRef.current;
+    if (!cur) return;
+    const serverUser = await syncUserWithServer(cur);
+    if (serverUser) {
+      applyServerUserSnapshot(serverUser);
+    }
+  }, [applyServerUserSnapshot]);
+
+  // Live subscription synchronization: immediate + periodic + focus/visibility + cross-tab storage listener
+  useEffect(() => {
+    if (!user?.id) return;
+
+    refreshCurrentUserFromServer();
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshCurrentUserFromServer();
+      }
+    }, 5000);
+
+    const handleFocus = () => {
+      refreshCurrentUserFromServer();
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        refreshCurrentUserFromServer();
+      }
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      const cur = userRef.current;
+      if (!cur) return;
+      if (e.key === CURRENT_USER_KEY || e.key === 'user') {
+        try {
+          if (e.newValue) {
+            const parsed = JSON.parse(e.newValue) as UserProfile;
+            if (isSameIdentity(cur, parsed)) {
+              applyServerUserSnapshot(parsed);
+            }
+          }
+        } catch {}
+      } else if (e.key === USERS_STORAGE_KEY) {
+        try {
+          if (e.newValue) {
+            const list = JSON.parse(e.newValue) as UserProfile[];
+            const match = Array.isArray(list) ? list.find((u) => isSameIdentity(u, cur)) : undefined;
+            if (match) {
+              applyServerUserSnapshot(match);
+            }
+          }
+        } catch {}
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [user?.id, user?.identifier, refreshCurrentUserFromServer, applyServerUserSnapshot]);
 
   // Ensure default seed users exist and are cleanly deduplicated in localStorage
   useEffect(() => {
@@ -717,7 +926,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setUser(found);
+    userRef.current = found;
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(found));
+    localStorage.setItem('user', JSON.stringify(found));
+    syncUserWithServer(found).then((serverUser) => {
+      if (serverUser) applyServerUserSnapshot(serverUser);
+    });
     return { success: true };
   };
 
@@ -834,9 +1048,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       users[existingIndex] = updatedUser;
       saveUsers(users);
       setUser(updatedUser);
+      userRef.current = updatedUser;
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      syncUserWithServer(updatedUser);
+      syncUserWithServer(updatedUser).then((serverUser) => {
+        if (serverUser) applyServerUserSnapshot(serverUser);
+      });
       return { success: true };
     } else {
       // Auto-register new student via phone or email code
@@ -879,12 +1096,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       filtered.unshift(newUser);
       saveUsers(filtered);
       setUser(newUser);
+      userRef.current = newUser;
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
       localStorage.setItem('user', JSON.stringify(newUser));
-      syncUserWithServer(newUser);
-      if (!isAdminAccount) {
-        setIsTrialWelcomeOpen(true);
-      }
+      syncUserWithServer(newUser).then((serverUser) => {
+        const applied = serverUser ? applyServerUserSnapshot(serverUser) : newUser;
+        if (!isAdminAccount && !applied?.isPaid) {
+          setIsTrialWelcomeOpen(true);
+        }
+      });
       return { success: true };
     }
   };
@@ -937,9 +1157,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         users[existingIndex] = updatedUser;
         saveUsers(users);
         setUser(updatedUser);
+        userRef.current = updatedUser;
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        syncUserWithServer(updatedUser);
+        const serverUser = await syncUserWithServer(updatedUser);
+        if (serverUser) {
+          applyServerUserSnapshot(serverUser);
+        }
         return { success: true };
       } else {
         const newUser: UserProfile = {
@@ -971,10 +1195,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         filtered.unshift(newUser);
         saveUsers(filtered);
         setUser(newUser);
+        userRef.current = newUser;
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
         localStorage.setItem('user', JSON.stringify(newUser));
-        syncUserWithServer(newUser);
-        if (!isAdminAccount) {
+        const serverUser = await syncUserWithServer(newUser);
+        const finalUser = serverUser ? applyServerUserSnapshot(serverUser) : newUser;
+        if (!isAdminAccount && !finalUser?.isPaid) {
           setIsTrialWelcomeOpen(true);
         }
         return { success: true };
@@ -1051,9 +1277,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       users[existingIndex] = updatedUser;
       saveUsers(users);
       setUser(updatedUser);
+      userRef.current = updatedUser;
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      syncUserWithServer(updatedUser);
+      syncUserWithServer(updatedUser).then((serverUser) => {
+        if (serverUser) applyServerUserSnapshot(serverUser);
+      });
       return { success: true };
     } else {
       const newUser: UserProfile = {
@@ -1086,12 +1315,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       filtered.unshift(newUser);
       saveUsers(filtered);
       setUser(newUser);
+      userRef.current = newUser;
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
       localStorage.setItem('user', JSON.stringify(newUser));
-      syncUserWithServer(newUser);
-      if (!isAdminAccount) {
-        setIsTrialWelcomeOpen(true);
-      }
+      syncUserWithServer(newUser).then((serverUser) => {
+        const applied = serverUser ? applyServerUserSnapshot(serverUser) : newUser;
+        if (!isAdminAccount && !applied?.isPaid) {
+          setIsTrialWelcomeOpen(true);
+        }
+      });
       return { success: true };
     }
   };
@@ -1197,14 +1429,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     const updatedUser: UserProfile = { ...user, ...data };
     setUser(updatedUser);
+    userRef.current = updatedUser;
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(updatedUser));
 
     const users = getUsers();
-    const idx = users.findIndex((u) => u.id === user.id);
+    const idx = users.findIndex((u) => isSameIdentity(u, user));
     if (idx !== -1) {
-      users[idx] = updatedUser;
+      users[idx] = { ...users[idx], ...updatedUser, id: users[idx].id };
       saveUsers(users);
     }
+    syncUserWithServer(updatedUser).then((serverUser) => {
+      if (serverUser) applyServerUserSnapshot(serverUser);
+    });
   };
 
   const setUserLogin = (newLogin: string) => {
@@ -1306,7 +1543,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const adminFetchRemoteUsers = async (): Promise<UserProfile[]> => {
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await fetch('/api/admin/users', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         if (data && (data.ok || data.success) && Array.isArray(data.users) && data.users.length > 0) {
@@ -1322,66 +1559,162 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return getUsers();
   };
 
-  const adminSetUserSubscription = (
+  const adminSetUserSubscription = async (
     userId: string,
     plan: 'free' | 'standard' | 'premium',
     isPaid: boolean,
-    expiry: string = '2027-06-01'
-  ) => {
+    expiry: string = '2027-06-01',
+    targetUserSnapshot?: UserProfile
+  ): Promise<{ ok: boolean; user?: UserProfile }> => {
+    const nowIso = new Date().toISOString();
     const users = getUsers();
-    const idx = users.findIndex((u) => u.id === userId);
-    if (idx !== -1) {
-      users[idx].subscriptionPlan = plan;
-      users[idx].isPaid = isPaid;
-      users[idx].subscriptionExpiry = expiry;
-      saveUsers(users);
+    const snapshot = targetUserSnapshot || users.find((u) => u.id === userId);
+    const matchTarget: Partial<UserProfile> = snapshot || { id: userId };
 
-      if (user && user.id === userId) {
-        const updatedSelf = { ...user, subscriptionPlan: plan, isPaid, subscriptionExpiry: expiry };
-        setUser(updatedSelf);
-        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
+    let foundLocal = false;
+    const updatedList = users.map((u) => {
+      if (u.id === userId || isSameIdentity(u, matchTarget)) {
+        foundLocal = true;
+        return {
+          ...u,
+          subscriptionPlan: plan,
+          isPaid,
+          subscriptionExpiry: expiry,
+          subscriptionUpdatedAt: nowIso,
+        };
       }
+      return u;
+    });
 
-      try {
-        fetch('/api/admin/users/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            data: { subscriptionPlan: plan, isPaid, subscriptionExpiry: expiry },
-          }),
-        }).catch(() => {});
-      } catch {}
+    if (!foundLocal && targetUserSnapshot) {
+      updatedList.push({
+        ...targetUserSnapshot,
+        subscriptionPlan: plan,
+        isPaid,
+        subscriptionExpiry: expiry,
+        subscriptionUpdatedAt: nowIso,
+      });
     }
+
+    saveUsers(updatedList);
+
+    if (user && (user.id === userId || isSameIdentity(user, matchTarget))) {
+      const updatedSelf: UserProfile = {
+        ...user,
+        subscriptionPlan: plan,
+        isPaid,
+        subscriptionExpiry: expiry,
+        subscriptionUpdatedAt: nowIso,
+      };
+      setUser(updatedSelf);
+      userRef.current = updatedSelf;
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
+      localStorage.setItem('user', JSON.stringify(updatedSelf));
+    }
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          userId,
+          email: snapshot?.email,
+          identifier: snapshot?.identifier,
+          telegramId: snapshot?.telegramId,
+          telegramUsername: snapshot?.telegramUsername,
+          fallbackUser: snapshot
+            ? {
+                ...snapshot,
+                subscriptionPlan: plan,
+                isPaid,
+                subscriptionExpiry: expiry,
+                subscriptionUpdatedAt: nowIso,
+              }
+            : undefined,
+          data: {
+            subscriptionPlan: plan,
+            isPaid,
+            subscriptionExpiry: expiry,
+          },
+        }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result?.user) {
+          const latestUsers = getUsers();
+          const syncedList = latestUsers.map((u) =>
+            u.id === userId || isSameIdentity(u, result.user) ? { ...u, ...result.user } : u
+          );
+          saveUsers(syncedList);
+          if (user && (user.id === userId || isSameIdentity(user, result.user))) {
+            applyServerUserSnapshot(result.user);
+          }
+          return { ok: true, user: result.user };
+        }
+      }
+    } catch (e) {
+      console.warn('[AuthContext] adminSetUserSubscription remote error:', e);
+    }
+
+    return {
+      ok: true,
+      user: snapshot
+        ? { ...snapshot, subscriptionPlan: plan, isPaid, subscriptionExpiry: expiry, subscriptionUpdatedAt: nowIso }
+        : undefined,
+    };
   };
 
-  const adminUpdateUser = (userId: string, data: Partial<UserProfile>) => {
+  const adminUpdateUser = async (userId: string, data: Partial<UserProfile>) => {
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === userId);
+    const target = idx !== -1 ? users[idx] : undefined;
+    const cleanLogin =
+      data.login !== undefined
+        ? data.login
+          ? formatUserLogin(data.login, target?.identifier || data.identifier)
+          : undefined
+        : target?.login;
+    const isSubUpdate =
+      data.subscriptionPlan !== undefined ||
+      data.isPaid !== undefined ||
+      data.subscriptionExpiry !== undefined;
+    const nowIso = new Date().toISOString();
+
     if (idx !== -1) {
-      const cleanLogin =
-        data.login !== undefined
-          ? data.login
-            ? formatUserLogin(data.login, users[idx].identifier)
-            : undefined
-          : users[idx].login;
-      const updatedUser = { ...users[idx], ...data, login: cleanLogin };
+      const updatedUser: UserProfile = {
+        ...users[idx],
+        ...data,
+        login: cleanLogin,
+        ...(isSubUpdate ? { subscriptionUpdatedAt: nowIso } : {}),
+      };
       users[idx] = updatedUser;
       saveUsers(users);
 
-      if (user && user.id === userId) {
+      if (user && (user.id === userId || isSameIdentity(user, updatedUser))) {
         setUser(updatedUser);
+        userRef.current = updatedUser;
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+        localStorage.setItem('user', JSON.stringify(updatedUser));
       }
-
-      try {
-        fetch('/api/admin/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'update', userId, data: { ...data, login: cleanLogin } }),
-        }).catch(() => {});
-      } catch {}
     }
+
+    try {
+      await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          userId,
+          email: target?.email || data.email,
+          identifier: target?.identifier || data.identifier,
+          telegramId: target?.telegramId ?? data.telegramId,
+          telegramUsername: target?.telegramUsername || data.telegramUsername,
+          fallbackUser: target ? { ...target, ...data, login: cleanLogin } : { id: userId, ...data, login: cleanLogin },
+          data: { ...data, login: cleanLogin },
+        }),
+      });
+    } catch {}
   };
 
      const adminDeleteUser = async (userId: string) => {
@@ -1403,39 +1736,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
      } catch {}
    };
 
-  const adminResetTrial = (userId: string) => {
+  const adminResetTrial = async (userId: string) => {
     const users = getUsers();
     const idx = users.findIndex((u) => u.id === userId);
+    const target = idx !== -1 ? users[idx] : undefined;
+    const nowIso = new Date().toISOString();
     if (idx !== -1) {
-      const nowIso = new Date().toISOString();
       users[idx].registeredAt = nowIso;
       users[idx].subscriptionPlan = 'free';
       users[idx].isPaid = false;
+      users[idx].subscriptionUpdatedAt = nowIso;
       saveUsers(users);
 
-      if (user && user.id === userId) {
-        const updatedSelf = {
+      if (user && (user.id === userId || isSameIdentity(user, users[idx]))) {
+        const updatedSelf: UserProfile = {
           ...user,
           registeredAt: nowIso,
           subscriptionPlan: 'free',
           isPaid: false,
+          subscriptionUpdatedAt: nowIso,
         };
         setUser(updatedSelf);
+        userRef.current = updatedSelf;
         localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedSelf));
+        localStorage.setItem('user', JSON.stringify(updatedSelf));
       }
-
-      try {
-        fetch('/api/admin/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'update',
-            userId,
-            data: { registeredAt: nowIso, subscriptionPlan: 'free', isPaid: false },
-          }),
-        }).catch(() => {});
-      } catch {}
     }
+
+    try {
+      await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          userId,
+          email: target?.email,
+          identifier: target?.identifier,
+          telegramId: target?.telegramId,
+          telegramUsername: target?.telegramUsername,
+          data: { registeredAt: nowIso, subscriptionPlan: 'free', isPaid: false },
+        }),
+      });
+    } catch {}
   };
 
   const adminCreateUser = (userData: Omit<UserProfile, 'id' | 'testHistory'>) => {

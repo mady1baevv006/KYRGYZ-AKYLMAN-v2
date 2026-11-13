@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { getFirestoreAdmin, getAdminAuth } from './firebaseAdmin.js';
 
 export interface UserProfile {
   id: string;
@@ -22,6 +23,7 @@ export interface UserProfile {
   subscriptionPlan?: 'free' | 'standard' | 'premium';
   subscriptionExpiry?: string;
   isPaid?: boolean;
+  subscriptionUpdatedAt?: string;
   hasSeenWelcomeGift?: boolean;
   hasExtendedTrial?: boolean;
 }
@@ -67,87 +69,7 @@ export const DEFAULT_ADMIN_PROFILE: UserProfile = {
   hasSeenWelcomeGift: true,
 };
 
-   const SEED_USERS: UserProfile[] = [DEFAULT_ADMIN_PROFILE];
-
-   const OLD_DEMO_USERS: UserProfile[] = [
-  DEFAULT_ADMIN_PROFILE,
-  {
-    id: 'user_seed_google',
-    name: 'Айпери Касымова',
-    identifier: 'aiperi.kasymova@gmail.com',
-    email: 'aiperi.kasymova@gmail.com',
-    authProvider: 'google',
-    authProviders: ['google'],
-    password: '',
-    avatar: '/avatars/argali.svg',
-    targetScore: 225,
-    targetUniversity: 'КГТУ им. И. Раззакова (Политех)',
-    registeredAt: new Date(Date.now() - 3600000 * 30).toISOString(),
-    lastLoginAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    testHistory: [],
-    subscriptionPlan: 'standard',
-    subscriptionExpiry: '2027-06-01',
-    isPaid: true,
-    hasSeenWelcomeGift: true,
-  },
-  {
-    id: 'user_seed_sync',
-    name: 'Эркин Бакиров',
-    identifier: 'erkin.bakirov@gmail.com',
-    email: 'erkin.bakirov@gmail.com',
-    authProvider: 'google',
-    authProviders: ['google', 'email_code'],
-    password: '',
-    avatar: '/avatars/snow_leopard.svg',
-    targetScore: 232,
-    targetUniversity: 'АУЦА (Американский университет в ЦА)',
-    registeredAt: new Date(Date.now() - 3600000 * 48).toISOString(),
-    lastLoginAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-    testHistory: [],
-    subscriptionPlan: 'premium',
-    subscriptionExpiry: '2027-06-01',
-    isPaid: true,
-    hasSeenWelcomeGift: true,
-  },
-  {
-    id: 'user_seed_tg',
-    name: 'Азамат Темиров',
-    identifier: '@azamat_ort',
-    telegramUsername: '@azamat_ort',
-    telegramId: 894021482,
-    authProvider: 'telegram',
-    authProviders: ['telegram'],
-    password: '',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-    targetScore: 220,
-    targetUniversity: 'КНУ им. Ж. Баласагына',
-    registeredAt: new Date(Date.now() - 3600000 * 50).toISOString(),
-    lastLoginAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    testHistory: [],
-    subscriptionPlan: 'premium',
-    subscriptionExpiry: '2027-06-01',
-    isPaid: true,
-    hasSeenWelcomeGift: true,
-  },
-  {
-    id: 'user_seed_code',
-    name: 'Чынгыз Айтматов',
-    identifier: 'chyngyz.student@yandex.ru',
-    email: 'chyngyz.student@yandex.ru',
-    authProvider: 'email_code',
-    authProviders: ['email_code'],
-    password: '',
-    avatar: '/avatars/falcon.svg',
-    targetScore: 215,
-    targetUniversity: 'БГУ им. К. Карасаева',
-    registeredAt: new Date(Date.now() - 3600000 * 72).toISOString(),
-    lastLoginAt: new Date(Date.now() - 3600000 * 10).toISOString(),
-    testHistory: [],
-    subscriptionPlan: 'free',
-    isPaid: false,
-    hasSeenWelcomeGift: false,
-  },
-];
+const SEED_USERS: UserProfile[] = [DEFAULT_ADMIN_PROFILE];
 
 // Determine data directory for persistence
 function getDataFilePath(): string {
@@ -173,6 +95,24 @@ function getDataFilePath(): string {
 // In-memory cache of users
 let memoryUsers: UserProfile[] = [];
 let isLoaded = false;
+
+function isFirebaseAdminConfigured(): boolean {
+  return Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64 && process.env.FIREBASE_SERVICE_ACCOUNT_BASE64.trim());
+}
+
+function getFirestoreDocId(u: Partial<UserProfile>): string {
+  const email = (u.email || (u.identifier && u.identifier.includes('@') && !u.identifier.startsWith('@') ? u.identifier : '')).trim().toLowerCase();
+  if (email) {
+    return 'email_' + email.replace(/[^a-z0-9@._-]/g, '_');
+  }
+  if (u.telegramId !== undefined && u.telegramId !== null) {
+    return `tg_${u.telegramId}`;
+  }
+  if (u.id) {
+    return String(u.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+  }
+  return `user_${Date.now()}`;
+}
 
 function loadUsersFromDisk(): void {
   if (isLoaded && memoryUsers.length > 0) return;
@@ -233,7 +173,6 @@ function ensureAdminUser(): void {
   if (adminIndex === -1) {
     memoryUsers.unshift(DEFAULT_ADMIN_PROFILE);
   } else {
-    // Ensure admin profile has full privileges
     memoryUsers[adminIndex] = {
       ...memoryUsers[adminIndex],
       ...DEFAULT_ADMIN_PROFILE,
@@ -248,6 +187,148 @@ function ensureAdminUser(): void {
   }
 }
 
+function matchesUserQuery(
+  u: UserProfile,
+  query: {
+    id?: string;
+    email?: string;
+    identifier?: string;
+    telegramId?: number | string;
+    telegramUsername?: string;
+  }
+): boolean {
+  const qId = (query.id || '').trim();
+  const qEmail = (query.email || '').trim().toLowerCase();
+  const qIdentifier = (query.identifier || '').trim().toLowerCase();
+  const qTgUsername = (query.telegramUsername || '').trim().toLowerCase();
+  const qTgId = query.telegramId !== undefined && query.telegramId !== null && query.telegramId !== '' ? Number(query.telegramId) : undefined;
+
+  if (qId && u.id === qId) return true;
+  if (qTgId !== undefined && !isNaN(qTgId) && u.telegramId !== undefined && Number(u.telegramId) === qTgId) return true;
+
+  const uEmail = (u.email || (u.identifier && u.identifier.includes('@') && !u.identifier.startsWith('@') ? u.identifier : '')).trim().toLowerCase();
+  const uIdLower = (u.identifier || '').trim().toLowerCase();
+  const uTgLower = (u.telegramUsername || '').trim().toLowerCase();
+
+  if (qEmail && (uEmail === qEmail || uIdLower === qEmail)) return true;
+  if (qIdentifier && (uIdLower === qIdentifier || uEmail === qIdentifier || uTgLower === qIdentifier)) return true;
+  if (qTgUsername && (uTgLower === qTgUsername || uIdLower === qTgUsername)) return true;
+
+  return false;
+}
+
+async function syncUserToCloud(user: UserProfile, isSubscriptionChange = false): Promise<void> {
+  if (!isFirebaseAdminConfigured()) return;
+
+  // 1. Firestore persistence (with short guard)
+  try {
+    const db = getFirestoreAdmin();
+    const docId = getFirestoreDocId(user);
+    const cleanData = JSON.parse(JSON.stringify(user));
+    await Promise.race([
+      db.collection('users').doc(docId).set(cleanData, { merge: true }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore write timeout')), 3000)),
+    ]);
+  } catch (e) {
+    // Non-fatal: Firestore may not be provisioned on this project
+  }
+
+  // 2. Firebase Auth Custom Claims persistence (works even if only Firebase Auth is enabled!)
+  if (isSubscriptionChange) {
+    try {
+      const auth = getAdminAuth();
+      const email = (user.email || (user.identifier?.includes('@') && !user.identifier.startsWith('@') ? user.identifier : '')).trim().toLowerCase();
+      let uid: string | undefined;
+
+      if (user.id && !user.id.startsWith('user_') && !user.id.startsWith('tg_') && user.id !== 'admin_mady1baevv') {
+        try {
+          await auth.getUser(user.id);
+          uid = user.id;
+        } catch {}
+      }
+      if (!uid && email) {
+        try {
+          const authUser = await auth.getUserByEmail(email);
+          uid = authUser.uid;
+        } catch {}
+      }
+
+      if (uid) {
+        const existingRecord = await auth.getUser(uid);
+        const existingClaims = existingRecord.customClaims || {};
+        await auth.setCustomUserClaims(uid, {
+          ...existingClaims,
+          subscriptionPlan: user.subscriptionPlan || 'free',
+          isPaid: Boolean(user.isPaid),
+          subscriptionExpiry: user.subscriptionExpiry || '2027-06-01',
+          subscriptionUpdatedAt: user.subscriptionUpdatedAt || new Date().toISOString(),
+        });
+      }
+    } catch (e) {
+      // Non-fatal if user is Telegram-only or Auth unavailable
+    }
+  }
+}
+
+async function hydrateFromCloud(): Promise<void> {
+  if (!isFirebaseAdminConfigured()) return;
+  loadUsersFromDisk();
+
+  try {
+    const db = getFirestoreAdmin();
+    const snapshot = (await Promise.race([
+      db.collection('users').get(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore read timeout')), 3000)),
+    ])) as any;
+
+    if (snapshot && Array.isArray(snapshot.docs)) {
+      let changed = false;
+      for (const doc of snapshot.docs) {
+        const remote = doc.data() as UserProfile;
+        if (!remote) continue;
+
+        const existingIdx = memoryUsers.findIndex((u) =>
+          matchesUserQuery(u, {
+            id: remote.id,
+            email: remote.email,
+            identifier: remote.identifier,
+            telegramId: remote.telegramId,
+            telegramUsername: remote.telegramUsername,
+          })
+        );
+
+        if (existingIdx !== -1) {
+          const local = memoryUsers[existingIdx];
+          const remoteTs = remote.subscriptionUpdatedAt ? new Date(remote.subscriptionUpdatedAt).getTime() : 0;
+          const localTs = local.subscriptionUpdatedAt ? new Date(local.subscriptionUpdatedAt).getTime() : 0;
+
+          if (remoteTs > localTs || (!local.isPaid && remote.isPaid)) {
+            memoryUsers[existingIdx] = {
+              ...local,
+              ...remote,
+              id: local.id,
+              subscriptionPlan: remote.subscriptionPlan || local.subscriptionPlan,
+              isPaid: remote.isPaid !== undefined ? remote.isPaid : local.isPaid,
+              subscriptionExpiry: remote.subscriptionExpiry || local.subscriptionExpiry,
+              subscriptionUpdatedAt: remote.subscriptionUpdatedAt || local.subscriptionUpdatedAt,
+            };
+            changed = true;
+          }
+        } else {
+          memoryUsers.push(remote);
+          changed = true;
+        }
+      }
+      if (changed) {
+        ensureAdminUser();
+        saveUsersToDisk();
+      }
+    }
+  } catch {
+    // Non-fatal fallback to disk/memory
+  }
+}
+
 /**
  * Returns all users sorted: Admin at top, then newest registered first.
  * Every user is guaranteed to have their login formatted as @username.
@@ -255,43 +336,111 @@ function ensureAdminUser(): void {
 export function getAllUsers(): UserProfile[] {
   loadUsersFromDisk();
 
-  return [...memoryUsers].map((u) => {
-    const isMasterAdmin =
-      u.id === 'admin_mady1baevv' ||
-      u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
-      u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-    return {
-      ...u,
-      login: isMasterAdmin ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
-    };
-  }).sort((a, b) => {
-    const isAdminA = a.id === 'admin_mady1baevv' || a.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-    const isAdminB = b.id === 'admin_mady1baevv' || b.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-    if (isAdminA) return -1;
-    if (isAdminB) return 1;
+  return [...memoryUsers]
+    .map((u) => {
+      const isMasterAdmin =
+        u.id === 'admin_mady1baevv' ||
+        u.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+        u.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      return {
+        ...u,
+        login: isMasterAdmin ? '@mady1baevv' : formatUserLogin(u.login, u.email || u.identifier),
+      };
+    })
+    .sort((a, b) => {
+      const isAdminA = a.id === 'admin_mady1baevv' || a.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const isAdminB = b.id === 'admin_mady1baevv' || b.identifier?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      if (isAdminA) return -1;
+      if (isAdminB) return 1;
 
-    const getTime = (u: UserProfile): number => {
-      if (u.registeredAt) {
-        const t = new Date(u.registeredAt).getTime();
-        if (!isNaN(t) && t > 0) return t;
-      }
-      if (typeof u.id === 'string' && u.id.startsWith('user_')) {
-        const parts = u.id.split('_');
-        const num = parseInt(parts[1], 10);
-        if (!isNaN(num) && num > 1000000000) return num;
-      }
-      return 0;
-    };
+      const getTime = (u: UserProfile): number => {
+        if (u.registeredAt) {
+          const t = new Date(u.registeredAt).getTime();
+          if (!isNaN(t) && t > 0) return t;
+        }
+        if (typeof u.id === 'string' && u.id.startsWith('user_')) {
+          const parts = u.id.split('_');
+          const num = parseInt(parts[1], 10);
+          if (!isNaN(num) && num > 1000000000) return num;
+        }
+        return 0;
+      };
 
-    return getTime(b) - getTime(a);
-  });
+      return getTime(b) - getTime(a);
+    });
+}
+
+export async function getAllUsersAsync(): Promise<UserProfile[]> {
+  await hydrateFromCloud();
+  return getAllUsers();
+}
+
+export function findUser(query: {
+  id?: string;
+  email?: string;
+  identifier?: string;
+  telegramId?: number | string;
+  telegramUsername?: string;
+}): UserProfile | null {
+  loadUsersFromDisk();
+  const found = memoryUsers.find((u) => matchesUserQuery(u, query));
+  return found || null;
+}
+
+export async function findUserAsync(query: {
+  id?: string;
+  email?: string;
+  identifier?: string;
+  telegramId?: number | string;
+  telegramUsername?: string;
+}): Promise<UserProfile | null> {
+  await hydrateFromCloud();
+  const existing = findUser(query);
+  if (existing) return existing;
+
+  // Also check Firebase Auth customClaims if user exists there
+  if (isFirebaseAdminConfigured()) {
+    try {
+      const auth = getAdminAuth();
+      const email = (query.email || (query.identifier?.includes('@') && !query.identifier.startsWith('@') ? query.identifier : '')).trim().toLowerCase();
+      if (email) {
+        const authUser = await auth.getUserByEmail(email);
+        const claims = authUser.customClaims || {};
+        if (claims.subscriptionPlan || claims.isPaid !== undefined) {
+          return upsertUser({
+            id: authUser.uid,
+            name: authUser.displayName || email.split('@')[0],
+            email,
+            identifier: email,
+            avatar: authUser.photoURL || '/avatars/snow_leopard.svg',
+            authProvider: 'google',
+            authProviders: ['google'],
+            registeredAt: authUser.metadata.creationTime ? new Date(authUser.metadata.creationTime).toISOString() : new Date().toISOString(),
+            subscriptionPlan: claims.subscriptionPlan || 'free',
+            isPaid: Boolean(claims.isPaid),
+            subscriptionExpiry: claims.subscriptionExpiry || '2027-06-01',
+            subscriptionUpdatedAt: claims.subscriptionUpdatedAt,
+          }, { fromAdmin: true });
+        }
+      }
+    } catch {}
+  }
+
+  return null;
 }
 
 /**
- * Upserts a user profile into persistent store
+ * Upserts a user profile into persistent store.
+ * When `fromAdmin` is false (default for client sync), server-side subscription fields
+ * (`subscriptionPlan`, `isPaid`, `subscriptionExpiry`) are authoritative and NOT overwritten
+ * by stale client data.
  */
-export function upsertUser(user: Partial<UserProfile>): UserProfile {
+export function upsertUser(
+  user: Partial<UserProfile>,
+  options?: { fromAdmin?: boolean }
+): UserProfile {
   loadUsersFromDisk();
+  const fromAdmin = Boolean(options?.fromAdmin);
 
   const rawId = (user.id || '').trim();
   const rawIdentifier = (user.identifier || '').trim().toLowerCase();
@@ -316,9 +465,10 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
     );
     const updatedAdmin: UserProfile = {
       ...DEFAULT_ADMIN_PROFILE,
-      ...(adminIdx !== -1 ? memoryUsers[adminIdx] : {}),
+      ...(adminIdx !== -1 ? memoryUsers[adminIndexOrZero(adminIdx)] : {}),
       ...user,
       id: 'admin_mady1baevv',
+      login: '@mady1baevv',
       identifier: ADMIN_EMAIL,
       email: ADMIN_EMAIL,
       subscriptionPlan: 'premium',
@@ -337,14 +487,15 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
   }
 
   // Find existing match by ID, Email, Telegram ID, Telegram username, or identifier
-  const existingIndex = memoryUsers.findIndex((u) => {
-    if (rawId && u.id === rawId) return true;
-    if (rawTgId !== undefined && u.telegramId !== undefined && Number(u.telegramId) === Number(rawTgId)) return true;
-    if (rawTgUsername && u.telegramUsername && u.telegramUsername.toLowerCase() === rawTgUsername) return true;
-    if (rawEmail && u.email && u.email.toLowerCase() === rawEmail) return true;
-    if (rawIdentifier && u.identifier && u.identifier.toLowerCase() === rawIdentifier) return true;
-    return false;
-  });
+  const existingIndex = memoryUsers.findIndex((u) =>
+    matchesUserQuery(u, {
+      id: rawId,
+      email: rawEmail,
+      identifier: rawIdentifier,
+      telegramId: rawTgId,
+      telegramUsername: rawTgUsername,
+    })
+  );
 
   const nowIso = new Date().toISOString();
 
@@ -361,6 +512,22 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
       user.login || existing.login,
       user.email || user.identifier || existing.email || existing.identifier
     );
+
+    // Merge test histories cleanly by id
+    const mergedHistory = [...(user.testHistory || []), ...(existing.testHistory || [])].filter(
+      (t, i, arr) => t && t.id && arr.findIndex((x) => x && x.id === t.id) === i
+    );
+
+    // Server is authoritative for subscription fields during client sync!
+    const authoritativePlan = fromAdmin
+      ? (user.subscriptionPlan ?? existing.subscriptionPlan ?? 'free')
+      : (existing.subscriptionPlan ?? user.subscriptionPlan ?? 'free');
+    const authoritativeIsPaid = fromAdmin
+      ? (user.isPaid !== undefined ? Boolean(user.isPaid) : Boolean(existing.isPaid))
+      : (existing.isPaid !== undefined ? Boolean(existing.isPaid) : Boolean(user.isPaid));
+    const authoritativeExpiry = fromAdmin
+      ? (user.subscriptionExpiry || existing.subscriptionExpiry || '2027-06-01')
+      : (existing.subscriptionExpiry || user.subscriptionExpiry || '2027-06-01');
 
     const updated: UserProfile = {
       ...existing,
@@ -379,15 +546,11 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
       avatar: user.avatar && !user.avatar.includes('snow_leopard.svg') ? user.avatar : existing.avatar || '/avatars/snow_leopard.svg',
       targetScore: user.targetScore || existing.targetScore || 215,
       targetUniversity: user.targetUniversity || existing.targetUniversity || 'КНУ им. Ж. Баласагына',
-      subscriptionPlan:
-        user.subscriptionPlan === 'premium' || existing.subscriptionPlan === 'premium'
-          ? 'premium'
-          : user.subscriptionPlan === 'standard' || existing.subscriptionPlan === 'standard'
-          ? 'standard'
-          : user.subscriptionPlan || existing.subscriptionPlan || 'free',
-      isPaid: user.isPaid !== undefined ? user.isPaid : existing.isPaid,
-      subscriptionExpiry: user.subscriptionExpiry || existing.subscriptionExpiry || '2027-06-01',
-      testHistory: user.testHistory || existing.testHistory || [],
+      subscriptionPlan: authoritativePlan,
+      isPaid: authoritativeIsPaid,
+      subscriptionExpiry: authoritativeExpiry,
+      subscriptionUpdatedAt: fromAdmin ? nowIso : existing.subscriptionUpdatedAt,
+      testHistory: mergedHistory,
     };
 
     memoryUsers[existingIndex] = updated;
@@ -425,11 +588,66 @@ export function upsertUser(user: Partial<UserProfile>): UserProfile {
     subscriptionPlan: user.subscriptionPlan || 'free',
     isPaid: Boolean(user.isPaid),
     subscriptionExpiry: user.subscriptionExpiry || '2027-06-01',
+    subscriptionUpdatedAt: fromAdmin ? nowIso : user.subscriptionUpdatedAt,
   };
 
   memoryUsers.push(created);
   saveUsersToDisk();
   return created;
+}
+
+function adminIdxOrZero(idx: number): number {
+  return idx >= 0 ? idx : 0;
+}
+
+function adminIndexOrZero(idx: number): number {
+  return adminIdxOrZero(idx);
+}
+
+export async function upsertUserAsync(
+  user: Partial<UserProfile>,
+  options?: { fromAdmin?: boolean }
+): Promise<UserProfile> {
+  await hydrateFromCloud();
+
+  // Check Firebase Auth customClaims for authoritative subscription status (survives Vercel cold starts / separate lambdas)
+  let authoritativeClaims: Partial<UserProfile> | null = null;
+  if (!options?.fromAdmin && isFirebaseAdminConfigured()) {
+    const email = (user.email || (user.identifier?.includes('@') && !user.identifier.startsWith('@') ? user.identifier : '')).trim().toLowerCase();
+    const existingLocal = findUser({
+      id: user.id,
+      email,
+      identifier: user.identifier,
+      telegramId: user.telegramId,
+      telegramUsername: user.telegramUsername,
+    });
+    if (email) {
+      try {
+        const auth = getAdminAuth();
+        const authUser = await auth.getUserByEmail(email);
+        const claims = authUser.customClaims || {};
+        if (claims.subscriptionPlan || claims.isPaid !== undefined) {
+          const claimsTs = claims.subscriptionUpdatedAt ? new Date(claims.subscriptionUpdatedAt).getTime() : 0;
+          const localTs = existingLocal?.subscriptionUpdatedAt ? new Date(existingLocal.subscriptionUpdatedAt).getTime() : 0;
+          if (!existingLocal || claimsTs > localTs || (!existingLocal.subscriptionUpdatedAt && claims.isPaid && !existingLocal.isPaid)) {
+            authoritativeClaims = {
+              subscriptionPlan: claims.subscriptionPlan || 'free',
+              isPaid: claims.isPaid !== undefined ? Boolean(claims.isPaid) : false,
+              subscriptionExpiry: claims.subscriptionExpiry || '2027-06-01',
+              subscriptionUpdatedAt: claims.subscriptionUpdatedAt,
+            };
+          }
+        }
+      } catch {}
+    }
+  }
+
+  let saved = upsertUser(
+    authoritativeClaims ? { ...user, ...authoritativeClaims } : user,
+    authoritativeClaims ? { fromAdmin: true } : options
+  );
+  await syncUserToCloud(saved, Boolean(options?.fromAdmin));
+  return saved;
 }
 
 /**
@@ -467,36 +685,99 @@ export function upsertTelegramUser(tgUser: {
     avatar: tgUser.photo_url || '/avatars/snow_leopard.svg',
     registeredAt: registeredTime,
     lastLoginAt: new Date().toISOString(),
-    subscriptionPlan: 'free',
-    isPaid: false,
-  });
+  }, { fromAdmin: false });
 }
 
 /**
- * Updates an existing user (for Admin edits)
+ * Updates an existing user (for Admin edits).
+ * Matches by userId OR email OR identifier OR telegramId OR telegramUsername.
+ * If the user only came from Firebase Auth and wasn't in store yet, creates them using fallbackUser!
  */
-export function updateUser(userId: string, data: Partial<UserProfile>): UserProfile | null {
+export function updateUser(
+  userId: string,
+  data: Partial<UserProfile>,
+  fallbackUser?: Partial<UserProfile>
+): UserProfile | null {
   loadUsersFromDisk();
 
-  const idx = memoryUsers.findIndex((u) => u.id === userId);
-  if (idx === -1) return null;
-
-  const current = memoryUsers[idx];
-  const cleanLogin =
-    data.login !== undefined
-      ? (data.login ? formatUserLogin(data.login, current.email || current.identifier) : undefined)
-      : (current.login ? formatUserLogin(current.login, current.email || current.identifier) : undefined);
-
-  const updated: UserProfile = {
-    ...current,
-    ...data,
-    login: cleanLogin,
-    id: current.id, // Immutable ID
-    registeredAt: current.registeredAt, // Preserve original registration time
+  const searchQuery = {
+    id: userId,
+    email: data.email || fallbackUser?.email,
+    identifier: data.identifier || fallbackUser?.identifier,
+    telegramId: data.telegramId ?? fallbackUser?.telegramId,
+    telegramUsername: data.telegramUsername || fallbackUser?.telegramUsername,
   };
 
-  memoryUsers[idx] = updated;
+  const matchingIndices: number[] = [];
+  memoryUsers.forEach((u, i) => {
+    if (matchesUserQuery(u, searchQuery)) {
+      matchingIndices.push(i);
+    }
+  });
+
+  const nowIso = new Date().toISOString();
+  const isSubChange =
+    data.subscriptionPlan !== undefined ||
+    data.isPaid !== undefined ||
+    data.subscriptionExpiry !== undefined;
+
+  if (matchingIndices.length === 0) {
+    // User came dynamically (e.g. Firebase Auth listUsers) and isn't on disk yet — upsert them!
+    if (fallbackUser || data.email || data.identifier) {
+      return upsertUser(
+        {
+          id: userId,
+          ...fallbackUser,
+          ...data,
+          subscriptionUpdatedAt: isSubChange ? nowIso : undefined,
+        },
+        { fromAdmin: true }
+      );
+    }
+    return null;
+  }
+
+  let primaryUpdated: UserProfile | null = null;
+  for (const idx of matchingIndices) {
+    const current = memoryUsers[idx];
+    const cleanLogin =
+      data.login !== undefined
+        ? (data.login ? formatUserLogin(data.login, current.email || current.identifier) : undefined)
+        : (current.login ? formatUserLogin(current.login, current.email || current.identifier) : undefined);
+
+    const updated: UserProfile = {
+      ...current,
+      ...data,
+      login: cleanLogin,
+      id: current.id, // Immutable ID
+      registeredAt: data.registeredAt || current.registeredAt,
+      subscriptionUpdatedAt: isSubChange ? nowIso : current.subscriptionUpdatedAt,
+    };
+
+    memoryUsers[idx] = updated;
+    if (!primaryUpdated) {
+      primaryUpdated = updated;
+    }
+  }
+
   saveUsersToDisk();
+  return primaryUpdated;
+}
+
+export async function updateUserAsync(
+  userId: string,
+  data: Partial<UserProfile>,
+  fallbackUser?: Partial<UserProfile>
+): Promise<UserProfile | null> {
+  await hydrateFromCloud();
+  const updated = updateUser(userId, data, fallbackUser);
+  if (updated) {
+    const isSubChange =
+      data.subscriptionPlan !== undefined ||
+      data.isPaid !== undefined ||
+      data.subscriptionExpiry !== undefined;
+    await syncUserToCloud(updated, isSubChange);
+  }
   return updated;
 }
 
@@ -510,13 +791,18 @@ export function deleteUser(userId: string): boolean {
     return false; // Cannot delete master admin
   }
 
+  const target = memoryUsers.find((u) => u.id === userId);
   const prevLen = memoryUsers.length;
-  memoryUsers = memoryUsers.filter(
-       (u) => u.id !== userId
-  );
+  memoryUsers = memoryUsers.filter((u) => u.id !== userId);
 
   if (memoryUsers.length !== prevLen) {
     saveUsersToDisk();
+    if (target && isFirebaseAdminConfigured()) {
+      try {
+        const db = getFirestoreAdmin();
+        db.collection('users').doc(getFirestoreDocId(target)).delete().catch(() => {});
+      } catch {}
+    }
     return true;
   }
   return false;

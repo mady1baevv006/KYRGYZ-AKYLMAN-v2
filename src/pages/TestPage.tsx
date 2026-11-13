@@ -563,10 +563,7 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
   };
 
   const getFallbackImageUrl = (origUrl: string, qNum?: number): string => {
-    // 1. If already a valid absolute URL, return optimized version directly
-    if (origUrl && (origUrl.startsWith('http://') || origUrl.startsWith('https://'))) {
-      return getOptimizedTestPageUrl(origUrl);
-    }
+    const q = qNum || currentQuestionNum;
 
     const decodedUrl = (() => {
       try {
@@ -576,15 +573,14 @@ export const TestPage: React.FC<{ lang?: AppLanguage }> = ({ lang = 'ru' }) => {
       }
     })();
 
-    // 2. Direct page token match (Priority: prevents reverting selected page to page 1)
+    // 1. Direct page token match if url contains section keywords
     for (const [token, directUrl] of Object.entries(SECTION_PAGE_FALLBACKS)) {
       if (decodedUrl.includes(token)) {
         return getOptimizedTestPageUrl(directUrl);
       }
     }
 
-    // 3. Fallback based on question number
-    const q = qNum || currentQuestionNum;
+    // 2. Fallback based on question number
 
     // Section 5: Практическая грамматика (Вопросы 121 - 150)
     if (q >= 121 && q <= 150) {

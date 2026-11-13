@@ -19,11 +19,35 @@ export const SECTION_NAMES_KG: SectionMap = {
 };
 
 export const SECTION_TIMERS: { [key: number]: number } = {
-  1: 1800, // 30 mins (Математика I)
-  2: 3600, // 60 mins (Математика II)
-  3: 1800, // 30 mins (Аналогии и дополнения)
-  4: 3600, // 60 mins (Чтение и понимание)
-  5: 2100, // 35 mins (Практическая грамматика)
+  1: 1800, // 30 mins (Математика 1 часть - 30 минут)
+  2: 3600, // 60 mins (Математика 2 часть - 60 минут) [1 и 2 часть вместе: 90 минут]
+  3: 1800, // 30 mins (Аналогии и дополнения предложений - 30 минут)
+  4: 3600, // 60 mins (Чтение и понимание - 60 минут)
+  5: 2100, // 35 mins (Практическая грамматика - 35 минут)
+};
+
+export const SECTION_DURATIONS_MINUTES: { [key: number]: number } = {
+  1: 30,
+  2: 60,
+  3: 30,
+  4: 60,
+  5: 35,
+};
+
+export const SECTION_DURATIONS_RU: { [key: number]: string } = {
+  1: '30 минут',
+  2: '60 минут',
+  3: '30 минут',
+  4: '60 минут',
+  5: '35 минут',
+};
+
+export const SECTION_DURATIONS_KG: { [key: number]: string } = {
+  1: '30 мүнөт',
+  2: '60 мүнөт',
+  3: '30 мүнөт',
+  4: '60 мүнөт',
+  5: '35 мүнөт',
 };
 
 export const SECTION_TIMES = SECTION_TIMERS;

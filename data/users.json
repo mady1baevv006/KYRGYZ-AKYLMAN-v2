@@ -1,0 +1,28 @@
+[
+  {
+    "id": "admin_mady1baevv",
+    "name": "Абдраим Мадылбаев (Администратор)",
+    "login": "@mady1baevv",
+    "identifier": "mady1baevv@kyrgyzakylman.com",
+    "email": "mady1baevv@kyrgyzakylman.com",
+    "telegramUsername": "@mady1baevv",
+    "authProvider": "google",
+    "authProviders": [
+      "google",
+      "email_code",
+      "telegram",
+      "password"
+    ],
+    "password": "123",
+    "avatar": "/avatars/snow_leopard.svg",
+    "targetScore": 240,
+    "targetUniversity": "Кыргызский национальный университет (КНУ)",
+    "registeredAt": "2025-01-01T00:00:00.000Z",
+    "lastLoginAt": "2026-11-13T17:48:01.341Z",
+    "testHistory": [],
+    "subscriptionPlan": "premium",
+    "subscriptionExpiry": "2027-06-01",
+    "isPaid": true,
+    "hasSeenWelcomeGift": true
+  }
+]

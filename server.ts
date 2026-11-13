@@ -5,11 +5,13 @@ import { createServer as createViteServer } from 'vite';
 import sendEmailCodeHandler from './api/email/send-code';
 import verifyEmailCodeHandler from './api/email/verify-code';
 import {
-  getAllUsers,
-  upsertUser,
+  getAllUsersAsync,
+  findUserAsync,
+  upsertUserAsync,
   upsertTelegramUser,
-  updateUser,
+  updateUserAsync,
   deleteUser,
+  deleteUsersWithoutLogin,
 } from './api/usersStore';
 
 // --- Telegram Bot Authentication State ---
@@ -440,52 +442,89 @@ async function startServer() {
   });
 
   // --- Centralized User Registry Endpoints (For Admin & Cross-device Sync) ---
-  app.get('/api/admin/users', (req, res) => {
+  app.get('/api/admin/users', async (req, res) => {
     try {
-      const users = getAllUsers();
+      res.setHeader('Cache-Control', 'no-store');
+      const users = await getAllUsersAsync();
       res.json({ ok: true, success: true, users, total: users.length });
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Server error' });
     }
   });
 
-  app.post('/api/admin/users', (req, res) => {
+  app.post('/api/admin/users', async (req, res) => {
     try {
       const action = req.body?.action;
       if (action === 'update') {
-        const { userId, data } = req.body || {};
-        const updated = updateUser(userId, data);
-        return res.json({ ok: true, user: updated });
+        const { userId, data, email, identifier, telegramId, telegramUsername, fallbackUser } = req.body || {};
+        const mergedFallback =
+          fallbackUser ||
+          (email || identifier || telegramId !== undefined || telegramUsername
+            ? { id: userId, email, identifier, telegramId, telegramUsername }
+            : userId
+            ? { id: userId, ...(data || {}) }
+            : undefined);
+        const updated = await updateUserAsync(userId || '', data || {}, mergedFallback);
+        return res.json({ ok: Boolean(updated), user: updated });
       }
       if (action === 'delete') {
         const { userId } = req.body || {};
         const deleted = deleteUser(userId);
         return res.json({ ok: true, deleted });
       }
+      if (action === 'cleanup_no_login') {
+        const deletedCount = deleteUsersWithoutLogin();
+        return res.json({ ok: true, deletedCount });
+      }
+      if (action === 'create') {
+        const user = req.body?.user;
+        if (!user) return res.status(400).json({ ok: false, error: 'Missing user data' });
+        const created = await upsertUserAsync(user, { fromAdmin: true });
+        return res.json({ ok: true, user: created });
+      }
       const user = req.body?.user || req.body;
-      const saved = upsertUser(user);
+      const saved = await upsertUserAsync(user, { fromAdmin: true });
       res.json({ ok: true, user: saved });
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Server error' });
     }
   });
 
-  app.post('/api/users/sync', (req, res) => {
+  app.get('/api/users/sync', async (req, res) => {
     try {
+      res.setHeader('Cache-Control', 'no-store');
+      const { id, email, identifier, telegramId, telegramUsername } = req.query as Record<string, string | undefined>;
+      const found = await findUserAsync({ id, email, identifier, telegramId, telegramUsername });
+      res.json({ ok: true, success: true, user: found });
+    } catch (e: any) {
+      res.status(500).json({ ok: false, error: e?.message || 'Server error' });
+    }
+  });
+
+  app.post('/api/users/sync', async (req, res) => {
+    try {
+      res.setHeader('Cache-Control', 'no-store');
       const user = req.body?.user || req.body;
       if (!user) return res.status(400).json({ ok: false, error: 'No user data provided' });
-      const saved = upsertUser(user);
+      const saved = await upsertUserAsync(user, { fromAdmin: false });
       res.json({ ok: true, success: true, user: saved });
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Server error' });
     }
   });
 
-  app.post('/api/admin/users/update', (req, res) => {
+  app.post('/api/admin/users/update', async (req, res) => {
     try {
-      const { userId, data } = req.body || {};
-      const updated = updateUser(userId, data);
-      res.json({ ok: true, user: updated });
+      const { userId, data, email, identifier, telegramId, telegramUsername, fallbackUser } = req.body || {};
+      const mergedFallback =
+        fallbackUser ||
+        (email || identifier || telegramId !== undefined || telegramUsername
+          ? { id: userId, email, identifier, telegramId, telegramUsername }
+          : userId
+          ? { id: userId, ...(data || {}) }
+          : undefined);
+      const updated = await updateUserAsync(userId || '', data || {}, mergedFallback);
+      res.json({ ok: Boolean(updated), user: updated });
     } catch (e: any) {
       res.status(500).json({ ok: false, error: e?.message || 'Server error' });
     }
